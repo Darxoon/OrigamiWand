@@ -121,13 +121,15 @@
 				
 				const { binary } = tabs[selectedIndex].properties
 				
+				const objects = binary.data.get(FILE_TYPES[dataType].objectType)
+				
 				showModal(FieldOptionAlert, {
 					title: `Field '${toReadableString(fieldName)}'`,
 					fieldName,
 					
 					dataType,
 					binary,
-					objects: binary.data.get(FILE_TYPES[dataType].objectType),
+					objects,
 				})
 			}
 		})

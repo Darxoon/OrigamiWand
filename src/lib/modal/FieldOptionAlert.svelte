@@ -87,7 +87,7 @@
 			{/if}
 			<div class="allValues nested">
 				{#each objects as arr, i}
-					{#each arr as obj, j}
+					{#each arr.objects ?? arr as obj, j}
 						{#if hideNulls ? obj[fieldName] !== null : true}
 							<div class="index">
 								{i}&nbsp;.&nbsp;{j}
