@@ -21,7 +21,7 @@
 	$: console.log('fieldOptionAlert.binary', binary)
 </script>
 
-<TabbedAlert title={title} selectedIndex={-1} tabNames={nestedAllValues 
+<TabbedAlert title={title} selectedIndex={0} tabNames={nestedAllValues 
 		? ["General Information", "All Local Values", "All Global Values"]
 		: ["General Information", "All Values"]}>
 	<div class="info">
