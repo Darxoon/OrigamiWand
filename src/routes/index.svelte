@@ -20,8 +20,9 @@
 	import { downloadBlob, map2d } from '$lib/util';
 	import { afterUpdate } from 'svelte';
 	import { onMount } from 'svelte/internal';
+	import type { Tab } from '$lib/editor/globalDragging';
 	
-	let tabs = [[]]
+	let tabs: Tab[][] = [[]]
 	let selectedTabs = []
 	let activeEditor = 0
 	
@@ -156,12 +157,14 @@
 		})
 	}
 
-	function Tab(fileName: string, binary: ElfBinary, dataType: DataType) {
+	function Tab(fileName: string, binary: ElfBinary, dataType: DataType): Tab {
 		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo) {
 			return {
+				id: Symbol(),
 				name: fileName,
+				shortName: fileName,
 				component: SpecialElfEditor,
-				hasChildren: false,
+				children: [],
 				properties: {
 					dataType,
 					binary,
@@ -169,9 +172,11 @@
 			}
 		} else {
 			return {
+				id: Symbol(),
 				name: fileName,
+				shortName: fileName,
 				component: ElfEditor,
-				hasChildren: false,
+				children: [],
 				properties: {
 					objectTitle: FILE_TYPES[dataType].displayName,
 					binary,
@@ -209,6 +214,14 @@
 	function saveFile() {
 		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
 		
+		if (tab.parentId) {
+			showModal(TextAlert, {
+				title: "Cannot Save",
+				content: "Try saving the parent file instead."
+			})
+			return
+		}
+		
 		let output = serializeElfBinary(tab.properties.dataType, tab.properties.binary)
 		
 		downloadBlob(output, tab.name)
@@ -243,10 +256,10 @@
 	
 	async function autoSaveWindows() {
 		const serializedWindows = tabs.map(currentTabs => {
-			const serializedTabs = currentTabs.map(tab => {
+			const serializedTabs = currentTabs.flatMap(tab => {
 				const { dataType, binary } = tab.properties
 				
-				return {
+				return tab.parentId ? [] : {
 					name: tab.name,
 					dataType,
 					content: serializeElfBinary(dataType, binary),
@@ -255,7 +268,7 @@
 			return serializedTabs
 		})
 		
-		console.log(serializedWindows)
+		console.log('serializedWindows', serializedWindows)
 		
 		await createTemporarySave(serializedWindows)
 	}
@@ -274,6 +287,8 @@
 						
 						return Tab(name, binary, dataType)
 					})
+					
+					tabs = tabs.filter(arr => arr.length > 0)
 				}
 			})
 		
@@ -322,7 +337,7 @@ to me, the developer (Darxoon). Thanks.`
 		}
 	})
 	
-	let tabToAdd
+	let tabToAdd: Tab
 	let tabToAddEditorIndex = 0
 	
 	afterUpdate(() => {
@@ -426,7 +441,11 @@ to me, the developer (Darxoon). Thanks.`
 						if (e.detail.type === "window") {
 							const { title, shortTitle, component, properties } = e.detail
 							
-							tabList[selectedTabs[i]].hasChildren = true
+							const childID = Symbol(`Tab ID ${title}`)
+							
+							tabList[selectedTabs[i]].children.push(childID)
+							
+							const parentId = tabList[selectedTabs[i]].id
 							
 							if (isWide) {
 								if (tabs.length < 2) {
@@ -435,18 +454,23 @@ to me, the developer (Darxoon). Thanks.`
 								
 								tabToAddEditorIndex = 1
 								tabToAdd = {
+									id: childID,
+									parentId,
 									name: title,
 									shortName: shortTitle,
 									component,
 									properties,
+									children: [],
 								}
 							} else {
 								editorWindows[0].addTab({
+									id: childID,
+									parentId,
 									name: title,
 									shortName: shortTitle,
 									component,
 									properties,
-									hasChildren: false,
+									children: [],
 								})
 							}
 						} else

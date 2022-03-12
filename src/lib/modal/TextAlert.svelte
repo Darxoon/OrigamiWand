@@ -4,7 +4,7 @@ import StringViewer from "./StringViewer.svelte";
 
 	export let title: string
 	export let content: string
-	export let fontSize = 12
+	export let fontSize = 14
 </script>
 
 <div class="wrapper">

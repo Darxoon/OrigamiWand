@@ -6,6 +6,7 @@
 	import { showFieldOptionEvent } from "$lib/events";
 	import FieldOptionAlert from "$lib/modal/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
+	import TernaryPrompt from "$lib/modal/TernaryPrompt.svelte";
 	
 	import { insertIntoArrayPure, resizeArray, toReadableString } from "$lib/util";
 	
@@ -267,11 +268,25 @@
 				
 				<span class="tabName">{tab.name}</span>
 				<img class="close_button" src={draggedSelectedIndex == i ? "/static/x-button-white.svg" : "/static/x-button.svg"} alt="x" on:mousedown|stopPropagation={() => {}}
-					on:click={() => {
-						if (tab.hasChildren) {
-							let result = confirm("Closing this tab will render all its related tabs useless. Do you want to continue?")
-							if (!result)
+					on:click={async () => {
+						if (tab.children.length > 0) {
+							let result = await showModal(TernaryPrompt, {
+								title: "Close all child tabs?",
+								content: `
+Closing this tab will render all of its child tabs useless.
+Do you want to close those too?`,
+							})
+							
+							if (result == null)
 								return
+							
+							if (result == true) {
+								// TODO close tabs by id
+								
+								for (const tabId of tabs[i].children) {
+									alert(`(Todo) Closing tab ${tabId.toString()}`)
+								}
+							}
 						}
 						
 						closeTab(i)

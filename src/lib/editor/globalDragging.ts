@@ -2,12 +2,18 @@ import EventEmitter from "events";
 import { writable } from "svelte/store";
 import type { TypeSafeEventEmitter } from "typesafe-event-emitter";
 
+export type TabID = Symbol
+
 export interface Tab {
+    id: TabID,
+    parentId?: TabID,
+    
     name: string
     shortName: string
+    
     component: any
     properties: any
-    hasChildren: boolean
+    children: TabID[]
 }
 
 export const globalDraggedTab = writable<{tab: Tab, width: number}>(undefined)

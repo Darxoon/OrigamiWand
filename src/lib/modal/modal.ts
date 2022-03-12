@@ -5,6 +5,13 @@ export const currentModal = writable<{ constructor: any, properties: object }>(n
 
 let onCloseCallback: (success: any) => void
 
+export enum PopupButtonVariant {
+	YesNo,
+	Okay,
+	None,
+}
+
+
 export function showModal<Success = any>(constructor: any, properties: object|undefined, onClose: (success: Success) => void): void;
 export function showModal<Success = any>(constructor: any, properties?: object): Promise<Success>;
 
