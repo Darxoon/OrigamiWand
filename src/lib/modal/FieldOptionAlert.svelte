@@ -1,8 +1,9 @@
 <script lang="ts">
 	import InputField from "$lib/editor/InputField.svelte";
 	import { hexFields, setHexField } from "$lib/editor/viewAsHex";
-	import type { DataType, ElfBinary } from "$lib/elf/elfBinary";
+	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
+	import { onMount } from "svelte";
 	import StringViewer from "./StringViewer.svelte";
 
 	import TabbedAlert from "./TabbedAlert.svelte"
@@ -15,10 +16,20 @@
 	
 	let hideNulls = false
 	
+	$: globalFieldId = DataType[dataType] + "/" + fieldName
+	
+	let notes: string
+	
 	$: fieldType = FILE_TYPES[dataType].typedef[fieldName]
 	$: nestedAllValues = FILE_TYPES[dataType].nestedAllValues
 	
+	$: if (notes) localStorage[globalFieldId + ".description"] = notes
+	
 	$: console.log('fieldOptionAlert.binary', binary)
+	
+	onMount(() => {
+		notes = localStorage[globalFieldId + ".description"]
+	})
 </script>
 
 <TabbedAlert title={title} selectedIndex={0} tabNames={nestedAllValues 
@@ -47,6 +58,11 @@
 				<StringViewer text={FILE_TYPES[dataType].metadata[fieldName]?.description} nopadding={true} />
 			</div>
 		{/if}
+		
+		<div>Personal Notes:</div>
+		<div>
+			<input class="box notes" type="text" name="notes" bind:value={notes} placeholder="Write something...">
+		</div>
 	</div>
 	<div>
 		{#if fieldType === "string"}
@@ -170,5 +186,14 @@
 	.description {
 		padding: 12px 12px;	
 		min-height: 5rem;
+	}
+	
+	.notes {
+		width: calc(100% - 27.2px);
+		font: inherit;
+	}
+	
+	.notes::placeholder {
+		font-style: italic;
 	}
 </style>

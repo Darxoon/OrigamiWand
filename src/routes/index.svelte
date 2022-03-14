@@ -21,6 +21,7 @@
 	import { afterUpdate } from 'svelte';
 	import { onMount } from 'svelte/internal';
 	import type { Tab } from '$lib/editor/globalDragging';
+	import NoteViewer from '$lib/modal/NoteViewer.svelte';
 	
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = []
@@ -89,11 +90,17 @@
 					},
 				},
 				{
+					name: "View all User Notes...",
+					onClick: () => {
+						showModal(NoteViewer, {})
+					}
+				},
+				{
 					name: "View all Descriptions...",
 					onClick: () => {
 						viewAllDescriptions()
 					}
-				}
+				},
 			],
 		},
 		{
