@@ -336,31 +336,31 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			console.log('setDataObjects', setDataObjects)
 			
-			let elementObjects = Object.entries(categories).flatMap(([categoryId, objects]) => {
-				return objects.map(id => {
-					let symbolName = 'wld::btl::data::s_setElementData_' + id
-					let { offset, size } = symbolOffsets[symbolName]
-					
-					let count = size / FILE_TYPES[DataType.BtlSetElement].size
-					
-					let result = {
-						symbolName,
-						objects: applyStrings(
-							offset,
-							DataType.BtlSetElement, 
-							dataStringSection, 
-							allRelocations.get('.data'), 
-							
-							parseRawDataSection(dataSection, count, offset.value, FILE_TYPES[DataType.BtlSetElement].typedef), 
-						),
-					}
-					
-					let category = setDataReference['wld::btl::data::s_setData_battle_' + categoryId]
-					category.childObjects.push(result)
-					
-					return result
-				})
-			})
+			let elementObjects = Object.entries(categories)
+				.flatMap(([categoryId, objects]) =>
+					objects.map(id => {
+						let symbolName = 'wld::btl::data::s_setElementData_' + id
+						let { offset, size } = symbolOffsets[symbolName]
+						
+						let count = size / FILE_TYPES[DataType.BtlSetElement].size
+						
+						let result = {
+							symbolName,
+							objects: applyStrings(
+								offset,
+								DataType.BtlSetElement, 
+								dataStringSection, 
+								allRelocations.get('.data'), 
+								
+								parseRawDataSection(dataSection, count, offset.value, FILE_TYPES[DataType.BtlSetElement].typedef), 
+							),
+						}
+						
+						let category = setDataReference['wld::btl::data::s_setData_battle_' + categoryId]
+						category.childObjects.push(result)
+						
+						return result
+					}))
 			
 			console.log('elementObjects', elementObjects)
 			

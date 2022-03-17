@@ -71,24 +71,46 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		
 		switch (dataType) {
 			case DataType.Maplink:
-				serializeObjects(writer, dataStringRelocations, undefined, dataType, 
-					binary.data.get(ElfBinary.ObjectType.MaplinkNodes))
 				serializeObjects(writer, dataStringRelocations, undefined, dataType, [
+					...binary.data.get(ElfBinary.ObjectType.MaplinkNodes),
 					FILE_TYPES[DataType.Maplink].instantiate()
 				])
+				
 				serializeObjects(writer, dataStringRelocations, undefined, DataType.MaplinkHeader, 
 					binary.data.get(ElfBinary.ObjectType.Main))
+				
 				break
 			
 			case DataType.DataBtlSet: {
 				for (const category of binary.data.get(ElfBinary.ObjectType.Main)) {
-					for (const battle of category.childObjects) {
-						let { symbolName, objects } = battle
+					const { childObjects, objects, symbolName } = category
+					
+					for (const battle of childObjects) {
+						const { objects, symbolName } = battle
+						
+						let symbol = binary.symbolTable.find(sym => sym.name === mangleIdentifier(symbolName))
+												
+						if (symbol) {
+							symbol.location = new Pointer(writer.size)
+							symbol.size = FILE_TYPES[DataType.BtlSetElement].size * objects.length
+						} else {
+							console.warn("Could not find symbol for " + symbolName)
+						}
+						
 						serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetElement, objects)
 					}
 					
+					let symbol = binary.symbolTable.find(sym => sym.name === mangleIdentifier(symbolName))
+												
+					if (symbol) {
+						symbol.location = new Pointer(writer.size)
+						symbol.size = FILE_TYPES[DataType.BtlSetCategory].size * (objects.length + 1)
+					} else {
+						console.warn("Could not find symbol for " + symbolName)
+					}
+					
 					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, [
-						...category.objects,
+						...objects,
 						FILE_TYPES[DataType.BtlSetCategory].instantiate()
 					])
 				}

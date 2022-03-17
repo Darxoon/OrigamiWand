@@ -296,6 +296,9 @@
 					})
 					
 					tabs = tabs.filter(arr => arr.length > 0)
+					
+					if (tabs.length == 0)
+						tabs = [[]]
 				}
 			})
 		
