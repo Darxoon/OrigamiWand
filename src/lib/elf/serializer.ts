@@ -86,7 +86,11 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 						let { symbolName, objects } = battle
 						serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetElement, objects)
 					}
-					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, category.objects)
+					
+					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, [
+						...category.objects,
+						FILE_TYPES[DataType.BtlSetCategory].instantiate()
+					])
 				}
 				
 				// data table
