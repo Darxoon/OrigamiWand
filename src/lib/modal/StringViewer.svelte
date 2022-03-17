@@ -108,7 +108,7 @@
 	pre {
 		display: inline-block;
 		font-family: "Fira Mono";
-		font-size: 11pt;
+		font-size: 12pt;
 		padding: 0 4px;
 		margin: 0;
 	}

@@ -796,7 +796,11 @@ The type of the DataItem which determines how it behaves. Possible values:
 		field_0x3c: "int",
 		value: "int",
 		field_0x44: "int",
-		modelFile: new Property("string", "Why is this linking to a model file when there's `modelId`?"),
+		textId: new Property("string", `
+The name of the item. Before it is displayed, it is looked up in \`glossary.msbt\`.
+
+This is also used for the collectible names and help descriptions, which are looked up
+in \`item.msbt\` with this value as the identifier.`),
 		field_0x50: "int",
 		field_0x54: "int",
 		helpText: new Property("string", "Reference to item.msbt"),
@@ -1115,24 +1119,24 @@ Seems to indicate whether the Puzzle Solver from the battle lab should show a ci
 	},
 	
 	[DataType.DataItemSet]: {
-		__displayName: "Item (Set)",
+		__displayName: "Item Set",
 		
 		id: "string",
-		field_0x8: "int",
+		itemCount: "int",
 		field_0xc: "int",
-		field_0x10: "string",
+		item1: "string",
 		field_0x18: "int",
 		field_0x1c: "float",
-		field_0x20: "string",
+		item2: "string",
 		field_0x28: "int",
-		field_0x2c: "int",
-		field_0x30: "string",
+		field_0x2c: "float",
+		item3: "string",
 		field_0x38: "int",
-		field_0x3c: "int",
-		field_0x40: "string",
+		field_0x3c: "float",
+		item4: "string",
 		field_0x48: "int",
-		field_0x4c: "int",
-		field_0x50: "int",
+		field_0x4c: "float",
+		field_0x50: new Property("int", "Might be the amount of total items dropped. Not sure yet."),
 		field_0x54: "int",
 		field_0x58: "int",
 		field_0x5c: "int",
