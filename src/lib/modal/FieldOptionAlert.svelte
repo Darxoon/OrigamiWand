@@ -106,7 +106,7 @@
 					{#each arr.objects ?? arr as obj, j}
 						{#if hideNulls ? obj[fieldName] !== null : true}
 							<div class="index">
-								{i}&nbsp;.&nbsp;{j}
+								{i}&nbsp;/&nbsp;{j}
 							</div>
 							<div class="fieldName" class:highlight={j > 0 ? j % 2 == 1 : i % 2 == 1}>
 								{obj[FILE_TYPES[dataType].identifyingField]}

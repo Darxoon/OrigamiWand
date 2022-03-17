@@ -1022,7 +1022,6 @@ Some commonly found translations:
 	[DataType.BtlSetCategory]: {
 		__displayName: "Set",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Category,
 
 		id: "string",
 		field_0x8: "string",
