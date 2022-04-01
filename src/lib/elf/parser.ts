@@ -316,7 +316,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let setDataObjects = Object.entries(categories).map(([categoryId, objects]) => {
 				let symbolName = 'wld::btl::data::s_setData_battle_' + categoryId
 				let { offset, size } = symbolOffsets[symbolName]
-				let count = size / FILE_TYPES[DataType.BtlSetCategory].size - 1
+				let count = size / FILE_TYPES[DataType.BtlSetCategory].size
 				
 				return {
 					symbolName,

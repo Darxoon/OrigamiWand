@@ -104,15 +104,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 												
 					if (symbol) {
 						symbol.location = new Pointer(writer.size)
-						symbol.size = FILE_TYPES[DataType.BtlSetCategory].size * (objects.length + 1)
+						symbol.size = FILE_TYPES[DataType.BtlSetCategory].size * objects.length
 					} else {
 						console.warn("Could not find symbol for " + symbolName)
 					}
 					
-					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, [
-						...objects,
-						FILE_TYPES[DataType.BtlSetCategory].instantiate()
-					])
+					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, objects)
 				}
 				
 				// data table
