@@ -439,7 +439,14 @@ Example: "Cam_Dokan"`),
 		
 		id: "string",
 		modelId: new Property("string", "Reference to data_model_npc.elf"),
-		field_0x10: "int",
+		field_0x10: new Property("int", `
+Is always either 0, 1 or 2.
+
+what 0 means is unknown.
+
+1 means Pera.
+
+2 means Enemy.`),
 		field_0x14: "int",
 		textureSubclass: "string",
 		field_0x20: "int",
@@ -462,13 +469,14 @@ Example: "Cam_Dokan"`),
 		field_0x70: "string",
 		field_0x78: "string",
 		field_0x80: "string",
-		field_0x88: "string",
-		field_0x90: "string",
-		field_0x98: "string",
-		field_0xa0: "string",
-		field_0xa8: "string",
+		landingSfx: "string",
+		jumpedOnSfx: "string",
+		hammeredOnSfx: "string",
+		jumpSfx: "string",
+		field_0xa8: new Property("int", "Alwasy zero, for some reason"),
+		field_0xac: new Property("int", "Alwasy zero, for some reason"),
 		field_0xb0: "string",
-		field_0xb8: "string",
+		talkSfx: "string",
 		field_0xc0: "string",
 		field_0xc8: "string",
 		field_0xd0: "string",
@@ -791,9 +799,18 @@ The type of the DataItem which determines how it behaves. Possible values:
 		field_0x20: "string",
 		collectibleModelId: "string",
 		field_0x30: "int",
-		field_0x34: "int",
-		field_0x38: "int",
-		field_0x3c: "int",
+		buyPrice: "int",
+		sellPrice: new Property("int", "Unused as it is not possible to sell items"),
+		variable: new Property("int", `
+The variable to increase. Can be 0, 1, 2 or 3.
+
+0 increases coins.
+
+1 increases HP.
+
+2 increases Level (Maximum HP and Attack Damage).
+
+3 increases confetti.`),
 		value: "int",
 		field_0x44: "int",
 		textId: new Property("string", `
@@ -804,7 +821,14 @@ in \`item.msbt\` with this value as the identifier.`),
 		field_0x50: "int",
 		field_0x54: "int",
 		helpText: new Property("string", "Reference to item.msbt"),
-		field_0x60: "string",
+		iconId: new Property("string", `
+The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
+
+Prefix 'B' is for Boots, 'H' is for hammers,
+'I' for normal items (e.g. Ice Flower, Mushroom),
+'S' for bundled shop set items,
+'C' for accessories and 'K' for key items
+`),
 		field_0x68: "int",
 		field_0x6c: "int",
 		field_0x70: "int",
@@ -813,16 +837,16 @@ in \`item.msbt\` with this value as the identifier.`),
 		field_0x7C: "int",
 		field_0x80: "int",
 		field_0x84: "int",
-		field_0x88: "string",
-		field_0x90: "string",
-		field_0x98: "string",
-		field_0xa0: "string",
-		field_0xa8: "string",
+		collectSfx: "string",
+		collectEffect: "string",
+		idleEffect: "string",
+		landingSfx: "string",
+		initFunction: new Property("string", `The function that is called when it loads. ${scriptDisclaimer}`),
 		onCollectFunction: new Property("string", "Please verify."),
 		onUseFunction: "string",
 		field_0xc0: "int",
 		field_0xc4: "int",
-		field_0xc8: "string",
+		scriptFilename: "string",
 	},
 	
 	[DataType.DataMap]: {

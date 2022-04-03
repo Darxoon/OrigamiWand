@@ -78,7 +78,7 @@ export function toReadableString(camelCaseStr: string) {
 			output += ' ' + camelCaseStr[i].toUpperCase()
 		} 
 		// special case for word "ID"
-		else if (output.endsWith(' I') && camelCaseStr[i] === 'd') {
+		else if (output.endsWith(' I') && camelCaseStr[i] === 'd' && !(/^[a-z]$/.test(camelCaseStr[i + 1]))) {
 			output += camelCaseStr[i].toUpperCase()
 		} else {
 			output += camelCaseStr[i]

@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { Property } from "$lib/elf/fileTypes";
+	import { FILE_TYPES } from "$lib/elf/fileTypes";
 	import Alert from "./Alert.svelte";
 	import StringViewer from "./StringViewer.svelte";
+	import { DataType } from "$lib/elf/elfBinary";
+	import { toReadableString } from "$lib/util";
 
 	let wrapper: HTMLDivElement
 	
-	let allNotes = Object.entries(localStorage).filter(arr => arr[0].endsWith('.description'))
+	let allNotes = Object.entries(localStorage)
+		.filter(arr => arr[0].endsWith('.description'))
+		.map(arr => [arr[0].slice(0, -'.description'.length).split('/'), arr[1]])
+	
+	$: console.log('allNotes', allNotes)
 	
 	onMount(() => {
 		wrapper.focus()
@@ -17,7 +23,7 @@
 	<div class="wrapper" bind:this={wrapper}>
 		{#each allNotes as [id, content], i}
 			<div class="element">
-				<b>{id}:</b>
+				<b>{FILE_TYPES[DataType[id[0]]].displayName + ' > ' + toReadableString(id[1])}:</b>
 				<StringViewer text={content} inline={true} />
 			</div>
 		{/each}
