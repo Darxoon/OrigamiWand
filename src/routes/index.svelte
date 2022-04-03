@@ -22,6 +22,7 @@
 	import { onMount } from 'svelte/internal';
 	import type { Tab } from '$lib/editor/globalDragging';
 	import NoteViewer from '$lib/modal/NoteViewer.svelte';
+	import { loadedAutosave } from '$lib/stores';
 	
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = []
@@ -288,18 +289,23 @@
 			.then(async () => {
 				let save = await getLatestSave()
 				
-				if (save) {
-					tabs = map2d(save, ({name, dataType, content}) => {
-						let binary = parseElfBinary(dataType, content)
+				console.log('loading save', ...save)
 						
-						return Tab(name, binary, dataType)
-					})
+				if (!save) {
+					$loadedAutosave = true
+					return
+				}
 					
-					tabs = tabs.filter(arr => arr.length > 0)
+				tabs = map2d(save, ({name, dataType, content}) => 
+					Tab(name, parseElfBinary(dataType, content), dataType)
+				).filter(arr => arr.length > 0)
 					
 					if (tabs.length == 0)
 						tabs = [[]]
-				}
+				
+				afterUpdateHandlers = [...afterUpdateHandlers, () => {
+					$loadedAutosave = true
+				}]
 			})
 		
 		let mediaQuery = window.matchMedia("(min-width: 1000px)")
@@ -350,12 +356,17 @@ to me, the developer (Darxoon). Thanks.`
 	let tabToAdd: Tab
 	let tabToAddEditorIndex = 0
 	
+	let afterUpdateHandlers: Function[] = []
+	
 	afterUpdate(() => {
 		if (tabToAdd) {
 			editorWindows[tabToAddEditorIndex].addTab(tabToAdd)
 			activeEditor = tabToAddEditorIndex
 			tabToAdd = null
 		}
+		
+		afterUpdateHandlers.forEach(fn => fn())
+		afterUpdateHandlers = []
 	})
 	
 	let draggingFile = false

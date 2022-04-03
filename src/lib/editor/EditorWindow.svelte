@@ -7,6 +7,7 @@
 	import FieldOptionAlert from "$lib/modal/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
 	import TernaryPrompt from "$lib/modal/TernaryPrompt.svelte";
+	import { loadedAutosave } from "$lib/stores";
 	
 	import { insertIntoArrayPure, resizeArray, toReadableString } from "$lib/util";
 	
@@ -219,8 +220,6 @@
 		
 		draggedTab = tab
 	}
-	
-	$: console.log('tabsBase', tabsBase)
 </script>
 
 <svelte:options accessors={true} />
@@ -301,7 +300,11 @@ Do you want to close those too?`,
 	</ul>
 	
 	
-	<div class="content">		
+	<div class="content">
+		{#if !$loadedAutosave && tabs.length == 0}
+			<p class="loadinglabel">Loading...</p>
+		{/if}
+		
 		{#each tabs as tab, i}
 			<div class:invisible={selectedIndex != i}>
 				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:addObject on:delete on:open on:valueChanged />
@@ -402,6 +405,12 @@ Do you want to close those too?`,
 		background: var(--editor-bg);
 		transition: background 0.08s;
 		flex: 1;
+		
+		.loadinglabel {
+			text-align: center;
+			font-size: 16pt;
+			color: white;
+		}
 		
 		.dockArea {
 			background: #dfdfdf;

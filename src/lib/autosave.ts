@@ -56,5 +56,5 @@ export async function getLatestSave() {
 	let saveId = latestSaveEntry.saveId
 	
 	let save = await db.saves.get(saveId)
-	return save.windows
+	return save?.windows
 }

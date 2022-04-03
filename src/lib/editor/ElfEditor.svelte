@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
-import { demangle, incrementName, mangleIdentifier } from "$lib/elf/nameMangling";
-import DataTypePrompt from "$lib/modal/DataTypePrompt.svelte";
+	import { demangle, incrementName, mangleIdentifier } from "$lib/elf/nameMangling";
 	import { afterUpdate, createEventDispatcher, onMount } from "svelte";
 	import ObjectEditor from "./ObjectEditor.svelte"
 

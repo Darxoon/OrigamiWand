@@ -2,10 +2,9 @@
 	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
 	import Expander from "$lib/Expander.svelte";
-import DataTypePrompt from "$lib/modal/DataTypePrompt.svelte";
 	import { createEventDispatcher } from "svelte";
 	import ElfEditor from "./ElfEditor.svelte";
-import ObjectEditor from "./ObjectEditor.svelte";
+	import ObjectEditor from "./ObjectEditor.svelte";
 
 	const dispatch = createEventDispatcher()
 	
