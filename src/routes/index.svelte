@@ -73,8 +73,12 @@
 			title: "Zstd",
 			items: [
 				{
-					name: "Coming soon...",
-					onClick: () => {},
+					name: "Decompress File",
+					onClick: decompressFileSelector,
+				},
+				{
+					name: "Compress File",
+					onClick: compressFileSelector,
 				},
 			],
 		},
@@ -138,17 +142,17 @@
 		},
 	]
 
-	function openFileSelector() {
-		function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
-			return new Promise((resolve, reject) => {
-				ZstdCodec.run(zstd => {
-					const simple = new zstd.Simple();
-					
-					resolve(simple.decompress(new Uint8Array(buffer)).buffer)
-				})
+	function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+		return new Promise((resolve, reject) => {
+			ZstdCodec.run(zstd => {
+				const simple = new zstd.Simple();
+				
+				resolve(simple.decompress(new Uint8Array(buffer)).buffer)
 			})
-		}
-		
+		})
+	}
+	
+	function openFileSelector() {
 		console.log("opening file")
 
 		const fileSelector = document.createElement('input')
@@ -176,6 +180,47 @@
 				...tabs[0], 
 				Tab(file.name, binary, dataType, isCompressed),
 			]
+		})
+	}
+	
+	function decompressFileSelector() {
+		console.log("opening file to decompress")
+
+		const fileSelector = document.createElement('input')
+		fileSelector.setAttribute('type', 'file')
+		fileSelector.click()
+		
+		fileSelector.addEventListener('change', async (e: any) => {
+			const file: File = e.target.files[0]
+			
+			const content = await loadFile(file)
+			const decompressed = await decompress(content)
+			
+			const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
+			
+			console.log('decompressing', file.name, newFileName)
+			
+			downloadBlob(decompressed, newFileName)
+			
+		})
+	}
+	function compressFileSelector() {
+		console.log("opening file to decompress")
+
+		const fileSelector = document.createElement('input')
+		fileSelector.setAttribute('type', 'file')
+		fileSelector.click()
+		
+		fileSelector.addEventListener('change', async (e: any) => {
+			const file: File = e.target.files[0]
+			
+			const content = await loadFile(file)
+			const compressed = await compress(content)
+			
+			console.log('compressing', file.name, file.name + '.zst')
+			
+			downloadBlob(compressed, file.name + '.zst')
+			
 		})
 	}
 
@@ -235,18 +280,18 @@
 		})
 	}
 	
-	async function saveFile() {
-		function compress(buffer: ArrayBuffer) {
-			return new Promise<ArrayBuffer>((resolve, reject) => {
-				ZstdCodec.run(zstd => {
-					let simple = new zstd.Simple()
-					
-					console.log('compressing file with size of', buffer.byteLength)
-					resolve(simple.compress(new Uint8Array(buffer)).buffer)
-				})
+	function compress(buffer: ArrayBuffer) {
+		return new Promise<ArrayBuffer>((resolve, reject) => {
+			ZstdCodec.run(zstd => {
+				let simple = new zstd.Simple()
+				
+				console.log('compressing file with size of', buffer.byteLength)
+				resolve(simple.compress(new Uint8Array(buffer)).buffer)
 			})
-		}
-		
+		})
+	}
+	
+	async function saveFile() {
 		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
 		
 		if (tab.parentId) {
