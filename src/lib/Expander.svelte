@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from "svelte";
 
-	import { Colors } from "./color";
-
 	const dispatch = createEventDispatcher()
 	
 	export let title: string
 	export let initialize: boolean = false
-	export let backgroundColor = Colors.WHITE
+	export let backgroundColor = "#FFFFFF"
 	export let showButtons: boolean = false
 	
 	let initialized = false

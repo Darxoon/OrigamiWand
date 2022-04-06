@@ -1,7 +1,6 @@
-import { Colors } from "$lib/color";
 import { DataType } from "$lib/elf/elfBinary";
 
-export const defaultDataTypeColor = Colors.WHITE
+export const defaultDataTypeColor = "#FFFFFF"
 
 export const dataTypeColors = {
 	[DataType.NpcSubState]: "#BEDA82",
