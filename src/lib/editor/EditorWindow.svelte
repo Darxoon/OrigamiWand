@@ -266,7 +266,7 @@
 				>
 				
 				<span class="tabName">{tab.name}</span>
-				<img class="close_button" src={draggedSelectedIndex == i ? "/static/x-button-white.svg" : "/static/x-button.svg"} alt="x" on:mousedown|stopPropagation={() => {}}
+				<img class="close_button" src={draggedSelectedIndex == i ? "/OrigamiWand/static/x-button-white.svg" : "/OrigamiWand/static/x-button.svg"} alt="x" on:mousedown|stopPropagation={() => {}}
 					on:click={async () => {
 						if (tab.children.length > 0) {
 							let result = await showModal(TernaryPrompt, {
@@ -295,7 +295,7 @@ Do you want to close those too?`,
 		
 		<li class="dragged_tab_overlay" class:invisible={draggedTab == undefined || draggingVertically} bind:this={draggedTabOverlay}>
 			{draggedTab?.name}
-			<!-- decoration only --><img class="close_button" src="/static/x-button-white.svg" alt="x">
+			<!-- decoration only --><img class="close_button" src="/OrigamiWand/static/x-button-white.svg" alt="x">
 		</li>
 	</ul>
 	
@@ -312,11 +312,11 @@ Do you want to close those too?`,
 		{/each}
 		
 		<div class="card dockArea dockLeft" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, false)}>
-			<img src="/static/down.svg" alt="V">
+			<img src="/OrigamiWand/static/down.svg" alt="V">
 		</div>
 		
 		<div class="card dockArea dockRight" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, true)}>
-			<img src="/static/down.svg" alt="V">
+			<img src="/OrigamiWand/static/down.svg" alt="V">
 		</div>
 	</div>
 	

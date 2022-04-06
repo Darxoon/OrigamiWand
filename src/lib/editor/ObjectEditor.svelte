@@ -93,11 +93,11 @@
 <div class="card editor" style="--bg-card: {backgroundColor}; --bg-label-highlight: {labelHighlightColor}" bind:this={editor} 
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	<div class="title" on:click={() => {open = !open; initialized = true}}>
-		<img src={open ? '/static/up.svg' : '/static/down.svg'} alt="V" class="expander_icon"><span>{title}</span>
+		<img src={open ? "/OrigamiWand/static/up.svg" : "/OrigamiWand/static/down.svg"} alt="V" class="expander_icon"><span>{title}</span>
 		
 		{#if showButtons}
 			<div class="buttons">
-				<div class="spinner" class:hidden={!spinnerShown}><img src="/static/spinner.svg" alt="..."></div>
+				<div class="spinner" class:hidden={!spinnerShown}><img src="/OrigamiWand/static/spinner.svg" alt="..."></div>
 				<div class="duplicate" on:click|stopPropagation={() => {
 					spinnerShown = true
 					afterUpdateAction = "duplicate"
@@ -105,7 +105,7 @@
 				<div class="delete" on:click|stopPropagation={() => {
 					spinnerShown = true
 					afterUpdateAction = "delete"
-				}}><img src="/static/x-button.svg" alt="x"></div>
+				}}><img src="/OrigamiWand/static/x-button.svg" alt="x"></div>
 			</div>
 		{/if}
 	</div>
@@ -155,7 +155,7 @@
 	{#if FILE_TYPES[dataType].childField}
 		<div class="child_container" class:invisible={!open}>
 			<div class="showChildren" on:click={e => childrenOpen = !childrenOpen}>
-				<img src="/static/down.svg" alt="V" class:rotated={childrenOpen}>
+				<img src="/OrigamiWand/static/down.svg" alt="V" class:rotated={childrenOpen}>
 				<span>{toReadableString(FILE_TYPES[dataType].childFieldLabel ?? FILE_TYPES[dataType].childField)}</span>
 			</div>
 			{#if childrenOpen}

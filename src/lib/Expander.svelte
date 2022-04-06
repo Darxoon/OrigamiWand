@@ -19,14 +19,15 @@
 
 <div class="card expander" style="--bg-card: {backgroundColor}">
 	<div class="title" on:click={() => {open = !open; initialized = true}}>
-		<img src={open ? '/static/up.svg' : '/static/down.svg'} alt="V" class="expander_icon"><span>{title}</span>
+		<!-- TODO: export these paths into one global location, to make changing them easier -->
+		<img src={open ? '/OrigamiWand/static/up.svg' : '/OrigamiWand/static/down.svg'} alt="V" class="expander_icon"><span>{title}</span>
 		{#if showButtons}<div class="buttons">
 			<div class="duplicate" on:click|stopPropagation={() => {
 				dispatch("duplicate")
 			}}><i class="fa fa-clone"></i></div>
 			<div class="delete" on:click|stopPropagation={() => {
 				dispatch("delete")
-			}}><img src="/static/x-button.svg" alt="x"></div>
+			}}><img src="/OrigamiWand/static/x-button.svg" alt="x"></div>
 		</div>{/if}
 	</div>
 	

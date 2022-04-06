@@ -10,7 +10,7 @@
 
 <div class="alert">
 	<div class="closeButton" on:click={close}>
-		<img src="/static/x-button.svg" alt="x" />
+		<img src="/OrigamiWand/static/x-button.svg" alt="x" />
 	</div>
 	
 	<h2>{title}</h2>

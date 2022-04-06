@@ -134,13 +134,13 @@
 			
 			addingNewObject = true
 		}}>
-			<img src="/static/x-button.svg" alt="">
+			<img src="/OrigamiWand/static/x-button.svg" alt="">
 			Add new Object
 		</div>
 		<div class="card btn deleteAll" on:click={e => {
 			dispatch('delete', {})
 		}}>
-			<img src="/static/x-button.svg" alt="">
+			<img src="/OrigamiWand/static/x-button.svg" alt="">
 			Delete all Objects
 		</div>
 		<div class="card search">
