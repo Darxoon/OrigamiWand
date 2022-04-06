@@ -1,4 +1,4 @@
-@import '@fontsource/fira-mono';
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap');
 
 :root {
 	--ff-monospace: 'Fira Mono', 'Courier New', monospace;
