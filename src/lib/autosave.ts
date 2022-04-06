@@ -12,6 +12,7 @@ export interface SaveFile {
 	name: string
 	dataType: DataType
 	content: ArrayBuffer
+	isCompressed: boolean
 }
 
 export async function init() {

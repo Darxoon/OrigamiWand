@@ -11,6 +11,8 @@ export interface Tab {
     name: string
     shortName: string
     
+    isCompressed: boolean,
+    
     component: any
     properties: any
     children: TabID[]

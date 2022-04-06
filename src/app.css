@@ -23,6 +23,24 @@ h1 {
 	font-weight: 600;
 }
 
+.modalbtn {
+	border: none;
+	padding: 6px 12px;
+	font-size: var(--alert-font-size);
+	min-width: 4rem;
+	background: #dcdcdc;
+	border-radius: 6px;
+	transition: background 0.1s;
+}
+
+.modalbtn:hover {
+	background: #aeaeae;
+}
+
+.modalbtn:active, .modalbtn:focus {
+	background: #808080;
+}
+
 .card {
 	padding: 12px;
 	border-radius: 16px;

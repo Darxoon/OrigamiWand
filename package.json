@@ -28,6 +28,7 @@
     "cookie": "^0.4.1",
     "dexie": "^3.0.3",
     "events": "^3.3.0",
-    "typesafe-event-emitter": "^1.1.0"
+    "typesafe-event-emitter": "^1.1.0",
+    "zstd-codec": "^0.1.4"
   }
 }

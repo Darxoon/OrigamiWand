@@ -13,6 +13,8 @@
 	
 	let selectedIndex = 0
 	
+	let isCompressed = false
+	
 	const defaultFileNames = {
 		"dispos_Npc": DataType.Npc,
 		"dispos_Item": DataType.Item,
@@ -67,6 +69,10 @@
 				selectedIndex = select.selectedIndex
 				okButton.disabled = false
 			}
+		}
+		
+		if (fileName.includes('.zst')) {
+			isCompressed = true
 		}
 	})
 	
@@ -123,12 +129,36 @@
 		<option value="DataParty">Party Member Registry (data_party)</option>
 	</select>
 	
-	<div class="buttons">
-		<button on:click={() => hideActiveModal(false)}>Cancel</button>
-		<button on:click={() => hideActiveModal(DataType[select.options[select.selectedIndex].value])} bind:this={okButton}>Okay</button>
+	<div class="checkbox" style="margin-top: 0.3rem;">
+		<input type="checkbox" id="iscompressed" bind:checked={isCompressed}>
+		<label for="iscompressed">Is Compressed with ZSTD?</label>
+	</div>
+	
+	<div class="buttons" style="margin-top: 1rem;">
+		<button class="modalbtn" on:click={() => hideActiveModal(false)}>Cancel</button>
+		<button class="modalbtn" on:click={() => hideActiveModal({
+			dataType: DataType[select.options[select.selectedIndex].value],
+			isCompressed,
+		})} bind:this={okButton}>Okay</button>
 	</div>
 </Alert>
 
 <style>
+	select {
+		border: none;
+		padding: 6px 12px;
+		font-size: var(--alert-font-size);
+		min-width: 4rem;
+		background: #dcdcdc;
+		border-radius: 6px;
+		transition: background 0.1s;
+	}
+
+	select:hover {
+		background: #aeaeae;
+	}
 	
+	label {
+		font-size: 13pt;
+	}
 </style>

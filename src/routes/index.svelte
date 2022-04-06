@@ -15,7 +15,7 @@
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';
 	import Modal from '$lib/modal/Modal.svelte';
 	import TextAlert from '$lib/modal/TextAlert.svelte';
-	import { createTemporarySave, getLatestSave, init } from '$lib/autosave';
+	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/autosave';
 	import TitleCard from '$lib/TitleCard.svelte';
 	import { downloadBlob, map2d } from '$lib/util';
 	import { afterUpdate } from 'svelte';
@@ -23,6 +23,8 @@
 	import type { Tab } from '$lib/editor/globalDragging';
 	import NoteViewer from '$lib/modal/NoteViewer.svelte';
 	import { loadedAutosave } from '$lib/stores';
+	
+	import { ZstdCodec } from 'zstd-codec'
 	
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = []
@@ -38,6 +40,7 @@
 						let result = confirm("Do you want to close all tabs?")
 						
 						if (result) {
+							$loadedAutosave = true
 							tabs = [[]]
 						}
 					}
@@ -136,6 +139,16 @@
 	]
 
 	function openFileSelector() {
+		function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+			return new Promise((resolve, reject) => {
+				ZstdCodec.run(zstd => {
+					const simple = new zstd.Simple();
+					
+					resolve(simple.decompress(new Uint8Array(buffer)).buffer)
+				})
+			})
+		}
+		
 		console.log("opening file")
 
 		const fileSelector = document.createElement('input')
@@ -145,27 +158,28 @@
 		fileSelector.addEventListener('change', async (e: any) => {
 			const file: File = e.target.files[0]
 			
-			const [content, dataType] = await Promise.all([
-				loadFile(file),
-				showModal<false | DataType>(DataTypePrompt, {
-					fileName: file.name,
-				})
-			])
+			const contentPromise = loadFile(file)
+			
+			const {dataType, isCompressed} = await showModal(DataTypePrompt, {
+				fileName: file.name,
+			})
 
 			if (!dataType) {
 				return
 			}
-
+			
+			const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
+			
 			const binary = parseElfBinary(dataType, content)
 
 			tabs[0] = [
 				...tabs[0], 
-				Tab(file.name, binary, dataType),
+				Tab(file.name, binary, dataType, isCompressed),
 			]
 		})
 	}
 
-	function Tab(fileName: string, binary: ElfBinary, dataType: DataType): Tab {
+	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
 		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo) {
 			return {
 				id: Symbol(),
@@ -173,6 +187,7 @@
 				shortName: fileName,
 				component: SpecialElfEditor,
 				children: [],
+				isCompressed,
 				properties: {
 					dataType,
 					binary,
@@ -185,6 +200,7 @@
 				shortName: fileName,
 				component: ElfEditor,
 				children: [],
+				isCompressed,
 				properties: {
 					objectTitle: FILE_TYPES[dataType].displayName,
 					binary,
@@ -219,7 +235,18 @@
 		})
 	}
 	
-	function saveFile() {
+	async function saveFile() {
+		function compress(buffer: ArrayBuffer) {
+			return new Promise<ArrayBuffer>((resolve, reject) => {
+				ZstdCodec.run(zstd => {
+					let simple = new zstd.Simple()
+					
+					console.log('compressing file with size of', buffer.byteLength)
+					resolve(simple.compress(new Uint8Array(buffer)).buffer)
+				})
+			})
+		}
+		
 		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
 		
 		if (tab.parentId) {
@@ -229,10 +256,13 @@
 			})
 			return
 		}
+
+		const { name, isCompressed, properties: { dataType, binary } } = tab
 		
-		let output = serializeElfBinary(tab.properties.dataType, tab.properties.binary)
+		let serialized = serializeElfBinary(dataType, binary)
+		let output = isCompressed ? await compress(serialized) : serialized
 		
-		downloadBlob(output, tab.name)
+		downloadBlob(output, name)
 	}
 	
 	let editorWindows: EditorWindow[] = []
@@ -264,12 +294,13 @@
 	
 	async function autoSaveWindows() {
 		const serializedWindows = tabs.map(currentTabs => {
-			const serializedTabs = currentTabs.flatMap(tab => {
+			const serializedTabs = currentTabs.flatMap<SaveFile>(tab => {
 				const { dataType, binary } = tab.properties
 				
 				return tab.parentId ? [] : {
 					name: tab.name,
 					dataType,
+					isCompressed: tab.isCompressed,
 					content: serializeElfBinary(dataType, binary),
 				}
 			})
@@ -290,18 +321,18 @@
 				let save = await getLatestSave()
 				
 				console.log('loading save', ...save)
-						
+				
 				if (!save) {
 					$loadedAutosave = true
 					return
 				}
-					
-				tabs = map2d(save, ({name, dataType, content}) => 
-					Tab(name, parseElfBinary(dataType, content), dataType)
+				
+				tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
+					Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
 				).filter(arr => arr.length > 0)
-					
-					if (tabs.length == 0)
-						tabs = [[]]
+				
+				if (tabs.length == 0)
+					tabs = [[]]
 				
 				afterUpdateHandlers = [...afterUpdateHandlers, () => {
 					$loadedAutosave = true
@@ -460,7 +491,7 @@ to me, the developer (Darxoon). Thanks.`
 					}}
 					on:open={e => {
 						if (e.detail.type === "window") {
-							const { title, shortTitle, component, properties } = e.detail
+							const { title, shortTitle, component, properties, isCompressed } = e.detail
 							
 							const childID = Symbol(`Tab ID ${title}`)
 							
@@ -474,6 +505,7 @@ to me, the developer (Darxoon). Thanks.`
 								}
 								
 								tabToAddEditorIndex = 1
+								
 								tabToAdd = {
 									id: childID,
 									parentId,
@@ -481,6 +513,7 @@ to me, the developer (Darxoon). Thanks.`
 									shortName: shortTitle,
 									component,
 									properties,
+									isCompressed: isCompressed ?? false,
 									children: [],
 								}
 							} else {
@@ -491,6 +524,7 @@ to me, the developer (Darxoon). Thanks.`
 									shortName: shortTitle,
 									component,
 									properties,
+									isCompressed: isCompressed ?? false,
 									children: [],
 								})
 							}
