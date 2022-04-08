@@ -1,9 +1,13 @@
 <script lang="ts">
+	import { afterUpdate, createEventDispatcher } from "svelte";
+	
 	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
 	import { demangle, incrementName, mangleIdentifier } from "$lib/elf/nameMangling";
-	import { afterUpdate, createEventDispatcher, onMount } from "svelte";
+	
 	import ObjectEditor from "./ObjectEditor.svelte"
+	import SearchBar from './SearchBar.svelte';
+	import type { SearchIndex } from "./searchIndex";
 
 	const dispatch = createEventDispatcher()
 	
@@ -29,10 +33,9 @@
 		editorElements.forEach(editor => editor.open = true)
 	}
 	
-	function deleteObject(index: number) {
-		console.log('yeeah')
+	function deleteObject(obj: object) {
 		objects = []
-		dispatch('delete', { index })
+		dispatch('delete', { index: objects.indexOf(obj) })
 	}
 	
 	function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, isRootObject: boolean = true): T {
@@ -74,18 +77,41 @@
 		// insert clone into array
 		let objectIndex = containingArray.indexOf(obj)
 		containingArray.splice(objectIndex + 1, 0, clone)
+		containingArray = containingArray
 		
 		return clone
 	}
 	
-	function duplicateObject(index: number) {
-		objectToClone = objects[index]
+	function duplicateObject(obj: object) {
+		objectToClone = obj
 		backupObjects = objects
 		objects = []
 	}
 	
 	let backupObjects: any[] = undefined
 	let objectToClone = undefined
+	
+	let addingNewObject = false
+	
+	$: index = createIndex(objects)
+	
+	function createIndex(objects: object[]) {
+		let index: SearchIndex = []
+		
+		for (const obj of objects) {
+			for (const key in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, key) && typeof obj[key] == 'string') {
+					index.push({
+						obj,
+						field: key,
+						value: obj[key],
+					})
+				}
+			}
+		}
+		
+		return index
+	}
 	
 	afterUpdate(() => {
 		if (objectToClone) {
@@ -112,17 +138,21 @@
 			
 			objectToClone = undefined
 		}
-	})
-	
-	let addingNewObject = false
-	
-	afterUpdate(() => {
+		
 		if (addingNewObject) {
 			addingNewObject = false
 			
 			editorElements[objects.length - 1]?.scrollIntoView()
 		}
 	})
+	
+	let searchResults: SearchIndex
+	$: searchResultObjects = searchResults && [...new Set(searchResults.map(result => result.obj))]
+	$: searchResultFields = searchResults && new WeakMap(
+		searchResultObjects.map(obj => [
+			obj, 
+			searchResults.filter(result => result.obj == obj).map(result => result.field),
+		]))
 </script>
 
 <div class="editor">
@@ -143,10 +173,7 @@
 			<img src="/static/x-button.svg" alt="">
 			Delete all Objects
 		</div>
-		<div class="card search">
-			<i class="fa fa-search" aria-hidden="true"></i>
-			Search Coming Soon...
-		</div>
+		<SearchBar index={index} bind:results={searchResults} />
 	</div>
 		
 	<!-- <div class="toolbar">Yes</div> -->
@@ -157,10 +184,16 @@
 	{/if}
 	
 	<div class="listing" style="--content-height: {objects?.length * 61}px;">
-		{#each objects as obj, i}
+		{#if searchResultObjects}
+			<div class="resultlabel">Showing {searchResultObjects.length} results
+				(out of {objects.length} objects):</div>
+		{/if}
+		
+		{#each searchResultObjects ?? objects as obj, i}
 			{#if i < loadedObjectCount}
-				<ObjectEditor bind:this={editorElements[i]} title="{objectTitle} {i}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
-					on:duplicate={() => duplicateObject(i)} on:delete={() => deleteObject(i)} on:open binary={binary}
+				<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
+					highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
+					on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
 					on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
 			{/if}
 		{/each}
@@ -211,16 +244,18 @@
 		}
 	}
 	
+	.resultlabel {
+		font-size: 17pt;
+		color: white;
+		max-width: 56rem;
+		margin: -0.8rem auto 1.6rem auto;
+	}
+	
 	.listing {
 		min-height: var(--content-height);
 	}
 	
 	.addObject img {
 		transform: translateY(1.5px) rotateZ(45deg);
-	}
-	
-	.search {
-		flex: 1;
-		cursor: not-allowed;
 	}
 </style>

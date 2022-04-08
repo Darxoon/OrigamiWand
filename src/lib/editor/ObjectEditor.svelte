@@ -25,6 +25,8 @@
 	
 	export let open = false
 	
+	export let highlightedFields: Set<string> = new Set()
+	
 	$: entries = Object.entries(obj)
 	
 	// $: console.log("entries", {entries, obj, children: contentDiv?.children})
@@ -114,13 +116,17 @@
 		<div class="content" class:invisible={!open}>
 			{#each entries as [field, value], i}
 				{#if !(FILE_TYPES[dataType].metadata[field]?.hidden ?? false)}
-					<div class="key" class:bold={!field.startsWith('field_')} bind:this={entryLabelElements[i]} 
+				
+					<div class="key" class:highlighted={highlightedFields?.has(field)} 
+					class:bold={!field.startsWith('field_')} bind:this={entryLabelElements[i]} 
 					class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 						{toReadableString(field)}
+						
 						<div class="fieldIcons" class:shown={mouseInside 
 							&& mouseY >= entryLabelElements[i]?.getBoundingClientRect()?.y
 							&& (mouseY < (entryLabelElements[i + 1] ? entryLabelElements[i + 1] : Array.from(entryLabelElements).slice(i + 2).find(x => x))
 								?.getBoundingClientRect()?.y || entryLabelElements.length - 1 <= i)}>
+							
 							<div class="info_icon" class:hidden={FILE_TYPES[dataType].metadata[field]?.description === undefined}
 								on:click={e => showModal(TextAlert, {
 									title: `${toReadableString(field)}`,
@@ -128,6 +134,7 @@
 							})}>
 								<i class="fa fa-info-circle"></i>
 							</div>
+							
 							<div class="more_icon" on:click={e => {
 								console.log("ObjectEditor.dataType", DataType[dataType])
 								showFieldOptionEvent.emit('show', {
@@ -139,6 +146,7 @@
 							</div>
 						</div>
 					</div>
+					
 					{#if FILE_TYPES[dataType].typedef[field] === "pointer"}
 						<div class="value"><CrossObjectLink label={`Click to open (${value.length} item${value.length > 1 ? 's' : ''})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
@@ -147,6 +155,7 @@
 						<div class="value"><InputField on:valueChanged={updateEntries} noSpaces={FILE_TYPES[dataType].metadata[field]?.noSpaces ?? false}
 							fieldType={FILE_TYPES[dataType].typedef[field]} key={field} value={value} viewAsHex={$hexFields[dataType] && $hexFields[dataType][field]} /></div>
 					{/if}
+					
 				{/if}
 			{/each}
 		</div>
@@ -284,6 +293,11 @@
 			
 			&.italic {
 				font-style: italic;
+			}
+			
+			&.highlighted {
+				background: #fff11c;
+				border-radius: 3px;
 			}
 		}
 		
