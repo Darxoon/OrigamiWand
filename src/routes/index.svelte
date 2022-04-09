@@ -486,6 +486,19 @@ to me, the developer (Darxoon). Thanks.`
 
 <svelte:head>
 	<title>Origami Wand</title>
+	
+	<meta property="og:url" content="https://darxoon.github.io/OrigamiWand/">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Origami Wand">
+	<meta property="og:description" content="Editor for Paper Mario: The Origami King (Beta)">
+	<meta property="og:image" content="https://darxoon.github.io/res/origamiwand.png">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta property="twitter:domain" content="darxoon.github.io">
+	<meta property="twitter:url" content="https://darxoon.github.io/OrigamiWand/">
+	<meta name="twitter:title" content="Origami Wand">
+	<meta name="twitter:description" content="Editor for Paper Mario: The Origami King (Beta)">
+	<meta name="twitter:image" content="https://darxoon.github.io/res/origamiwand.png">
 </svelte:head>
 
 <section class="main" on:dragover={fileDragHandler} on:dragleave={dragLeaveHandler} on:drop={fileDropHandler}>
