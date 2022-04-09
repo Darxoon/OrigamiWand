@@ -34,8 +34,9 @@
 	}
 	
 	function deleteObject(obj: object) {
+		let index = objects.indexOf(obj)
 		objects = []
-		dispatch('delete', { index: objects.indexOf(obj) })
+		dispatch('delete', { index })
 	}
 	
 	function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, isRootObject: boolean = true): T {
