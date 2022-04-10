@@ -784,7 +784,7 @@ this references though.`),
 		id: "string",
 		description: "string",
 		type: new Property("string", `
-The type of the DataItem which determines how it behaves. Possible values:
+The type of the item which determines how it behaves. Possible values:
 
 "Icon" - item will trigger something and immediately be discarded (like coins or hearts)
 
@@ -816,7 +816,7 @@ The variable to increase. Can be 0, 1, 2 or 3.
 		textId: new Property("string", `
 The name of the item. Before it is displayed, it is looked up in \`glossary.msbt\`.
 
-This is also used for the collectible names and help descriptions, which are looked up
+This is also used for the collectible names, which are looked up
 in \`item.msbt\` with this value as the identifier.`),
 		field_0x50: "int",
 		field_0x54: "int",
@@ -829,7 +829,10 @@ Prefix 'B' is for Boots, 'H' is for hammers,
 'S' for bundled shop set items,
 'C' for accessories and 'K' for key items
 `),
-		field_0x68: "int",
+		field_0x68: "bool8",
+		field_0x69: "bool8",
+		field_0x6a: "bool8",
+		field_0x6b: "bool8",
 		field_0x6c: "int",
 		field_0x70: "int",
 		field_0x74: "int",
@@ -1080,9 +1083,15 @@ Some commonly found translations:
 		field_0x84: "int",
 		field_0x88: "int",
 		field_0x8c: "int",
-		field_0x90: "string",
-		field_0x98: "string",
-		field_0xa0: "string",
+		battleBackground: new Property("string", `
+The background asset group. The files in this asset group are found 
+in romfs/map/battle/.
+
+They always have the same file name as the asset group
+and usually have one of these extensions: .bfres, .probe and .light.bfres.`),
+		backgroundMusic: new Property("string", `
+The background music file that plays during the battle. It is found in romfs/sound/stream/`),
+		eventScript: "string",
 		field_0xa8: "int",
 		field_0xac: "int",
 		field_0xb0: "string",
@@ -1116,7 +1125,9 @@ Some commonly found translations:
 		type: new Property("string", `
 The type of the enemy. While it is similar to the NPC ID's (e. g. P_KNP, O_KUR, ...),
 it seems to never contain the 'O_' prefix, which means that it has to be referencing something else.
-Where it is referencing to is not known yet.`),
+Where it is referencing to is not known yet.
+
+Maybe, it is referencing data_btl, but that is just an idea.`),
 		field_0x8: "int",
 		field_0xc: "int",
 		field_0x10: "int",
