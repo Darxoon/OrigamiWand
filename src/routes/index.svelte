@@ -4,8 +4,8 @@
 
 <script lang="ts">
 	import EditorWindow from '$lib/editor/EditorWindow.svelte';
-	import ElfEditor from '$lib/editor/ElfEditor.svelte';
-	import SpecialElfEditor from '$lib/editor/SpecialElfEditor.svelte';
+	import ElfEditor from '$lib/editor/fileEditor/ElfEditor.svelte';
+	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
 	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
 	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
 	import parseElfBinary from 'paper-mario-elfs/parser';

@@ -5,9 +5,9 @@
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { demangle, incrementName, mangleIdentifier } from "paper-mario-elfs/nameMangling";
 	
-	import ObjectEditor from "./ObjectEditor.svelte"
-	import SearchBar from './SearchBar.svelte';
-	import type { SearchIndex } from "./searchIndex";
+	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
+	import SearchBar from '../search/SearchBar.svelte';
+	import type { SearchIndex } from "../search/searchIndex";
 
 	const dispatch = createEventDispatcher()
 	

@@ -3,7 +3,7 @@
 
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 
-	import { showFieldOptionEvent } from "$lib/events";
+	import { showFieldOptionEvent } from "$lib/util/events";
 	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
 	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";

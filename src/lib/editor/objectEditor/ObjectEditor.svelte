@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-	import { showFieldOptionEvent } from "$lib/events";
+	import { showFieldOptionEvent } from "$lib/util/events";
 	import { showModal } from "$lib/modal/modal";
 	import TextAlert from "$lib/modal/TextAlert.svelte";
 	import { toReadableString } from "$lib/util";

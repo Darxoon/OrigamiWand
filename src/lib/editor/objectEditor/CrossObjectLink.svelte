@@ -3,7 +3,7 @@
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	
 	import { createEventDispatcher } from "svelte";
-	import ElfEditor from "./ElfEditor.svelte";
+	import ElfEditor from "../fileEditor/ElfEditor.svelte";
 
 	const dispatch = createEventDispatcher()
 	
@@ -14,6 +14,7 @@
 	export let tabTitle: string
 	export let targetObjects: object[]
 	export let binary: ElfBinary = undefined
+	
 	
 </script>
 
