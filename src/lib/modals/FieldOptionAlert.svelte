@@ -4,9 +4,9 @@
 	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
 	import { onMount } from "svelte";
-	import StringViewer from "./StringViewer.svelte";
+	import StringViewer from "../modal/StringViewer.svelte";
 
-	import TabbedAlert from "./TabbedAlert.svelte"
+	import TabbedAlert from "../modal/TabbedAlert.svelte"
 
 	export let dataType: DataType
 	export let objects: any[]

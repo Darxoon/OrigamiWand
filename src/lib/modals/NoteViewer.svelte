@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { FILE_TYPES } from "$lib/elf/fileTypes";
-	import Alert from "./Alert.svelte";
-	import StringViewer from "./StringViewer.svelte";
+	import Alert from "../modal/Alert.svelte";
+	import StringViewer from "../modal/StringViewer.svelte";
 	import { DataType } from "$lib/elf/elfBinary";
 	import { toReadableString } from "$lib/util";
 
