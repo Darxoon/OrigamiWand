@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import type { DataType } from './elf/elfBinary'
+import type { DataType } from 'paper-mario-elfs/elfBinary'
 
 type DB = Dexie & {
 	overview: Dexie.Table<{id: number, timestamp: number, saveId: number}>,

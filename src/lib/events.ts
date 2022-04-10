@@ -1,7 +1,7 @@
 import { onMount } from "svelte";
 import { EventEmitter } from "events"
 import type { TypeSafeEventEmitter } from "typesafe-event-emitter";
-import type { DataType } from "./elf/elfBinary";
+import type { DataType } from "paper-mario-elfs/elfBinary";
 
 export interface ShowFieldOptionEventArgs {
     fieldName: string

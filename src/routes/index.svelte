@@ -6,10 +6,10 @@
 	import EditorWindow from '$lib/editor/EditorWindow.svelte';
 	import ElfEditor from '$lib/editor/ElfEditor.svelte';
 	import SpecialElfEditor from '$lib/editor/SpecialElfEditor.svelte';
-	import { DataType, ElfBinary } from '$lib/elf/elfBinary';
-	import { FILE_TYPES } from '$lib/elf/fileTypes';
-	import parseElfBinary from '$lib/elf/parser';
-	import serializeElfBinary from '$lib/elf/serializer';
+	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
+	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
+	import parseElfBinary from 'paper-mario-elfs/parser';
+	import serializeElfBinary from 'paper-mario-elfs/serializer';
 	import DataTypePrompt from '$lib/modals/DataTypePrompt.svelte';
 	import DescriptionViewer from '$lib/modals/DescriptionViewer.svelte';
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';

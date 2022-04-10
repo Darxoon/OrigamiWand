@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { DataType, ElfBinary } from "$lib/elf/elfBinary";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
+	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	
 	import { createEventDispatcher } from "svelte";
 	import ElfEditor from "./ElfEditor.svelte";

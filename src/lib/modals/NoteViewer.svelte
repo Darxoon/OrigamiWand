@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import Alert from "../modal/Alert.svelte";
 	import StringViewer from "../modal/StringViewer.svelte";
-	import { DataType } from "$lib/elf/elfBinary";
+	import { DataType } from "paper-mario-elfs/elfBinary";
 	import { toReadableString } from "$lib/util";
 
 	let wrapper: HTMLDivElement

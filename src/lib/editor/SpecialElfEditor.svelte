@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataType, ElfBinary } from "$lib/elf/elfBinary";
+	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import InnerSpecialSvelteEditor from "./InnerSpecialSvelteEditor.svelte";
 	
 	export let dataType: DataType

@@ -24,7 +24,9 @@
 		"checkJs": true,
 		"paths": {
 			"$lib": ["src/lib"],
-			"$lib/*": ["src/lib/*"]
+			"$lib/*": ["src/lib/*"],
+			"paper-mario-elfs": ["src/elf/"],
+			"paper-mario-elfs/*": ["src/elf/*"]
 		}
 	},
 	"extends": "./.svelte-kit/tsconfig.json",

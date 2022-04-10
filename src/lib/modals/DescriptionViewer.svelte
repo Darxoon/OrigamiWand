@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { Property } from "$lib/elf/fileTypes";
+	import type { Property } from "paper-mario-elfs/fileTypes";
 	import Alert from "../modal/Alert.svelte";
 	import StringViewer from "../modal/StringViewer.svelte";
 

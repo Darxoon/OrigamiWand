@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { afterUpdate, createEventDispatcher } from "svelte";
 	
-	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
-	import { demangle, incrementName, mangleIdentifier } from "$lib/elf/nameMangling";
+	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
+	import { demangle, incrementName, mangleIdentifier } from "paper-mario-elfs/nameMangling";
 	
 	import ObjectEditor from "./ObjectEditor.svelte"
 	import SearchBar from './SearchBar.svelte';

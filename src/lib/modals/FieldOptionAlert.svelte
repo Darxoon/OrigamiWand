@@ -1,8 +1,8 @@
 <script lang="ts">
 	import InputField from "$lib/editor/InputField.svelte";
 	import { hexFields, setHexField } from "$lib/editor/viewAsHex";
-	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
+	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { onMount } from "svelte";
 	import StringViewer from "../modal/StringViewer.svelte";
 
