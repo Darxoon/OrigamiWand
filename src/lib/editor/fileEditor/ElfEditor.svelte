@@ -190,14 +190,25 @@
 				(out of {objects.length} objects):</div>
 		{/if}
 		
-		{#each searchResultObjects ?? objects as obj, i}
-			{#if i < loadedObjectCount}
-				<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
-					highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
-					on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
-					on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
-			{/if}
-		{/each}
+		{#if searchResults}
+			{#each searchResultObjects as obj, i}
+				{#if i < loadedObjectCount}
+					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
+						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
+						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
+						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
+				{/if}
+			{/each}
+		{:else}
+			{#each objects as obj, i}
+				{#if i < loadedObjectCount}
+					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
+						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
+						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
+						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
+				{/if}
+			{/each}
+		{/if}
 	</div>
 	
 	{#if dataType === DataType.Maplink}
