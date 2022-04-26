@@ -371,7 +371,12 @@ Please verify."),
 		destinationStage: "string",
 		destinationId: "string",
 		// TODO string enums
-		type: new Property("string", "Dokan = pipe\n\n土管：下 = Vertical pipe"),
+		type: new Property("string", `
+Type type of the link. Possible values:
+
+* Dokan = pipe
+* 土管：下 = Vertical pipe
+`),
 		field_0x28: new Property("string", `No idea what this is for.\n\nExamples: "Bero0", "Door_WaitingArea", "Dokan1"`),
 		rotationDegrees: "float",
 		field_0x34: "int",
@@ -388,13 +393,10 @@ to its collision area."),
 		direction: new Property("string", `
 The direction in which the link is facing. Possible values, among others:
 
-右後ろ - right back
-
-右 - right
-
-左 - left
-
-Possibly more.`),
+* 右後ろ - right back
+* 右 - right
+* 左 - left
+* Possibly more.`),
 		field_0x68: "int",
 		field_0x6c: "int",
 		field_0x70: "int",
@@ -439,20 +441,48 @@ Example: "Cam_Dokan"`),
 		
 		id: "string",
 		modelId: new Property("string", "Reference to data_model_npc.elf"),
-		field_0x10: new Property("int", `
-Is always either 0, 1 or 2.
+		rotationBehavior: new Property("int", `
+Determines how the NPC rotates. Possible values:
 
-what 0 means is unknown.
-
-1 means Pera.
-
-2 means Enemy.`),
+* 0 - the object's rotation is only modified by scripts.
+* 1 - the object always faces either forwards or backwards and tries to use back sprites (basically Pera).
+* 2 - the object always faces the player when they get close or talk to the NPC
+but otherwise behaves like 0.
+* everything bigger just behaves like 2`),
 		field_0x14: "int",
 		textureSubclass: "string",
-		field_0x20: "int",
+		alwaysFacesFront: new Property("bool32", `
+If set to true, the NPC will only use its front sprites
+and won't turn flip around when going into the direction that the camera faces.`),
 		field_0x24: "int",
-		instanceScript: "string",
-		field_0x30: "string",
+		instanceScriptFilename: "string",
+		instanceScriptNamespace: new Property("string", `
+The namespace for the common instance functions of the NPC.
+Appears to only apply to the file name given above.
+
+Additionally, when the instance script filename is set to
+\`npc_dummy\`, then this field appears to always be null.
+
+Examples:
+
+* \`GES\`
+* \`knp\`
+* \`hei\`
+* \`Crab::Normal\`
+
+Some examples of functions that are in this namespace:
+
+* \`void <namespace>::npc_init()\`
+* \`void <namespace>::ResetMain(npc::Handle)\`
+* \`void <namespace>::ResetAction(npc::Handle)\`
+* \`void <namespace>::ResetExit(npc::Handle)\`
+* \`void <namespace>::npc_main()\`
+* \`void <namespace>::npc_action()\`
+* \`void <namespace>::npc_exit()\`
+* \`void <namespace>::npc_encount()\`
+* \`void <namespace>::npc_exit_by_first_attack()\`
+
+`),
 		field_0x38: "int",
 		field_0x3c: "float",
 		field_0x40: "float",
@@ -620,11 +650,9 @@ Could also have a purpose but I doubt it.
 
 Examples with translations:
 
-１回以下で修復　小さく = Repair in less than 1 time. Small.
-
-２回で修復ぐらいに　小さく = Small enough to repair in two tries.
-
-縦方向をジャンプできないぐらい小さく = Small enough to not jump vertically.`),
+* １回以下で修復　小さく = Repair in less than 1 time. Small.
+* ２回で修復ぐらいに　小さく = Small enough to repair in two tries.
+* 縦方向をジャンプできないぐらい小さく = Small enough to not jump vertically.`),
 		field_0x18: new Property("string", `
 Usage unknown, but it's always one of these possible values: \
 GET_YATARA_SMALL, GET_YATARA_MIDDLE or GET_YATARA_BIG.
@@ -786,15 +814,12 @@ this references though.`),
 		type: new Property("string", `
 The type of the item which determines how it behaves. Possible values:
 
-"Icon" - item will trigger something and immediately be discarded (like coins or hearts)
-
-"Pouch" - item will be added to the item inventory
-
-"Magic" - Velluminal books
-
-"KeyItem" - key item
-
-"Collectable" - trophy, collectibleModelId determines displayed mesh`),
+* "Icon" - item will trigger something and immediately be discarded (like coins or hearts)
+* "Pouch" - item will be added to the item inventory
+* "Magic" - Velluminal books
+* "KeyItem" - key item
+* "Collectable" - trophy, collectibleModelId determines displayed mesh (probably misspelling of Collectible)
+`),
 		modelId: "string",
 		field_0x20: "string",
 		collectibleModelId: "string",
@@ -802,15 +827,13 @@ The type of the item which determines how it behaves. Possible values:
 		buyPrice: "int",
 		sellPrice: new Property("int", "Unused as it is not possible to sell items"),
 		variable: new Property("int", `
-The variable to increase. Can be 0, 1, 2 or 3.
+The variable to increase. Possible values:
 
-0 increases coins.
-
-1 increases HP.
-
-2 increases Level (Maximum HP and Attack Damage).
-
-3 increases confetti.`),
+* 0 increases coins.
+* 1 increases HP.
+* 2 increases Level (Maximum HP and Attack Damage).
+* 3 increases confetti.
+`),
 		value: "int",
 		field_0x44: "int",
 		textId: new Property("string", `
@@ -824,10 +847,10 @@ in \`item.msbt\` with this value as the identifier.`),
 		iconId: new Property("string", `
 The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 
-Prefix 'B' is for Boots, 'H' is for hammers,
-'I' for normal items (e.g. Ice Flower, Mushroom),
-'S' for bundled shop set items,
-'C' for accessories and 'K' for key items
+* Prefix 'B' is for Boots, 'H' is for hammers,
+* 'I' for normal items (e.g. Ice Flower, Mushroom),
+* 'S' for bundled shop set items,
+* 'C' for accessories and 'K' for key items
 `),
 		field_0x68: "bool8",
 		field_0x69: "bool8",
@@ -858,18 +881,15 @@ Prefix 'B' is for Boots, 'H' is for hammers,
 		
 		field_0x0: new Property("string", `
 Always contains on of these values:
-		
-"finalize"
 
-"rough"
+* "finalize"
+* "rough"
+* "sample"
+* "test"
+* "battle"
 
-"sample"
-
-"test"
-
-"battle"
-
-Usage unknown.`),
+Usage unknown.
+`),
 		fullId: "string",
 		levelId: "string",
 		worldId: "string",
@@ -949,11 +969,9 @@ Usage unknown.`),
 Description of the state, which doesn't seem to have an effect on its behavior.
 Some commonly found translations:
 
-通常 = normal
-
-ダメージ = damage
-
-変形 = deformation/variation
+* 通常 = normal
+* ダメージ = damage
+* 変形 = deformation/variation
 `),
 		substates: new Property("pointer", undefined, {hidden: true}),
 		substateCount: new Property("int", undefined, {hidden: true}),
