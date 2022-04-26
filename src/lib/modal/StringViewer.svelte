@@ -1,16 +1,22 @@
 <script lang="ts">
+import InnerSpecialSvelteEditor from "$lib/editor/fileEditor/InnerSpecialSvelteEditor.svelte"
+import InnerParagraphDisplay from "./StringViewer/InnerParagraphDisplay.svelte"
+
 	export let text: string
 	export let inline: boolean = false
 	export let nopadding: boolean = false
 	
 	type LinkObject = {type: "link", text: string, href: string, newTab: boolean}
 	type MarkupObject = {type: "code" | "bold", text: string}
+	type BulletObject = {type: "bullet", text: string}
 	
-	$: paragraphs = text.split('\n\n').map(parseParagraph)
+	type TextSlice = string | LinkObject | MarkupObject | BulletObject
+	
+	$: paragraphs = text.split(/(?:\n+[ \t]*(?=\* ))|(?:\n\n+)/g).map(parseParagraph)
 	
 	function parseParagraph(paragraph: string) {
 		const matches = paragraph.matchAll(/\[(.*?)\]\((@?)(.+?)\)|`(.*?)`|\*\*(.*?)\*\*/g)
-		let arr: (string | LinkObject | MarkupObject)[] = []
+		let arr: TextSlice[] = []
 		let sectionStart = 0
 		
 		for (const match of matches) {
@@ -55,42 +61,29 @@
 		return arr
 	}
 	
+	function removeBulletStar(paragraph: TextSlice[]) {
+		let firstParagraph = typeof paragraph[0] === 'string'
+				? paragraph[0].trimStart().slice(2)
+				: paragraph[0]
+		return [firstParagraph, ...paragraph.slice(1)]
+	}
+	
 	$: console.log('paragraphs', paragraphs)
 </script>
 
 <div class="wrapper" class:nopadding={nopadding}>
 	{#each paragraphs as paragraph}
-		{#if inline}
+		{#if typeof paragraph[0] === 'string' && paragraph[0].trimStart().includes('* ')}
+			<li>
+				<InnerParagraphDisplay paragraph={removeBulletStar(paragraph)} />
+			</li>
+		{:else if inline}
 			<span>
-				{#each paragraph as part}
-					{#if typeof part === 'object' && part.type == 'link' && part.newTab}
-						<a href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a>
-					{:else if typeof part === 'object' && part.type == 'link'}
-						<a href={part.href}>{part.text}</a>
-					{:else if typeof part === 'object' && part.type == 'code'}
-						<pre>{part.text}</pre>
-					{:else if typeof part === 'object' && part.type == 'bold'}
-						<strong>{part.text}</strong>
-					{:else}
-						{part}
-					{/if}
-				{/each}
+				<InnerParagraphDisplay paragraph={paragraph} />
 			</span>
 		{:else}
 			<p>
-				{#each paragraph as part}
-					{#if typeof part === 'object' && part.type == 'link' && part.newTab}
-						<a href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a>
-					{:else if typeof part === 'object' && part.type == 'link'}
-						<a href={part.href}>{part.text}</a>
-					{:else if typeof part === 'object' && part.type == 'code'}
-						<pre>{part.text}</pre>
-					{:else if typeof part === 'object' && part.type == 'bold'}
-						<strong>{part.text}</strong>
-					{:else}
-						{part}
-					{/if}
-				{/each}
+				<InnerParagraphDisplay paragraph={paragraph} />
 			</p>
 		{/if}
 	{/each}
@@ -105,11 +98,7 @@
 		margin-bottom: 0;
 	}
 	
-	pre {
-		display: inline-block;
-		font-family: "Fira Mono";
-		font-size: 12pt;
-		padding: 0 4px;
-		margin: 0;
+	li {
+		margin-left: 1.4rem;
 	}
 </style>
