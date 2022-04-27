@@ -371,7 +371,12 @@ Please verify."),
 		destinationStage: "string",
 		destinationId: "string",
 		// TODO string enums
-		type: new Property("string", "Dokan = pipe\n\n土管：下 = Vertical pipe"),
+		type: new Property("string", `
+Type type of the link. Possible values:
+
+* Dokan = pipe
+* 土管：下 = Vertical pipe
+`),
 		field_0x28: new Property("string", `No idea what this is for.\n\nExamples: "Bero0", "Door_WaitingArea", "Dokan1"`),
 		rotationDegrees: "float",
 		field_0x34: "int",
@@ -388,13 +393,10 @@ to its collision area."),
 		direction: new Property("string", `
 The direction in which the link is facing. Possible values, among others:
 
-右後ろ - right back
-
-右 - right
-
-左 - left
-
-Possibly more.`),
+* 右後ろ - right back
+* 右 - right
+* 左 - left
+* Possibly more.`),
 		field_0x68: "int",
 		field_0x6c: "int",
 		field_0x70: "int",
@@ -439,20 +441,48 @@ Example: "Cam_Dokan"`),
 		
 		id: "string",
 		modelId: new Property("string", "Reference to data_model_npc.elf"),
-		field_0x10: new Property("int", `
-Is always either 0, 1 or 2.
+		rotationBehavior: new Property("int", `
+Determines how the NPC rotates. Possible values:
 
-what 0 means is unknown.
-
-1 means Pera.
-
-2 means Enemy.`),
+* 0 - the object's rotation is only modified by scripts.
+* 1 - the object always faces either forwards or backwards and tries to use back sprites (basically Pera).
+* 2 - the object always faces the player when they get close or talk to the NPC
+but otherwise behaves like 0.
+* everything bigger just behaves like 2`),
 		field_0x14: "int",
 		textureSubclass: "string",
-		field_0x20: "int",
+		alwaysFacesFront: new Property("bool32", `
+If set to true, the NPC will only use its front sprites
+and won't turn flip around when going into the direction that the camera faces.`),
 		field_0x24: "int",
-		instanceScript: "string",
-		field_0x30: "string",
+		instanceScriptFilename: "string",
+		instanceScriptNamespace: new Property("string", `
+The namespace for the common instance functions of the NPC.
+Appears to only apply to the file name given above.
+
+Additionally, when the instance script filename is set to
+\`npc_dummy\`, then this field appears to always be null.
+
+Examples:
+
+* \`GES\`
+* \`knp\`
+* \`hei\`
+* \`Crab::Normal\`
+
+Some examples of functions that are in this namespace:
+
+* \`void <namespace>::npc_init()\`
+* \`void <namespace>::ResetMain(npc::Handle)\`
+* \`void <namespace>::ResetAction(npc::Handle)\`
+* \`void <namespace>::ResetExit(npc::Handle)\`
+* \`void <namespace>::npc_main()\`
+* \`void <namespace>::npc_action()\`
+* \`void <namespace>::npc_exit()\`
+* \`void <namespace>::npc_encount()\`
+* \`void <namespace>::npc_exit_by_first_attack()\`
+
+`),
 		field_0x38: "int",
 		field_0x3c: "float",
 		field_0x40: "float",
@@ -620,11 +650,9 @@ Could also have a purpose but I doubt it.
 
 Examples with translations:
 
-１回以下で修復　小さく = Repair in less than 1 time. Small.
-
-２回で修復ぐらいに　小さく = Small enough to repair in two tries.
-
-縦方向をジャンプできないぐらい小さく = Small enough to not jump vertically.`),
+* １回以下で修復　小さく = Repair in less than 1 time. Small.
+* ２回で修復ぐらいに　小さく = Small enough to repair in two tries.
+* 縦方向をジャンプできないぐらい小さく = Small enough to not jump vertically.`),
 		field_0x18: new Property("string", `
 Usage unknown, but it's always one of these possible values: \
 GET_YATARA_SMALL, GET_YATARA_MIDDLE or GET_YATARA_BIG.
@@ -784,39 +812,45 @@ this references though.`),
 		id: "string",
 		description: "string",
 		type: new Property("string", `
-The type of the DataItem which determines how it behaves. Possible values:
+The type of the item which determines how it behaves. Possible values:
 
-"Icon" - item will trigger something and immediately be discarded (like coins or hearts)
-
-"Pouch" - item will be added to the item inventory
-
-"Magic" - Velluminal books
-
-"KeyItem" - key item
-
-"Collectable" - trophy, collectibleModelId determines displayed mesh`),
+* "Icon" - item will trigger something and immediately be discarded (like coins or hearts)
+* "Pouch" - item will be added to the item inventory
+* "Magic" - Velluminal books
+* "KeyItem" - key item
+* "Collectable" - trophy, collectibleModelId determines displayed mesh (probably misspelling of Collectible)
+`),
 		modelId: "string",
 		field_0x20: "string",
 		collectibleModelId: "string",
-		field_0x30: "int",
+		field_0x30: new Property("int", `
+I don't know what this does but this is a pattern that I noticed:
+
+* 0 - everything else
+* 1 - common weapons and items
+* 2 - silver and golden weapons as well as fire and ice flowers
+* 3 - shiny weapons
+* 4 - flashy weapons
+* >4 - collectibles
+
+My original thought was the shine on an item, but then I saw the collectibles
+which have values up to 99.`),
 		buyPrice: "int",
 		sellPrice: new Property("int", "Unused as it is not possible to sell items"),
 		variable: new Property("int", `
-The variable to increase. Can be 0, 1, 2 or 3.
+The variable to increase. Possible values:
 
-0 increases coins.
-
-1 increases HP.
-
-2 increases Level (Maximum HP and Attack Damage).
-
-3 increases confetti.`),
+* 0 increases coins.
+* 1 increases HP.
+* 2 increases Level (Maximum HP and Attack Damage).
+* 3 increases confetti.
+`),
 		value: "int",
 		field_0x44: "int",
 		textId: new Property("string", `
 The name of the item. Before it is displayed, it is looked up in \`glossary.msbt\`.
 
-This is also used for the collectible names and help descriptions, which are looked up
+This is also used for the collectible names, which are looked up
 in \`item.msbt\` with this value as the identifier.`),
 		field_0x50: "int",
 		field_0x54: "int",
@@ -824,12 +858,15 @@ in \`item.msbt\` with this value as the identifier.`),
 		iconId: new Property("string", `
 The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 
-Prefix 'B' is for Boots, 'H' is for hammers,
-'I' for normal items (e.g. Ice Flower, Mushroom),
-'S' for bundled shop set items,
-'C' for accessories and 'K' for key items
+* Prefix 'B' is for Boots, 'H' is for hammers,
+* 'I' for normal items (e.g. Ice Flower, Mushroom),
+* 'S' for bundled shop set items,
+* 'C' for accessories and 'K' for key items
 `),
-		field_0x68: "int",
+		field_0x68: "bool8",
+		field_0x69: "bool8",
+		field_0x6a: "bool8",
+		field_0x6b: "bool8",
 		field_0x6c: "int",
 		field_0x70: "int",
 		field_0x74: "int",
@@ -855,18 +892,15 @@ Prefix 'B' is for Boots, 'H' is for hammers,
 		
 		field_0x0: new Property("string", `
 Always contains on of these values:
-		
-"finalize"
 
-"rough"
+* "finalize"
+* "rough"
+* "sample"
+* "test"
+* "battle"
 
-"sample"
-
-"test"
-
-"battle"
-
-Usage unknown.`),
+Usage unknown.
+`),
 		fullId: "string",
 		levelId: "string",
 		worldId: "string",
@@ -946,11 +980,9 @@ Usage unknown.`),
 Description of the state, which doesn't seem to have an effect on its behavior.
 Some commonly found translations:
 
-通常 = normal
-
-ダメージ = damage
-
-変形 = deformation/variation
+* 通常 = normal
+* ダメージ = damage
+* 変形 = deformation/variation
 `),
 		substates: new Property("pointer", undefined, {hidden: true}),
 		substateCount: new Property("int", undefined, {hidden: true}),
@@ -1080,9 +1112,15 @@ Some commonly found translations:
 		field_0x84: "int",
 		field_0x88: "int",
 		field_0x8c: "int",
-		field_0x90: "string",
-		field_0x98: "string",
-		field_0xa0: "string",
+		battleBackground: new Property("string", `
+The background asset group. The files in this asset group are found 
+in romfs/map/battle/.
+
+They always have the same file name as the asset group
+and usually have one of these extensions: .bfres, .probe and .light.bfres.`),
+		backgroundMusic: new Property("string", `
+The background music file that plays during the battle. It is found in romfs/sound/stream/`),
+		eventScript: "string",
 		field_0xa8: "int",
 		field_0xac: "int",
 		field_0xb0: "string",
@@ -1108,7 +1146,7 @@ Some commonly found translations:
 	},
 	
 	[DataType.BtlSetElement]: {
-		__displayName:  "Enemy Instance",
+		__displayName:  "Enemy",
 		__importantField: "type",
 		__nestedAllValues: true,
 		__objectType: ElfBinary.ObjectType.Element,
@@ -1116,7 +1154,9 @@ Some commonly found translations:
 		type: new Property("string", `
 The type of the enemy. While it is similar to the NPC ID's (e. g. P_KNP, O_KUR, ...),
 it seems to never contain the 'O_' prefix, which means that it has to be referencing something else.
-Where it is referencing to is not known yet.`),
+Where it is referencing to is not known yet.
+
+Maybe, it is referencing data_btl, but that is just an idea.`),
 		field_0x8: "int",
 		field_0xc: "int",
 		field_0x10: "int",

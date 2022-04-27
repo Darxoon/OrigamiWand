@@ -1,9 +1,9 @@
 <script lang="ts">
-import { onMount } from "svelte";
+    import { onMount } from "svelte";
 
-    import Alert from "./Alert.svelte";
-    import { hideActiveModal, PopupButtonVariant } from "./modal";
-    import StringViewer from "./StringViewer.svelte";
+    import Alert from "../modal/Alert.svelte";
+    import { hideActiveModal, PopupButtonVariant } from "../modal/modal";
+    import StringViewer from "../modal/StringViewer.svelte";
     
     export let title: string
     export let content: string

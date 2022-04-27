@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
-	import Expander from "$lib/Expander.svelte";
+	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
+	import Expander from "$lib/editor/fileEditor/Expander.svelte";
 	import { createEventDispatcher } from "svelte";
 	import ElfEditor from "./ElfEditor.svelte";
-	import ObjectEditor from "./ObjectEditor.svelte";
+	import ObjectEditor from "../objectEditor/ObjectEditor.svelte";
 
 	const dispatch = createEventDispatcher()
 	
@@ -25,25 +25,6 @@
 	export function applyChangedValue(instance: any) {
 		binary = binary
 	}
-	
-	// function deleteObject(index: number) {
-	// 	console.log('yeeah')
-	// 	objects = []
-	// 	dispatch('delete', { index })
-	// }
-	
-	// function duplicateObject(index: number) {
-	// 	// let newObjects = [...objects]
-	// 	let newObject = {...objects[index]}
-	// 	// newObjects.splice(index, 0, newObject)
-	// 	// afterUpdateObjects = newObjects
-	// 	objects = []
-		
-	// 	dispatch('addObject', {
-	// 		index: index,
-	// 		obj: newObject,
-	// 	})
-	// }
 </script>
 
 <div class="editor">
@@ -67,8 +48,6 @@
 			Search Coming Soon...
 		</div>
 	</div>
-	
-	<!-- <div class="toolbar">Yes</div> -->
 	
 	{#if dataType === DataType.DataBtlSet}
 		<Expander title="Special Map Names">

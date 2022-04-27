@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { DataType } from "$lib/elf/elfBinary";
+	import { DataType } from "paper-mario-elfs/elfBinary";
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte";
 	
-	import Alert from "./Alert.svelte";
-	import { hideActiveModal } from "./modal";
+	import Alert from "../modal/Alert.svelte";
+	import { hideActiveModal } from "../modal/modal";
 
 	export let fileName: string = ""
 	

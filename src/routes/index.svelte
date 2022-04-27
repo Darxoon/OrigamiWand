@@ -4,14 +4,14 @@
 
 <script lang="ts">
 	import EditorWindow from '$lib/editor/EditorWindow.svelte';
-	import ElfEditor from '$lib/editor/ElfEditor.svelte';
-	import SpecialElfEditor from '$lib/editor/SpecialElfEditor.svelte';
-	import { DataType, ElfBinary } from '$lib/elf/elfBinary';
-	import { FILE_TYPES } from '$lib/elf/fileTypes';
-	import parseElfBinary from '$lib/elf/parser';
-	import serializeElfBinary from '$lib/elf/serializer';
-	import DataTypePrompt from '$lib/modal/DataTypePrompt.svelte';
-	import DescriptionViewer from '$lib/modal/DescriptionViewer.svelte';
+	import ElfEditor from '$lib/editor/fileEditor/ElfEditor.svelte';
+	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
+	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
+	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
+	import parseElfBinary from 'paper-mario-elfs/parser';
+	import serializeElfBinary from 'paper-mario-elfs/serializer';
+	import DataTypePrompt from '$lib/modals/DataTypePrompt.svelte';
+	import DescriptionViewer from '$lib/modals/DescriptionViewer.svelte';
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';
 	import Modal from '$lib/modal/Modal.svelte';
 	import TextAlert from '$lib/modal/TextAlert.svelte';
@@ -21,7 +21,7 @@
 	import { afterUpdate } from 'svelte';
 	import { onMount } from 'svelte/internal';
 	import type { Tab } from '$lib/editor/globalDragging';
-	import NoteViewer from '$lib/modal/NoteViewer.svelte';
+	import NoteViewer from '$lib/modals/NoteViewer.svelte';
 	import { loadedAutosave } from '$lib/stores';
 	
 	import { ZstdCodec } from 'zstd-codec'

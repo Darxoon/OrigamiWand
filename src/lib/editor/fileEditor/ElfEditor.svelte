@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { afterUpdate, createEventDispatcher } from "svelte";
 	
-	import { DataType, ElfBinary } from "$lib/elf/elfBinary";
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
-	import { demangle, incrementName, mangleIdentifier } from "$lib/elf/nameMangling";
+	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
+	import { demangle, incrementName, mangleIdentifier } from "paper-mario-elfs/nameMangling";
 	
-	import ObjectEditor from "./ObjectEditor.svelte"
-	import SearchBar from './SearchBar.svelte';
-	import type { SearchIndex } from "./searchIndex";
+	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
+	import SearchBar from '../search/SearchBar.svelte';
+	import type { SearchIndex } from "../search/searchIndex";
+	import { duplicateElfObject } from "paper-mario-elfs/util";
 
 	const dispatch = createEventDispatcher()
 	
@@ -39,49 +40,6 @@
 		dispatch('delete', { index })
 	}
 	
-	function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, isRootObject: boolean = true): T {
-		function cloneObject<T>(dataType: DataType, obj: T): T {
-			// deep clone self
-			let clone = {...obj}
-			Object.setPrototypeOf(clone, Object.getPrototypeOf(obj))
-			
-			if (isRootObject && FILE_TYPES[dataType].identifyingField == "id") {
-				// @ts-ignore
-				clone.id = incrementName(obj.id)
-			}
-			
-			// deep clone children
-			for (const [fieldName, fieldValue] of Object.entries(obj)) {
-				const fieldType = FILE_TYPES[dataType].typedef[fieldName]
-				
-				if (fieldType === "pointer") {
-					const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
-					let childObjectType = FILE_TYPES[childDataType].objectType
-					
-					let clonedChild = duplicateElfObject(binary, childDataType, binary.data.get(childObjectType), fieldValue, false)
-					clone[fieldName] = clonedChild
-				}
-			}
-			
-			return clone
-		}
-		
-		function cloneArray<T>(dataType: DataType, arr: T[]): T[] {
-			let result = arr.map(obj => cloneObject(dataType, obj))
-			console.log(result)
-			return result
-		}
-		
-		console.log('cloning', DataType[dataType], obj)
-		let clone = obj instanceof Array ? cloneArray(dataType, obj) as unknown as T : cloneObject(dataType, obj)
-		
-		// insert clone into array
-		let objectIndex = containingArray.indexOf(obj)
-		containingArray.splice(objectIndex + 1, 0, clone)
-		containingArray = containingArray
-		
-		return clone
-	}
 	
 	function duplicateObject(obj: object) {
 		objectToClone = obj
@@ -190,14 +148,26 @@
 				(out of {objects.length} objects):</div>
 		{/if}
 		
-		{#each searchResultObjects ?? objects as obj, i}
-			{#if i < loadedObjectCount}
-				<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
-					highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
-					on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
-					on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
-			{/if}
-		{/each}
+		{#if searchResults}
+			{#each searchResultObjects as obj, i}
+				{#if i < loadedObjectCount}
+					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} bind:obj={obj} dataType={dataType}
+						title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}"
+						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
+						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
+						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
+				{/if}
+			{/each}
+		{:else}
+			{#each objects as obj, i}
+				{#if i < loadedObjectCount}
+					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
+						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
+						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
+						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
+				{/if}
+			{/each}
+		{/if}
 	</div>
 	
 	{#if dataType === DataType.Maplink}

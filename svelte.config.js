@@ -1,3 +1,4 @@
+import path from 'path';
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
 
@@ -19,6 +20,11 @@ const config = {
 		vite: () => ({
 			build: {
 				target: [ 'es2020' ]
+			},
+			resolve: {
+				alias: {
+					'paper-mario-elfs': path.resolve('src/elf')
+				}
 			}
 		}),
 	}

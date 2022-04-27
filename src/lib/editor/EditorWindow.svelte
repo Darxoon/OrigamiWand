@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { DataType } from "$lib/elf/elfBinary";
+	import { DataType } from "paper-mario-elfs/elfBinary";
 
-	import { FILE_TYPES } from "$lib/elf/fileTypes";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 
-	import { showFieldOptionEvent } from "$lib/events";
-	import FieldOptionAlert from "$lib/modal/FieldOptionAlert.svelte";
+	import { showFieldOptionEvent } from "$lib/util/events";
+	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
-	import TernaryPrompt from "$lib/modal/TernaryPrompt.svelte";
+	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";
 	import { loadedAutosave } from "$lib/stores";
 	
 	import { insertIntoArrayPure, resizeArray, toReadableString } from "$lib/util";
