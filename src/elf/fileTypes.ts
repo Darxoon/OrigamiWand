@@ -823,7 +823,18 @@ The type of the item which determines how it behaves. Possible values:
 		modelId: "string",
 		field_0x20: "string",
 		collectibleModelId: "string",
-		field_0x30: "int",
+		field_0x30: new Property("int", `
+I don't know what this does but this is a pattern that I noticed:
+
+* 0 - everything else
+* 1 - common weapons and items
+* 2 - silver and golden weapons as well as fire and ice flowers
+* 3 - shiny weapons
+* 4 - flashy weapons
+* >4 - collectibles
+
+My original thought was the shine on an item, but then I saw the collectibles
+which have values up to 99.`),
 		buyPrice: "int",
 		sellPrice: new Property("int", "Unused as it is not possible to sell items"),
 		variable: new Property("int", `
@@ -1135,7 +1146,7 @@ The background music file that plays during the battle. It is found in romfs/sou
 	},
 	
 	[DataType.BtlSetElement]: {
-		__displayName:  "Enemy Instance",
+		__displayName:  "Enemy",
 		__importantField: "type",
 		__nestedAllValues: true,
 		__objectType: ElfBinary.ObjectType.Element,
