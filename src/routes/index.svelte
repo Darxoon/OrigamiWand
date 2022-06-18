@@ -8,7 +8,7 @@
 	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
 	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
 	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
-	import parseElfBinary from 'paper-mario-elfs/parser';
+	import parseElfBinary, { EmptyFileError } from 'paper-mario-elfs/parser';
 	import serializeElfBinary from 'paper-mario-elfs/serializer';
 	import DataTypePrompt from '$lib/modals/DataTypePrompt.svelte';
 	import DescriptionViewer from '$lib/modals/DescriptionViewer.svelte';
@@ -174,7 +174,25 @@
 			
 			const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
 			
-			const binary = parseElfBinary(dataType, content)
+			let binary 
+			try {
+				binary = parseElfBinary(dataType, content)
+			} catch (e) {
+				if (e instanceof EmptyFileError) {
+					showModal(TextAlert, {
+						title: "Opening File",
+						content: "File is empty. Generating a new file instead."
+					})
+						.then(() => {
+							showModal(TextAlert, {
+								title: "Error",
+								content: "Error: Not implemented yet."
+							})
+						})
+				}
+				
+				throw e
+			}
 
 			tabs[0] = [
 				...tabs[0], 
@@ -365,7 +383,7 @@
 			.then(async () => {
 				let save = await getLatestSave()
 				
-				console.log('loading save', ...save)
+				console.log('loading save', save)
 				
 				if (!save) {
 					$loadedAutosave = true

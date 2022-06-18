@@ -2,7 +2,7 @@
 
 git checkout master > /dev/null
 
-echo -n "name of the new release: "
+echo -n "id of the new release: "
 read tag
 
 echo -n "title of release: "
