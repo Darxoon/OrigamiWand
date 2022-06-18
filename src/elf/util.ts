@@ -1,5 +1,6 @@
 import { DataType, ElfBinary } from "./elfBinary"
 import { FILE_TYPES } from "./fileTypes"
+import { incrementName } from "./nameMangling"
 
 export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
 	for (let i = 0; i < arr.length; i++) {
