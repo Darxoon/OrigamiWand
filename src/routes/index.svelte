@@ -365,7 +365,7 @@
 			.then(async () => {
 				let save = await getLatestSave()
 				
-				console.log('loading save', ...save)
+				console.log('loading save', save)
 				
 				if (!save) {
 					$loadedAutosave = true

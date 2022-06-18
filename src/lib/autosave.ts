@@ -54,7 +54,7 @@ export async function createTemporarySave(windows: SaveFile[][]) {
 
 export async function getLatestSave() {
 	let latestSaveEntry = await db.overview.orderBy('timestamp').last()
-	let saveId = latestSaveEntry.saveId
+	let saveId = latestSaveEntry?.saveId ?? 0
 	
 	let save = await db.saves.get(saveId)
 	return save?.windows
