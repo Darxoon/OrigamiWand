@@ -10,6 +10,7 @@
 	
 	export let dataType: DataType
 	export let binary: ElfBinary
+	export let fileName: string
 	export let self
 	
 	let editorElements = []
@@ -113,6 +114,155 @@
 		{/each}
 	{/if}
 	
+	{#if dataType === DataType.DataUi}
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Models (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiModel].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.Model),
+					importantFieldName: FILE_TYPES[DataType.UiModel].identifyingField,
+					dataType: DataType.UiModel,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Models
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Messages (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiMsg].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.Msg),
+					importantFieldName: FILE_TYPES[DataType.UiMsg].identifyingField,
+					dataType: DataType.UiMsg,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Messages
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Shops (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiShop].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.Shop),
+					importantFieldName: FILE_TYPES[DataType.UiShop].identifyingField,
+					dataType: DataType.UiShop,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Shops
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Sea Map (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiSeaMap].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.SeaEntry),
+					importantFieldName: FILE_TYPES[DataType.UiSeaMap].identifyingField,
+					dataType: DataType.UiSeaMap,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Sea Map
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Menus (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiMenu].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.Menu),
+					importantFieldName: FILE_TYPES[DataType.UiMenu].identifyingField,
+					dataType: DataType.UiMenu,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Menus
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Announcements (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiAnnouncement].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.Announcement),
+					importantFieldName: FILE_TYPES[DataType.UiAnnouncement].identifyingField,
+					dataType: DataType.UiAnnouncement,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Announcements
+			</div>
+		</div>
+		
+		<div class="card link" on:click={e => {
+			dispatch("open", {
+				type: "window",
+				title: `Announcement Excludes (${fileName})`,
+				component: ElfEditor,
+				properties: {
+					objectTitle: FILE_TYPES[DataType.UiAnnouncementExclude].displayName,
+					objects: binary.data.get(ElfBinary.ObjectType.AnnouncementExclude),
+					importantFieldName: FILE_TYPES[DataType.UiAnnouncementExclude].identifyingField,
+					dataType: DataType.UiAnnouncementExclude,
+					parent: self,
+					binary,
+				}
+			})
+		}}>
+			<div style="dislay: flex; user-select: none">
+				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
+				Announcement Excludes
+			</div>
+		</div>
+	{/if}
+	
 	<!-- {#each objects as obj, i}
 		<ObjectEditor bind:this={editorElements[i]} title="{objectTitle} {i}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
 			on:duplicate={() => duplicateObject(i)} on:delete={() => deleteObject(i)} on:open />
@@ -160,6 +310,11 @@
 			height: var(--size);
 			width: var(--size);
 		}
+	}
+	
+	.link {
+		margin: 1rem auto;
+		max-width: 56rem;
 	}
 	
 	.category {

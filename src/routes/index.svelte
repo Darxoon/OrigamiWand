@@ -243,7 +243,7 @@
 	}
 
 	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo) {
+		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
 			return {
 				id: Symbol(),
 				name: fileName,
@@ -254,6 +254,7 @@
 				properties: {
 					dataType,
 					binary,
+					fileName,
 				},
 			}
 		} else {
