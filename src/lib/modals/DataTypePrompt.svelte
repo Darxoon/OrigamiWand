@@ -54,6 +54,7 @@
 		"data_effect": DataType.DataEffect,
 		"data_mapLinkZoom": DataType.DataMaplinkZoom,
 		"data_party": DataType.DataParty,
+		"data_ui": DataType.DataUi,
 	}
 	
 	onMount(() => {
@@ -127,6 +128,7 @@
 		<option value="DataEffect">Particle Effect Registry (data_effect)</option>
 		<option value="DataMaplinkZoom">data_mapLinkZoom</option>
 		<option value="DataParty">Party Member Registry (data_party)</option>
+		<option value="DataUi">User Interface Registry (data_ui)</option>
 	</select>
 	
 	<div class="checkbox" style="margin-top: 0.3rem;">
