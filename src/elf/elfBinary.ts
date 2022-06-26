@@ -41,6 +41,16 @@ export namespace ElfBinary {
 		Version,
 		
 		Category,
+		
+		Model,
+		ModelProperty,
+		Msg,
+		Shop,
+		SellItem,
+		SeaEntry,
+		Menu,
+		Announcement,
+		AnnouncementExclude,
 	}
 }
 
@@ -94,6 +104,7 @@ export enum DataType {
 	DataEffect,
 	DataMaplinkZoom,
 	DataParty,
+	DataUi,
 	
 	// this is the end of the actual file types
 	TypeAmount,
@@ -114,6 +125,16 @@ export enum DataType {
 	ConfettiData,
 	ConfettiMap,
 	ConfettiHole,
+	
+	UiModel,
+	UiModelProperty,
+	UiMsg,
+	UiShop,
+	UiSellItem,
+	UiSeaMap,
+	UiMenu,
+	UiAnnouncement,
+	UiAnnouncementExclude,
 }
 
 
@@ -134,7 +155,7 @@ export class Pointer {
 	}
 	
 	toString() {
-		return this.equals(Pointer.NULL) ? "pointer->null" : `pointer->0x${this._offset.toString(16)}`
+		return this.equals(Pointer.NULL) ? "$null" : `$0x${this._offset.toString(16)}`
 	}
 	
 	get value(): number {

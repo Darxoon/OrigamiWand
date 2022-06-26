@@ -243,7 +243,7 @@
 	}
 
 	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo) {
+		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
 			return {
 				id: Symbol(),
 				name: fileName,
@@ -254,6 +254,7 @@
 				properties: {
 					dataType,
 					binary,
+					fileName,
 				},
 			}
 		} else {
@@ -519,7 +520,7 @@ to me, the developer (Darxoon). Thanks.`
 	<meta name="twitter:image" content="https://darxoon.github.io/res/origamiwand.png">
 </svelte:head>
 
-<section class="main" on:dragover={fileDragHandler} on:dragleave={dragLeaveHandler} on:drop={fileDropHandler}>
+<section class="main" class:noOverflow={$modalVisible} on:dragover={fileDragHandler} on:dragleave={dragLeaveHandler} on:drop={fileDropHandler}>
 	<div class="title_card">
 		<TitleCard menu={menuItems} />
 	</div>
@@ -652,6 +653,10 @@ to me, the developer (Darxoon). Thanks.`
 		div {
 			flex: 1;
 		}
+	}
+	
+	.noOverflow {
+		overflow-y: hidden;
 	}
 	
 	.dragOverlay {

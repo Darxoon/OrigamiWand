@@ -4,6 +4,7 @@
 	
 	export let dataType: DataType
 	export let binary: ElfBinary
+	export let fileName: string
 	
 	let inner: InnerSpecialSvelteEditor
 	
@@ -16,4 +17,5 @@
 	}
 </script>
 
-<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary} bind:this={inner} self={inner} on:addObject on:delete on:open />
+<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
+		bind:this={inner} self={inner} on:addObject on:delete on:open />
