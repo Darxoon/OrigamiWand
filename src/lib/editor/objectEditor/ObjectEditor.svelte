@@ -107,7 +107,7 @@
 				
 				<!-- Value Input -->
 				<div class="value">
-					{#if FILE_TYPES[dataType].typedef[field] === "pointer"}
+					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
 						<CrossObjectLink label={`Click to open (${value.length} item${value.length > 1 ? 's' : ''})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
 								sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />

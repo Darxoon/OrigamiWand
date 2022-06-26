@@ -1499,16 +1499,23 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.DataUi]: {},
 	
 	[DataType.UiModel]: {
+		__displayName: "Model",
+		__childTypes: {
+			properties: DataType.UiModelProperty,
+		},
+		
 		id: "string",
 		modelFolder: "string",
 		modelId: new Property("string", `
 Not sure what this is for. It seems like it's the same as \`id\`.`),
-		properties: "pointer",
+		properties: new Property("pointer", undefined, {tabName: "Model Properties of {id}"}),
 		propertyCount: "int",
 		field_0x24: "int",
 	},
 	
 	[DataType.UiModelProperty]: {
+		__displayName: "Model Property",
+		
 		id: "string",
 		model: "string",
 		field_0x10: "string",
@@ -1523,6 +1530,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiMsg]: {
+		__displayName: "Message",
+		
 		id: "string",
 		modelAsset: "string",
 		field_0x10: "string",
@@ -1550,13 +1559,20 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiShop]: {
+		__displayName: "Shop",
+		__childTypes: {
+			soldItems: DataType.UiSellItem,
+		},
+		
 		id: "string",
-		soldItems: "symbol",
+		soldItems: new Property("symbol", undefined, {tabName: "Sold Items of {id}"}),
 		soldItemCount: new Property("int", undefined, {hidden: true}),
 		field_0x14: "int",
 	},
 	
 	[DataType.UiSellItem]: {
+		__displayName: "Sold Item",
+		
 		id: "string",
 		field_0x8: "string",
 		field_0x10: "int",
@@ -1581,6 +1597,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiSeaMap]: {
+		__displayName: "Map Entry",
+		
 		id: "string",
 		group: "string",
 		field_0x10: "string",
@@ -1596,6 +1614,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiMenu]: {
+		__displayName: "Menu",
+		
 		stage: "string",
 		id: "string",
 		field_0x10: "string",
@@ -1647,6 +1667,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiAnnouncement]: {
+		__displayName: "Announcement",
+		
 		number: "int",
 		field_0x4: "int",
 		id: "string",
@@ -1659,6 +1681,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.UiAnnouncementExclude]: {
+		__displayName: "Announcement Exclude",
+		
 		id: "string",
 		field_0x8: "int",
 		field_0xc: "int",
