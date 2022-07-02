@@ -2,7 +2,7 @@ import { DataType, ElfBinary, Pointer } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
 import type { Struct } from "./fileTypes";
 import { BinaryWriter } from "./misc";
-import { Relocation } from "./types";
+import { Relocation, Section, Symbol } from "./types";
 import { demangle, mangleIdentifier } from "./nameMangling";
 import { enumerate } from "./util";
 
@@ -48,6 +48,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const symbolLocationReference: Map<string, Pointer> = new Map()
 	const symbolNameOverrides: Map<string, string> = new Map()
 	
+	// TODO use these functions more
+	function findSection(sectionName: string): Section {
+		return sections.find(section => section.name == sectionName)
+	}
+	
+	function findSymbol(name: string): Symbol {
+		return binary.symbolTable.find(symbol => demangle(symbol.name) === name)
+	}
+	
 	// We will start with the .data section
 	// Because it is just an array of structs, serializing it is relatively straight forward
 	
@@ -59,6 +68,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// However, we need to note which strings exist, so they can all be written into .rodata.str1.1.
 	
 	{
+		// TODO rename to dataWriter
 		let writer = new BinaryWriter()
 		
 		let dataStringRelocations = new Map() as Map<Offset, string>
@@ -230,6 +240,87 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 
 				break
 			}
+
+			case DataType.DataUi: {
+				const rodataWriter = new BinaryWriter()
+				const dataPointers = new Map()
+				
+				let dataRelocations: Relocation[] = []
+				allRelocations.set('.data', dataRelocations)
+				
+				// models
+				for (const model of binary.data.get(ElfBinary.ObjectType.Model) as Struct<DataType.UiModel>[]) {
+					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(writer.size))
+					
+					if (model.properties)
+						serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiModelProperty, model.properties, false)
+				}
+				
+				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(writer.size))
+				
+				// TODO refactor 3 first args into an object that can be passed down easier
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiModel, binary.data.get(ElfBinary.ObjectType.Model))
+				
+				// msg
+				symbolLocationReference.set(`wld::fld::data::s_uiMessageData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiMsg, binary.data.get(ElfBinary.ObjectType.Msg))
+				
+				// sell data
+				for (const shop of binary.data.get(ElfBinary.ObjectType.Shop) as Struct<DataType.UiShop>[]) {
+					symbolLocationReference.set(`wld::fld::data::s_sellData_${shop.id}`, new Pointer(writer.size))
+					
+					serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiSellItem, shop.soldItems)
+				}
+				
+				// shops
+				for (const [shop, i] of enumerate(binary.data.get(ElfBinary.ObjectType.Shop) as Struct<DataType.UiShop>[])) {
+					let locationOffset: number = writer.size 
+							+ FILE_TYPES[DataType.UiShop].size * i
+							+ (FILE_TYPES[DataType.UiShop].fieldOffsets["soldItems"] as number)
+					let sellDataSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === `wld::fld::data::s_sellData_${shop.id}`)
+					dataRelocations.push(new Relocation(new Pointer(locationOffset), 0x101, sellDataSymbolIndex, Pointer.ZERO))
+				}
+				
+				symbolLocationReference.set(`wld::fld::data::s_shopData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiShop, binary.data.get(ElfBinary.ObjectType.Shop))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiShop, [
+					FILE_TYPES[DataType.UiShop].instantiate()
+				])
+				
+				// sea map
+				symbolLocationReference.set(`wld::fld::data::s_uiSeaMapData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiSeaMap, binary.data.get(ElfBinary.ObjectType.SeaEntry))
+				
+				// menu
+				symbolLocationReference.set(`wld::fld::data::s_menuData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiMenu, binary.data.get(ElfBinary.ObjectType.Menu))
+				
+				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Menu).length)
+				
+				// announce
+				symbolLocationReference.set(`wld::fld::data::s_announceData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiAnnouncement, binary.data.get(ElfBinary.ObjectType.Announcement))
+				
+				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Announcement).length)
+				
+				symbolLocationReference.set(`wld::fld::data::s_announceExcludeData`, new Pointer(writer.size))
+				serializeObjects(writer, dataStringRelocations, dataPointers, 
+					DataType.UiAnnouncementExclude, binary.data.get(ElfBinary.ObjectType.AnnouncementExclude))
+				
+				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.AnnouncementExclude).length)
+
+				// remaining strings
+				for (const model of binary.data.get(ElfBinary.ObjectType.Model) as Struct<DataType.UiModel>[]) {
+					if (model.properties)
+						serializeStringsOnly(DataType.UiModelProperty, model.properties)
+				}
+				
+				
+				updatedSections.set('.rodata', rodataWriter.toArrayBuffer())
+				objectRelocations.set('.data', dataPointers)
+
+				break
+			}
 			
 			default:
 				serializeObjects(writer, dataStringRelocations, undefined,
@@ -358,7 +449,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			return rodataWriter.toArrayBuffer()
 		}
 		
-		function serializeObjects(writer: BinaryWriter, sectionStringRelocations, sectionPointers, dataType: DataType, objects: object[]) {
+		function serializeObjects(writer: BinaryWriter, sectionStringRelocations, sectionPointers, dataType: DataType, objects: object[], addStrings: boolean = true) {
 			if (objects.length == 0) {
 				objectOffsets.set(objects, new Pointer(writer.size))
 			}
@@ -371,7 +462,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					
 					switch (fieldType) {
 						case "string": 
-							allStrings.add(fieldValue)
+							if (addStrings)
+								allStrings.add(fieldValue)
 							
 							if (fieldValue != null)
 								sectionStringRelocations.set(writer.size, fieldValue)
@@ -386,10 +478,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 							break
 						case "pointer":
 							// empty arrays are null as well
-							if (!Pointer.NULL.equals(fieldValue)) {
-								if (fieldValue === undefined)
-									console.warn()
-								
+							if (!Pointer.NULL.equals(fieldValue) && fieldValue != null) {
 								sectionPointers.set(writer.size, fieldValue)
 							}
 						
@@ -587,7 +676,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	}
 	
 	{
-		let rodataSectionIndex = sections.findIndex(section => section.name === ".rodata")
+		let destinationSection = dataType === DataType.DataUi ? ".data" : ".rodata"
+		let rodataSectionIndex = sections.findIndex(section => section.name === destinationSection)
 		let symbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3 && symbol.sectionHeaderIndex == rodataSectionIndex)
 		
 		for (const [sectionName, sectionObjectRelocations] of objectRelocations) {
@@ -600,9 +690,9 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				let targetLocation = objectOffsets.get(target instanceof Array && target.length > 0 ? target[0] : target)
 				
 				if (!targetLocation)
-					console.warn()
+					console.warn("No offset entry for object", target)
 				
-				if (targetLocation != Pointer.NULL)
+				if (targetLocation != Pointer.NULL && targetLocation != undefined)
 					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, symbolIndex, targetLocation))
 			}
 		}
