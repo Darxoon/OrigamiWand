@@ -48,7 +48,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const symbolLocationReference: Map<string, Pointer> = new Map()
 	const symbolNameOverrides: Map<string, string> = new Map()
 	
-	// TODO use these functions more
 	function findSection(sectionName: string): Section {
 		return sections.find(section => section.name == sectionName)
 	}
@@ -68,8 +67,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// However, we need to note which strings exist, so they can all be written into .rodata.str1.1.
 	
 	{
-		// TODO rename to dataWriter
-		let writer = new BinaryWriter()
+		let dataWriter = new BinaryWriter()
 		
 		let dataStringRelocations = new Map() as Map<Offset, string>
 		stringRelocations.set(".data", dataStringRelocations)
@@ -80,55 +78,68 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		let symbolRelocations = new Map() as Map<Offset, SymbolName>
 		
 		switch (dataType) {
-			case DataType.Maplink:
-				serializeObjects(writer, dataStringRelocations, undefined, dataType, [
+			case DataType.Maplink: {
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: undefined,
+				}
+				
+				serializeObjects(data, dataType, [
 					...binary.data.get(ElfBinary.ObjectType.MaplinkNodes),
 					FILE_TYPES[DataType.Maplink].instantiate()
 				])
 				
-				serializeObjects(writer, dataStringRelocations, undefined, DataType.MaplinkHeader, 
+				serializeObjects(data, DataType.MaplinkHeader, 
 					binary.data.get(ElfBinary.ObjectType.Main))
 				
 				break
+			}
 			
 			case DataType.DataBtlSet: {
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: undefined,
+				}
+				
 				for (const category of binary.data.get(ElfBinary.ObjectType.Main)) {
 					const { childObjects, objects, symbolName } = category
 					
 					for (const battle of childObjects) {
 						const { objects, symbolName } = battle
 						
-						let symbol = binary.symbolTable.find(sym => sym.name === mangleIdentifier(symbolName))
+						let symbol = findSymbol(symbolName)
 												
 						if (symbol) {
-							symbol.location = new Pointer(writer.size)
+							symbol.location = new Pointer(dataWriter.size)
 							symbol.size = FILE_TYPES[DataType.BtlSetElement].size * objects.length
 						} else {
 							console.warn("Could not find symbol for " + symbolName)
 						}
 						
-						serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetElement, objects)
+						serializeObjects(data, DataType.BtlSetElement, objects)
 					}
 					
-					let symbol = binary.symbolTable.find(sym => sym.name === mangleIdentifier(symbolName))
+					let symbol = findSymbol(symbolName)
 												
 					if (symbol) {
-						symbol.location = new Pointer(writer.size)
+						symbol.location = new Pointer(dataWriter.size)
 						symbol.size = FILE_TYPES[DataType.BtlSetCategory].size * objects.length
 					} else {
 						console.warn("Could not find symbol for " + symbolName)
 					}
 					
-					serializeObjects(writer, dataStringRelocations, undefined, DataType.BtlSetCategory, objects)
+					serializeObjects(data, DataType.BtlSetCategory, objects)
 				}
 				
 				// data table
 				for (const { symbolName } of binary.data.get(ElfBinary.ObjectType.Main)) {
-					symbolRelocations.set(writer.size, symbolName)
-					writer.writeBigInt64(0n)
+					symbolRelocations.set(dataWriter.size, symbolName)
+					dataWriter.writeBigInt64(0n)
 				}
 				
-				writer.writeBigInt64(0n)
+				dataWriter.writeBigInt64(0n)
 				
 				
 				// reloctions towards custom symbols
@@ -156,11 +167,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				let dataRelocations = new Map()
 				objectRelocations.set('.data', dataRelocations)
 				
-				serializeObjects(writer, dataStringRelocations, dataRelocations, dataType,
-					binary.data.get(ElfBinary.ObjectType.Main))
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataRelocations,
+				}
+				
+				serializeObjects(data, dataType, binary.data.get(ElfBinary.ObjectType.Main))
 					
-				serializeObjects(writer, dataStringRelocations, dataRelocations, dataType,
-					[FILE_TYPES[dataType].instantiate()])
+				serializeObjects(data, dataType, [FILE_TYPES[dataType].instantiate()])
 				
 				
 				let rodataStringRelocations = new Map()
@@ -184,28 +199,30 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			case DataType.DataEffect: {
 				// .rodata section contains normal data, dataCount and category count
 				{
-					const rodataWriter = new BinaryWriter()
+					let rodata: SectionElements = {
+						writer: new BinaryWriter(),
+						stringRelocations: new Map(),
+						crossPointers: undefined,
+					}
 					
-					const rodataStringRelocations = new Map() as Map<Offset, string>
-					stringRelocations.set(".rodata", rodataStringRelocations)
+					serializeObjects(rodata, dataType, binary.data.get(ElfBinary.ObjectType.Main))
 					
-					serializeObjects(rodataWriter, rodataStringRelocations, undefined, dataType, binary.data.get(ElfBinary.ObjectType.Main))
+					symbolLocationReference.set("eft::data::s_dataCount", new Pointer(rodata.writer.size))
+					rodata.writer.writeInt32(binary.data.get(ElfBinary.ObjectType.Main).length)
 					
-					symbolLocationReference.set("eft::data::s_dataCount", new Pointer(rodataWriter.size))
-					rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Main).length)
+					symbolLocationReference.set("eft::data::s_categoryCount", new Pointer(rodata.writer.size))
+					rodata.writer.writeInt32(binary.data.get(ElfBinary.ObjectType.Category).length)
 					
-					symbolLocationReference.set("eft::data::s_categoryCount", new Pointer(rodataWriter.size))
-					rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Category).length)
-					
-					updatedSections.set('.rodata', rodataWriter.toArrayBuffer())
+					stringRelocations.set(".rodata", rodata.stringRelocations)
+					updatedSections.set('.rodata', rodata.writer.toArrayBuffer())
 				}
 				
 				// .data section is an array of category name strings
 				for (const category of binary.data.get(ElfBinary.ObjectType.Category)) {
 					allStrings.add(category)
-					dataStringRelocations.set(writer.size, category)
+					dataStringRelocations.set(dataWriter.size, category)
 					
-					writer.writeBigInt64(0n)
+					dataWriter.writeBigInt64(0n)
 				}
 				break
 			}
@@ -215,21 +232,24 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				const rodataStringRelocations = new Map() as Map<Offset, string>
 				const rodataPointers = new Map()
 				
+				let rodata: SectionElements = {
+					writer: rodataWriter,
+					stringRelocations: rodataStringRelocations,
+					crossPointers: rodataPointers,
+				}
+				
 				rodataWriter.writeBigInt64(BigInt(binary.data.get(ElfBinary.ObjectType.Version)[0].version))
 				
-				serializeObjects(rodataWriter, rodataStringRelocations, rodataPointers, DataType.ConfettiMap,
-					binary.data.get(ElfBinary.ObjectType.Map))
+				serializeObjects(rodata, DataType.ConfettiMap, binary.data.get(ElfBinary.ObjectType.Map))
 				
 				symbolLocationReference.set("confetti::data::hole::data", new Pointer(rodataWriter.size))
 				
-				serializeObjects(rodataWriter, rodataStringRelocations, rodataPointers, DataType.ConfettiData,
-					binary.data.get(ElfBinary.ObjectType.DataHeader))
+				serializeObjects(rodata, DataType.ConfettiData, binary.data.get(ElfBinary.ObjectType.DataHeader))
 				
 				for (const map of binary.data.get(ElfBinary.ObjectType.Map) as Struct<DataType.ConfettiMap>[]) {
 					symbolLocationReference.set(`confetti::data::hole::${map.id}_Hole_List`, new Pointer(rodataWriter.size))
 
-					serializeObjects(rodataWriter, rodataStringRelocations, rodataPointers, DataType.ConfettiHole,
-						map.holes)
+					serializeObjects(rodata, DataType.ConfettiHole, map.holes)
 				}
 				
 				console.log('rodataPointers', rodataPointers)
@@ -245,67 +265,71 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				const rodataWriter = new BinaryWriter()
 				const dataPointers = new Map()
 				
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataPointers,
+				}
+				
 				let dataRelocations: Relocation[] = []
 				allRelocations.set('.data', dataRelocations)
 				
 				// models
 				for (const model of binary.data.get(ElfBinary.ObjectType.Model) as Struct<DataType.UiModel>[]) {
-					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(writer.size))
+					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(dataWriter.size))
 					
 					if (model.properties)
-						serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiModelProperty, model.properties, false)
+						serializeObjects(data, DataType.UiModelProperty, model.properties, false)
 				}
 				
-				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(writer.size))
+				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(dataWriter.size))
 				
-				// TODO refactor 3 first args into an object that can be passed down easier
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiModel, binary.data.get(ElfBinary.ObjectType.Model))
+				serializeObjects(data, DataType.UiModel, binary.data.get(ElfBinary.ObjectType.Model))
 				
 				// msg
-				symbolLocationReference.set(`wld::fld::data::s_uiMessageData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiMsg, binary.data.get(ElfBinary.ObjectType.Msg))
+				symbolLocationReference.set(`wld::fld::data::s_uiMessageData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiMsg, binary.data.get(ElfBinary.ObjectType.Msg))
 				
 				// sell data
 				for (const shop of binary.data.get(ElfBinary.ObjectType.Shop) as Struct<DataType.UiShop>[]) {
-					symbolLocationReference.set(`wld::fld::data::s_sellData_${shop.id}`, new Pointer(writer.size))
+					symbolLocationReference.set(`wld::fld::data::s_sellData_${shop.id}`, new Pointer(dataWriter.size))
 					
-					serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiSellItem, shop.soldItems)
+					serializeObjects(data, DataType.UiSellItem, shop.soldItems)
 				}
 				
 				// shops
 				for (const [shop, i] of enumerate(binary.data.get(ElfBinary.ObjectType.Shop) as Struct<DataType.UiShop>[])) {
-					let locationOffset: number = writer.size 
+					let locationOffset: number = dataWriter.size 
 							+ FILE_TYPES[DataType.UiShop].size * i
 							+ (FILE_TYPES[DataType.UiShop].fieldOffsets["soldItems"] as number)
 					let sellDataSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === `wld::fld::data::s_sellData_${shop.id}`)
 					dataRelocations.push(new Relocation(new Pointer(locationOffset), 0x101, sellDataSymbolIndex, Pointer.ZERO))
 				}
 				
-				symbolLocationReference.set(`wld::fld::data::s_shopData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiShop, binary.data.get(ElfBinary.ObjectType.Shop))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiShop, [
+				symbolLocationReference.set(`wld::fld::data::s_shopData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiShop, binary.data.get(ElfBinary.ObjectType.Shop))
+				serializeObjects(data, DataType.UiShop, [
 					FILE_TYPES[DataType.UiShop].instantiate()
 				])
 				
 				// sea map
-				symbolLocationReference.set(`wld::fld::data::s_uiSeaMapData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiSeaMap, binary.data.get(ElfBinary.ObjectType.SeaEntry))
+				symbolLocationReference.set(`wld::fld::data::s_uiSeaMapData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiSeaMap, binary.data.get(ElfBinary.ObjectType.SeaEntry))
 				
 				// menu
-				symbolLocationReference.set(`wld::fld::data::s_menuData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiMenu, binary.data.get(ElfBinary.ObjectType.Menu))
+				symbolLocationReference.set(`wld::fld::data::s_menuData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiMenu, binary.data.get(ElfBinary.ObjectType.Menu))
 				
 				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Menu).length)
 				
 				// announce
-				symbolLocationReference.set(`wld::fld::data::s_announceData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, DataType.UiAnnouncement, binary.data.get(ElfBinary.ObjectType.Announcement))
+				symbolLocationReference.set(`wld::fld::data::s_announceData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiAnnouncement, binary.data.get(ElfBinary.ObjectType.Announcement))
 				
 				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.Announcement).length)
 				
-				symbolLocationReference.set(`wld::fld::data::s_announceExcludeData`, new Pointer(writer.size))
-				serializeObjects(writer, dataStringRelocations, dataPointers, 
-					DataType.UiAnnouncementExclude, binary.data.get(ElfBinary.ObjectType.AnnouncementExclude))
+				symbolLocationReference.set(`wld::fld::data::s_announceExcludeData`, new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.UiAnnouncementExclude, binary.data.get(ElfBinary.ObjectType.AnnouncementExclude))
 				
 				rodataWriter.writeInt32(binary.data.get(ElfBinary.ObjectType.AnnouncementExclude).length)
 
@@ -323,28 +347,34 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			}
 			
 			default:
-				serializeObjects(writer, dataStringRelocations, undefined,
-					dataType, binary.data.get(ElfBinary.ObjectType.Main))
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: undefined,
+				}
+				
+				serializeObjects(data, dataType, binary.data.get(ElfBinary.ObjectType.Main))
 				
 				let isStandardDataFile = dataType >= DataType.DataNpc && dataType < DataType.DataNpcModel
 				
 				if (isStandardDataFile || dataType == DataType.DataItemSet || dataType == DataType.DataMaplinkZoom || dataType == DataType.DataParty) {
-					serializeObjects(writer, dataStringRelocations, undefined,
-						dataType, [FILE_TYPES[dataType].instantiate()])
+					serializeObjects(data, dataType, [FILE_TYPES[dataType].instantiate()])
 				}
 				break
 		}
 		
-		updatedSections.set('.data', writer.toArrayBuffer())
+		updatedSections.set('.data', dataWriter.toArrayBuffer())
 		
 		type RodataReference = [id: string, originalId: string, assetGroups: Struct<DataType.NpcFiles>[], states: Struct<DataType.NpcState>[]]
 		
 		function serializeModelRodata(rodataReferences: RodataReference[], rodataStringRelocations: Map<number, string>, rodataRelocations: Map<number, object>) {
 			const rodataWriter = new BinaryWriter()
 			
-			const serializeObjectsRodata = serializeObjects.bind(undefined, 
-				rodataWriter, rodataStringRelocations, rodataRelocations) as 
-				(dataType: DataType, objects: object[]) => void
+			let rodata: SectionElements = {
+				writer: rodataWriter,
+				stringRelocations: rodataStringRelocations,
+				crossPointers: rodataRelocations,
+			}
 				
 			// .rodata section is structured like this:
 			
@@ -373,11 +403,11 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			
 			// step 1: Serialize Asset Groups, States and the strings from animes
 			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				serializeObjectsRodata(DataType.NpcFiles, assetGroups)
-				serializeObjectsRodata(DataType.NpcFiles, [FILE_TYPES[DataType.NpcFiles].instantiate()])
+				serializeObjects(rodata, DataType.NpcFiles, assetGroups)
+				serializeObjects(rodata, DataType.NpcFiles, [FILE_TYPES[DataType.NpcFiles].instantiate()])
 				
-				serializeObjectsRodata(DataType.NpcState, states)
-				serializeObjectsRodata(DataType.NpcState, [FILE_TYPES[DataType.NpcState].instantiate()])
+				serializeObjects(rodata, DataType.NpcState, states)
+				serializeObjects(rodata, DataType.NpcState, [FILE_TYPES[DataType.NpcState].instantiate()])
 				
 				let animes = (states as any[])
 					.flatMap(state => state.substates)
@@ -411,8 +441,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					symbolLocationReference?.set(`wld::fld::data:::${originalId}_state${i}`, new Pointer(rodataWriter.size))
 					symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state${i}`, `wld::fld::data:::${id}_state${i}`)
 					
-					serializeObjectsRodata(DataType.NpcSubState, state.substates)
-					serializeObjectsRodata(DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
+					serializeObjects(rodata, DataType.NpcSubState, state.substates)
+					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
 				}
 				
 				for (const [state, i] of enumerate(states)) {
@@ -424,8 +454,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 						symbolLocationReference?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
 						symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, `wld::fld::data:::${id}_state${i}_face${j}`)
 						
-						serializeObjectsRodata(DataType.NpcFace, faces)
-						serializeObjectsRodata(DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
+						serializeObjects(rodata, DataType.NpcFace, faces)
+						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
 					}
 					
 					for (const substate of substates) {
@@ -439,8 +469,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 							
 							animeCount += 1
 							
-							serializeObjectsRodata(DataType.NpcAnime, animes)
-							serializeObjectsRodata(DataType.NpcAnime, [FILE_TYPES[DataType.NpcAnime].instantiate()])
+							serializeObjects(rodata, DataType.NpcAnime, animes)
+							serializeObjects(rodata, DataType.NpcAnime, [FILE_TYPES[DataType.NpcAnime].instantiate()])
 						}
 					}
 				}
@@ -449,7 +479,13 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			return rodataWriter.toArrayBuffer()
 		}
 		
-		function serializeObjects(writer: BinaryWriter, sectionStringRelocations, sectionPointers, dataType: DataType, objects: object[], addStrings: boolean = true) {
+		interface SectionElements {
+			writer: BinaryWriter
+			stringRelocations: Map<number, string>
+			crossPointers: Map<number, object>
+		}
+		
+		function serializeObjects({writer, stringRelocations, crossPointers}: SectionElements, dataType: DataType, objects: object[], addStrings: boolean = true) {
 			if (objects.length == 0) {
 				objectOffsets.set(objects, new Pointer(writer.size))
 			}
@@ -466,7 +502,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 								allStrings.add(fieldValue)
 							
 							if (fieldValue != null)
-								sectionStringRelocations.set(writer.size, fieldValue)
+								stringRelocations.set(writer.size, fieldValue)
 							
 							writer.writeBigInt64(0n)
 							break
@@ -479,7 +515,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 						case "pointer":
 							// empty arrays are null as well
 							if (!Pointer.NULL.equals(fieldValue) && fieldValue != null) {
-								sectionPointers.set(writer.size, fieldValue)
+								crossPointers.set(writer.size, fieldValue)
 							}
 						
 							writer.writeBigInt64(0n)
@@ -608,7 +644,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// The symbol table is very straight forward. It's an array of `Symbol`s. However, the
 	// first element is always completely zero.
 	{
-		const stringTable = sections.find(section => section.name == ".strtab")
+		const stringTable = findSection(".strtab")
 		
 		let writer = new BinaryWriter()
 		
