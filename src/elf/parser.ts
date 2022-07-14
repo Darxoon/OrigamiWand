@@ -507,107 +507,60 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			data = new Map()
 			
-			// models
-			let modelDataSymbol = findSymbol("wld::fld::data::s_uiModelData")
-			let modelCount = modelDataSymbol.size / FILE_TYPES[DataType.UiModel].size
-			
-			let models: Struct<DataType.UiModel>[] = applyStrings(
-				modelDataSymbol.location, DataType.UiModel,  dataStringSection, 
-				allRelocations.get('.data'), 
+			// automated parsing
+			for (const [objectTypeStr, entryPoint] of Object.entries(FILE_TYPES[dataType].entryPoints)) {
+				let symbol = findSymbol(entryPoint.symbol)
+				let count = entryPoint.count ?? symbol.size / FILE_TYPES[entryPoint.dataType].size
 				
-				parseRawDataSection(dataSection, modelCount, modelDataSymbol.location, FILE_TYPES[DataType.UiModel].typedef), 
-			)
-			
-			data.set(ElfBinary.ObjectType.Model, models)
-			
-			// model properties
-			let propertiesByOffset: Map<number, any> = new Map()
-			
-			let modelProperties = models.filter(model => !model.properties.equals(Pointer.NULL)).map(model => {
-				const { properties: propertyOffset, propertyCount } = model
+				let section = entryPoint.section == ".rodata" ? rodataSection : dataSection
 				
-				let result = applyStrings(
-					propertyOffset, DataType.UiModelProperty, dataStringSection,
-					allRelocations.get('.data'), 
+				let rawObjects = applyStrings(
+					symbol.location, entryPoint.dataType, dataStringSection, 
+					allRelocations.get(entryPoint.section), 
 					
-					parseRawDataSection(dataSection, propertyCount, propertyOffset, FILE_TYPES[DataType.UiModelProperty].typedef), 
+					parseRawDataSection(section, count, symbol.location, FILE_TYPES[entryPoint.dataType].typedef), 
 				)
 				
-				propertiesByOffset.set(propertyOffset.value, result)
-				return result
-			})
-			
-			data.set(ElfBinary.ObjectType.ModelProperty, modelProperties)
-			
-			// fix references to properties
-			for (const model of models) {
-				model.properties = propertiesByOffset.get(model.properties.value) ?? null
-			}
-			
-			// msg
-			let msgSymbol = findSymbol("wld::fld::data::s_uiMessageData")
-			let msgCount = msgSymbol.size / FILE_TYPES[DataType.UiMsg].size
-			
-			let messages: Struct<DataType.UiMsg>[] = applyStrings(
-				msgSymbol.location, DataType.UiMsg,  dataStringSection, 
-				allRelocations.get('.data'), 
+				let objects = entryPoint.cutoff ? rawObjects.slice(0, -entryPoint.cutoff) : rawObjects
 				
-				parseRawDataSection(dataSection, msgCount, msgSymbol.location, FILE_TYPES[DataType.UiMsg].typedef),
-			)
-			
-			data.set(ElfBinary.ObjectType.Msg, messages)
-			
-			// shop
-			let shopSymbol = findSymbol("wld::fld::data::s_shopData")
-			let shopCount = shopSymbol.size / FILE_TYPES[DataType.UiShop].size
-			
-			let shops: Struct<DataType.UiShop>[] = applyStrings(
-				shopSymbol.location, DataType.UiShop,  dataStringSection, 
-				allRelocations.get('.data'), 
+				data.set(parseInt(objectTypeStr), objects)
 				
-				parseRawDataSection(dataSection, shopCount, shopSymbol.location, FILE_TYPES[DataType.UiShop].typedef),
-			).slice(0, -1)
+				// children
+				for (const [fieldName, child] of Object.entries(entryPoint.children ?? {}) as [string, any][]) {
+					let childrenByOffset: Map<number, any> = new Map()
 			
-			data.set(ElfBinary.ObjectType.Shop, shops)
-			
-			// sell data
-			let sellItemsBySymbolName: Map<string, any> = new Map()
-			
-			let sellItems = shops.map(shop => {
-				const { soldItems: sellData, soldItemCount } = shop
-				
-				const soldItemSymbol = findSymbol(sellData)
-				
-				let result = applyStrings(
-					soldItemSymbol.location, DataType.UiSellItem, dataStringSection,
-					allRelocations.get('.data'), 
+					let filtered = objects.filter(obj => obj[fieldName] != Pointer.NULL && obj[fieldName] != null)
+					let children = filtered.map(obj => {
+						let offset = obj[fieldName]
+						let count = obj[child.count]
+						
+						if (FILE_TYPES[entryPoint.dataType].typedef[fieldName] == "symbol") {
+							// debugger
+							let symbol = findSymbol(obj[fieldName])
+							offset = symbol.location
+						}
+						
+						let section = entryPoint.section == ".rodata" ? rodataSection : dataSection
+						
+						let result = applyStrings(
+							offset, child.dataType, dataStringSection,
+							allRelocations.get(child.section), 
+							
+							parseRawDataSection(section, count, offset, FILE_TYPES[child.dataType].typedef), 
+						)
+						
+						childrenByOffset.set(offset.value, result)
+						return result
+					})
 					
-					parseRawDataSection(dataSection, soldItemCount, soldItemSymbol.location, FILE_TYPES[DataType.UiSellItem].typedef), 
-				)
-				
-				sellItemsBySymbolName.set(sellData, result)
-				return result
-			})
-			
-			data.set(ElfBinary.ObjectType.SellItem, sellItems)
-			
-			// fix references to sell data
-			for (const shop of shops) {
-				shop.soldItems = sellItemsBySymbolName.get(shop.soldItems) ?? null
+					data.set(child.objectType, children)
+					
+					// fix references to properties
+					for (const obj of objects) {
+						obj[fieldName] = childrenByOffset.get(obj[fieldName] instanceof Pointer ? obj[fieldName].value : obj[fieldName]) ?? null
+					}
+				}
 			}
-			
-			// seaMap
-			let seaMapSymbol = findSymbol("wld::fld::data::s_uiSeaMapData")
-			let seaEntryCount = seaMapSymbol.size / FILE_TYPES[DataType.UiSeaMap].size
-			
-			let seaEntries: Struct<DataType.UiSeaMap>[] = applyStrings(
-				seaMapSymbol.location, DataType.UiSeaMap,  dataStringSection, 
-				allRelocations.get('.data'), 
-				
-				parseRawDataSection(dataSection, seaEntryCount, seaMapSymbol.location, FILE_TYPES[DataType.UiSeaMap].typedef),
-			)
-			
-			data.set(ElfBinary.ObjectType.SeaEntry, seaEntries)
 			
 			// menu data
 			let menuDataCountSymbol = findSymbol("wld::fld::data::kMenuDataCount")

@@ -1496,7 +1496,53 @@ might be the interaction function (called when pressing A; similar to talking).`
 		field_0xb8: "string",
 	},
 	
-	[DataType.DataUi]: {},
+	[DataType.DataUi]: {
+		__entryPoints: {
+			
+			[ElfBinary.ObjectType.Model]: {
+				symbol: "wld::fld::data::s_uiModelData",
+				dataType: DataType.UiModel,
+				section: ".data",
+				
+				children: {
+					properties: {
+						count: "propertyCount",
+						section: ".data",
+						dataType: DataType.UiModelProperty,
+						objectType: ElfBinary.ObjectType.ModelProperty,
+					}
+				}
+			},
+			
+			[ElfBinary.ObjectType.Msg]: {
+				symbol: "wld::fld::data::s_uiMessageData",
+				dataType: DataType.UiMsg,
+				section: ".data",
+			},
+			
+			[ElfBinary.ObjectType.Shop]: {
+				symbol: "wld::fld::data::s_shopData",
+				dataType: DataType.UiShop,
+				section: ".data",
+				cutoff: 1,
+				
+				children: {
+					soldItems: {
+						count: "soldItemCount",
+						section: ".data",
+						dataType: DataType.UiSellItem,
+						objectType: ElfBinary.ObjectType.SellItem,
+					}
+				}
+			},
+			
+			[ElfBinary.ObjectType.SeaEntry]: {
+				symbol: "wld::fld::data::s_uiSeaMapData",
+				dataType: DataType.UiSeaMap,
+				section: ".data",
+			}
+		}
+	},
 	
 	[DataType.UiModel]: {
 		__displayName: "Model",
@@ -1714,6 +1760,7 @@ interface FileTypeRegistry {
 	countSymbol: string
 	nestedAllValues: boolean
 	objectType: ElfBinary.ObjectType
+	entryPoints: {[objectType: number]: any}
 	
 	instantiate(): object
 }
@@ -1784,6 +1831,8 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 		
 		nestedAllValues: extendedTypedef.__nestedAllValues as boolean ?? false,
 		objectType: extendedTypedef.__objectType as ElfBinary.ObjectType ?? ElfBinary.ObjectType.Main,
+		
+		entryPoints: extendedTypedef.__entryPoints ?? {},
 		
 		instantiate(): object {
 			let result = {}
