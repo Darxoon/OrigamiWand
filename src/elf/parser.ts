@@ -527,12 +527,14 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				
 				// children
 				for (const [fieldName, child] of Object.entries(entryPoint.children ?? {}) as [string, any][]) {
-					let childrenByOffset: Map<number, any> = new Map()
+					let childrenByKey: Map<number|string, any> = new Map()
 			
 					let filtered = objects.filter(obj => obj[fieldName] != Pointer.NULL && obj[fieldName] != null)
 					let children = filtered.map(obj => {
-						let offset = obj[fieldName]
+						let childKey = obj[fieldName]
 						let count = obj[child.count]
+						
+						let offset = childKey
 						
 						if (FILE_TYPES[entryPoint.dataType].typedef[fieldName] == "symbol") {
 							// debugger
@@ -549,7 +551,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 							parseRawDataSection(section, count, offset, FILE_TYPES[child.dataType].typedef), 
 						)
 						
-						childrenByOffset.set(offset.value, result)
+						childrenByKey.set(childKey?.value ?? childKey, result)
 						return result
 					})
 					
@@ -557,7 +559,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					
 					// fix references to properties
 					for (const obj of objects) {
-						obj[fieldName] = childrenByOffset.get(obj[fieldName] instanceof Pointer ? obj[fieldName].value : obj[fieldName]) ?? null
+						obj[fieldName] = childrenByKey.get(obj[fieldName]?.value ?? obj[fieldName]) ?? null
 					}
 				}
 			}

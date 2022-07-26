@@ -6,7 +6,8 @@ const config = {
 	plugins: [sveltekit()],
 	
 	build: {
-		target: [ 'es2020' ]
+		target: [ 'es2020' ],
+		sourcemap: false,
 	},
 	resolve: {
 		alias: {
