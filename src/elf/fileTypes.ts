@@ -370,7 +370,6 @@ Please verify."),
 		id: "string",
 		destinationStage: "string",
 		destinationId: "string",
-		// TODO string enums
 		type: new Property("string", `
 Type type of the link. Possible values:
 
