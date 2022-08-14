@@ -443,16 +443,14 @@ Example: "Cam_Dokan"`),
 		rotationBehavior: new Property("int", `
 Determines how the NPC rotates. Possible values:
 
-* 0 - the object's rotation is only modified by scripts.
-* 1 - the object always faces either forwards or backwards and tries to use back sprites (basically Pera).
-* 2 - the object always faces the player when they get close or talk to the NPC
-but otherwise behaves like 0.
-* everything bigger just behaves like 2`),
+* 0 - the object's rotation is only modified by scripts. allows 360° rotation.
+* 1 - the object's rotation is locked into left, right and the back facing variations (which try to use back sprites).
+* 2 - the object faces the player when they get close or interact. allows 360° rotation.
+* everything else behaves like 2`),
 		field_0x14: "int",
 		textureSubclass: "string",
 		alwaysFacesFront: new Property("bool32", `
-If set to true, the NPC will only use its front sprites
-and won't turn flip around when going into the direction that the camera faces.`),
+If set to true, the NPC will not turn backwards or forwards but only turn horizontally.`),
 		field_0x24: "int",
 		instanceScriptFilename: "string",
 		instanceScriptNamespace: new Property("string", `
@@ -1551,15 +1549,16 @@ might be the interaction function (called when pressing A; similar to talking).`
 		
 		id: "string",
 		modelFolder: "string",
-		modelId: new Property("string", `
+		modelFileName: new Property("string", `
 Not sure what this is for. It seems like it's the same as \`id\`.`),
 		properties: new Property("pointer", undefined, {tabName: "Model Properties of {id}"}),
-		propertyCount: "int",
+		propertyCount: new Property("int", undefined, {hidden: true}),
 		field_0x24: "int",
 	},
 	
 	[DataType.UiModelProperty]: {
 		__displayName: "Model Property",
+		__objectType: ElfBinary.ObjectType.ModelProperty,
 		
 		id: "string",
 		model: "string",
