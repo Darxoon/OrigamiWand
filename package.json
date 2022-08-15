@@ -11,26 +11,28 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
-	"@sveltejs/adapter-static": "^1.0.0-next.38",
-	"@sveltejs/kit": "next",
-	"@tsconfig/svelte": "^3.0.0",
-	"@types/cookie": "^0.4.1",
-	"node-sass": "^7.0.1",
-	"sass": "^1.54.0",
-	"svelte": "^3.49.0",
-	"svelte-check": "^2.8.0",
-	"svelte-preprocess": "^4.10.7",
-	"tslib": "^2.4.0",
-	"typesafe-event-emitter": "^1.1.0",
-	"typescript": "^4.7.4",
-	"vite": "^3.0.3"
+		"@sveltejs/adapter-static": "^1.0.0-next.38",
+		"@sveltejs/kit": "next",
+		"@tsconfig/svelte": "^3.0.0",
+		"@types/cookie": "^0.4.1",
+		"node-sass": "^7.0.1",
+		"sass": "^1.54.0",
+		"svelte": "^3.49.0",
+		"svelte-check": "^2.8.0",
+		"svelte-preprocess": "^4.10.7",
+		"tslib": "^2.4.0",
+		"typesafe-event-emitter": "^1.1.0",
+		"typescript": "^4.7.4",
+		"vite": "^3.0.3"
 	},
 	"type": "module",
 	"dependencies": {
-	"cookie": "^0.4.1",
-	"dexie": "^3.2.2",
-	"events": "^3.3.0",
-	"fuzzysort": "^1.9.0",
-	"zstd-codec": "^0.1.4"
+		"@types/path-browserify": "^1.0.0",
+		"cookie": "^0.4.1",
+		"dexie": "^3.2.2",
+		"events": "^3.3.0",
+		"fuzzysort": "^1.9.0",
+		"path-browserify": "^1.0.1",
+		"zstd-codec": "^0.1.4"
 	}
 }

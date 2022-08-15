@@ -15,7 +15,7 @@
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';
 	import Modal from '$lib/modal/Modal.svelte';
 	import TextAlert from '$lib/modal/TextAlert.svelte';
-	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/autosave';
+	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/save/autosave';
 	import TitleCard from '$lib/TitleCard.svelte';
 	import { downloadBlob, map2d } from '$lib/util';
 	import { afterUpdate } from 'svelte';

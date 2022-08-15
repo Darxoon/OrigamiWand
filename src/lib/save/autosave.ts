@@ -49,7 +49,7 @@ export async function createTemporarySave(windows: SaveFile[][]) {
 	let saveId = latestSave.id
 	console.log(saveId)
 	
-	db.overview.put({ id: 0, timestamp: performance.now(), saveId })
+	db.overview.put({ id: 0, timestamp: Date.now(), saveId })
 }
 
 export async function getLatestSave() {
