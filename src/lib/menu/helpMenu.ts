@@ -1,5 +1,5 @@
-import { showModal } from "./modal/modal"
-import TextAlert from "./modal/TextAlert.svelte"
+import { showModal } from "../modal/modal"
+import TextAlert from "../modal/TextAlert.svelte"
 
 export function getHelpMenu() {
 	return {

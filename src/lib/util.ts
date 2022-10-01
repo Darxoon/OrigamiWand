@@ -1,4 +1,9 @@
+import { DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
+import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
 import { ZstdCodec } from "zstd-codec"
+import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
+import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
+import type { Tab } from "./editor/globalDragging"
 
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
@@ -84,6 +89,41 @@ export function compress(buffer: ArrayBuffer) {
 			resolve(simple.compress(new Uint8Array(buffer)).buffer)
 		})
 	})
+}
+
+export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
+    if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
+        return {
+            id: Symbol(),
+            name: fileName,
+            component: SpecialElfEditor,
+            children: [],
+            isCompressed,
+            properties: {
+                dataType,
+                binary,
+                fileName,
+            },
+        }
+    } else {
+        return {
+            id: Symbol(),
+            name: fileName,
+            component: ElfEditor,
+            children: [],
+            isCompressed,
+            properties: {
+                objectTitle: FILE_TYPES[dataType].displayName,
+                binary,
+                objects: dataType === DataType.Maplink
+                    ? binary.data.get(ElfBinary.ObjectType.MaplinkNodes)
+                    : binary.data.get(ElfBinary.ObjectType.Main),
+                headerObject: dataType === DataType.Maplink ? binary.data.get(ElfBinary.ObjectType.Main)[0] : undefined,
+                importantFieldName: FILE_TYPES[dataType].identifyingField,
+                dataType,
+            },
+        }
+    }
 }
 
 export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {

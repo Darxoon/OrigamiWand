@@ -3,56 +3,31 @@
 </script>
 
 <script lang="ts">
-	import ElfEditor from '$lib/editor/fileEditor/ElfEditor.svelte';
-	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
-	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
-	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
-	import parseElfBinary, { EmptyFileError } from 'paper-mario-elfs/parser';
+	import { onMount } from 'svelte/internal';
+	
+	import parseElfBinary from 'paper-mario-elfs/parser';
 	import serializeElfBinary from 'paper-mario-elfs/serializer';
-	import DataTypePrompt from '$lib/modals/DataTypePrompt.svelte';
-	import DescriptionViewer from '$lib/modals/DescriptionViewer.svelte';
+	
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';
 	import Modal from '$lib/modal/Modal.svelte';
 	import TextAlert from '$lib/modal/TextAlert.svelte';
-	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/save/autosave';
-	import TitleCard from '$lib/TitleCard.svelte';
-	import { compress, decompress, downloadBlob, loadFile, map2d } from '$lib/util';
-	import { onMount } from 'svelte/internal';
-	import type { Tab } from '$lib/editor/globalDragging';
-	import NoteViewer from '$lib/modals/NoteViewer.svelte';
-	import { loadedAutosave } from '$lib/stores';
-	
+	import { createTemporarySave, getLatestSave, initializeAutosaves } from '$lib/save/autosave';
 	import EditorStrip from '$lib/editor/EditorStrip.svelte';
-	import { getZstdMenu } from '$lib/zstdMenu';
-	import { getHelpMenu } from '$lib/helpMenu';
+	import { getZstdMenu } from '$lib/menu/zstdMenu';
+	import { getHelpMenu } from '$lib/menu/helpMenu';
+	import { getFileMenu } from '$lib/menu/fileMenu';
+	import { getViewMenu } from '$lib/menu/viewMenu';
+	import { globalEditorStrip, loadedAutosave } from '$lib/stores';
+	import { loadFile, map2d, Tab } from '$lib/util';
+	
+	import TitleCard from '$lib/TitleCard.svelte';
 	
 	let editorStrip: EditorStrip
 	
+	$: globalEditorStrip.set(editorStrip)
+	
 	export const menuItems = [
-		{
-			title: "File",
-			items: [
-				{
-					name: "Close session",
-					onClick() {
-						let result = confirm("Do you want to close all tabs?")
-						
-						if (result) {
-							$loadedAutosave = true
-							editorStrip.reset()
-						}
-					}
-				},
-				{
-					name: "Open...",
-					onClick: openFileSelector
-				},
-				{
-					name: "Save...",
-					onClick: saveFile
-				},
-			],
-		},
+		getFileMenu(),
 		{
 			title: "Edit",
 			items: [
@@ -68,204 +43,36 @@
 			],
 		},
 		getZstdMenu(),
-		{
-			title: "View",
-			items: [
-				{
-					name: "Collapse all",
-					onClick: () => editorStrip.collapseAll(),
-				},
-				{
-					name: "Expand all",
-					onClick: () => editorStrip.expandAll(),
-				},
-				{
-					name: "View all User Notes...",
-					onClick: () => {
-						showModal(NoteViewer, {})
-					}
-				},
-				{
-					name: "View all Descriptions...",
-					onClick: () => {
-						viewAllDescriptions()
-					}
-				},
-			],
-		},
+		getViewMenu(),
 		getHelpMenu(),
 	]
 	
-	function openFileSelector() {
-		console.log("opening file")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
+	onMount(() => {
+		initializeAutosaves().then(async () => {
+			let save = await getLatestSave()
 			
-			const contentPromise = loadFile(file)
+			console.log('loading save', save)
 			
-			const {dataType, isCompressed} = await showModal(DataTypePrompt, {
-				fileName: file.name,
-			})
-
-			if (!dataType) {
+			if (!save) {
+				$loadedAutosave = true
 				return
 			}
 			
-			const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
+			let tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
+				Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
+			).filter(arr => arr.length > 0)
 			
-			let binary 
-			try {
-				binary = parseElfBinary(dataType, content)
-			} catch (e) {
-				if (e instanceof EmptyFileError) {
-					showModal(TextAlert, {
-						title: "Opening File",
-						content: "File is empty. Generating a new file instead."
-					})
-						.then(() => {
-							showModal(TextAlert, {
-								title: "Error",
-								content: "Error: Not implemented yet."
-							})
-						})
-				}
-				
-				throw e
+			if (tabs.length != 0) {
+				editorStrip.load(tabs)
 			}
-
-			editorStrip.appendTab(Tab(file.name, binary, dataType, isCompressed))
+			
+			afterUpdateHandlers = [...afterUpdateHandlers, () => {
+				$loadedAutosave = true
+			}]
 		})
-	}
-
-	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
-			return {
-				id: Symbol(),
-				name: fileName,
-				shortName: fileName,
-				component: SpecialElfEditor,
-				children: [],
-				isCompressed,
-				properties: {
-					dataType,
-					binary,
-					fileName,
-				},
-			}
-		} else {
-			return {
-				id: Symbol(),
-				name: fileName,
-				shortName: fileName,
-				component: ElfEditor,
-				children: [],
-				isCompressed,
-				properties: {
-					objectTitle: FILE_TYPES[dataType].displayName,
-					binary,
-					objects: dataType === DataType.Maplink
-						? binary.data.get(ElfBinary.ObjectType.MaplinkNodes)
-						: binary.data.get(ElfBinary.ObjectType.Main),
-					headerObject: dataType === DataType.Maplink ? binary.data.get(ElfBinary.ObjectType.Main)[0] : undefined,
-					importantFieldName: FILE_TYPES[dataType].identifyingField,
-					dataType,
-				},
-			}
-		}
-	}
-	
-	async function saveFile() {
-		let tab = editorStrip.activeTab()
-		
-		if (tab.parentId) {
-			showModal(TextAlert, {
-				title: "Cannot Save",
-				content: "Try saving the parent file instead."
-			})
-			return
-		}
-
-		const { name, isCompressed, properties: { dataType, binary } } = tab
-		
-		let serialized = serializeElfBinary(dataType, binary)
-		let output = isCompressed ? await compress(serialized) : serialized
-		
-		downloadBlob(output, name)
-	}
-
-	function viewAllDescriptions() {
-		let	tab = editorStrip.activeTab()
-		let dataType = tab.properties.dataType
-		
-		if (Object.entries(FILE_TYPES[dataType].metadata).length > 0) {
-			showModal(DescriptionViewer, {
-				typeMetadata: FILE_TYPES[dataType].metadata,
-			})
-		} else {
-			showModal(TextAlert, {
-				title: "No Descriptions",
-				content: "This file format contains no field descriptions.",
-			})
-		}
-	}
-	
-	
-	async function autoSaveWindows() {
-		const serializedWindows = editorStrip.serialize(serializeElfBinary)
-		
-		console.log('serializedWindows', serializedWindows)
-		
-		await createTemporarySave(serializedWindows)
-	}
-	
-	onMount(() => {
-		init()
-			.then(async () => {
-				let save = await getLatestSave()
-				
-				console.log('loading save', save)
-				
-				if (!save) {
-					$loadedAutosave = true
-					return
-				}
-				
-				let tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
-					Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
-				).filter(arr => arr.length > 0)
-				
-				if (tabs.length != 0) {
-					editorStrip.load(tabs)
-				}
-				
-				afterUpdateHandlers = [...afterUpdateHandlers, () => {
-					$loadedAutosave = true
-				}]
-			})
 
 		window.addEventListener('beforeunload', async e => {
-			await autoSaveWindows()
-		})
-
-		window.addEventListener('keydown', e => {
-			if (e.ctrlKey) {
-				switch (e.key) {
-					// doesn't work because file input gets blocked
-					//case "o":
-					//	e.preventDefault()
-					//	openFileSelector()
-					//	break
-					case "s":
-						e.preventDefault()
-						saveFile()
-						break
-				}
-			}
+			await createTemporarySave(editorStrip.serialize(serializeElfBinary))
 		})
 		
 		let betaBannerShown = !!localStorage.beta

@@ -15,7 +15,7 @@ export interface SaveFile {
 	isCompressed: boolean
 }
 
-export async function init() {
+export async function initializeAutosaves() {
 	if (!window.indexedDB) {
 		console.error("Your browser doesn't support a stable version of IndexedDB. Consider updating your browser.")
 	}

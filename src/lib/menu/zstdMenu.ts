@@ -1,4 +1,4 @@
-import { compress, decompress, downloadBlob, loadFile } from "./util"
+import { compress, decompress, downloadBlob, loadFile } from "../util"
 
 export function getZstdMenu() {
 	return {

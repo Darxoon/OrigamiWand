@@ -9,7 +9,6 @@ export interface Tab {
     parentId?: TabID,
     
     name: string
-    shortName: string
     
     isCompressed: boolean,
     
