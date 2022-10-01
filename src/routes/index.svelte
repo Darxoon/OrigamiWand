@@ -26,9 +26,6 @@
 	import { getZstdMenu } from '$lib/zstdMenu';
 	import { getHelpMenu } from '$lib/helpMenu';
 	
-	let tabs: Tab[][] = [[]]
-	let selectedTabs = []
-	let activeEditor = 0
 	let editorStrip: EditorStrip
 	
 	export const menuItems = [
@@ -42,7 +39,7 @@
 						
 						if (result) {
 							$loadedAutosave = true
-							tabs = [[]]
+							editorStrip.reset()
 						}
 					}
 				},
@@ -141,10 +138,7 @@
 				throw e
 			}
 
-			tabs[0] = [
-				...tabs[0], 
-				Tab(file.name, binary, dataType, isCompressed),
-			]
+			editorStrip.appendTab(Tab(file.name, binary, dataType, isCompressed))
 		})
 	}
 
@@ -183,12 +177,10 @@
 				},
 			}
 		}
-		
-		selectedTabs[0] = tabs[0].length - 1
 	}
 	
 	async function saveFile() {
-		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
+		let tab = editorStrip.activeTab()
 		
 		if (tab.parentId) {
 			showModal(TextAlert, {
@@ -207,7 +199,7 @@
 	}
 
 	function viewAllDescriptions() {
-		let	tab = tabs[activeEditor][selectedTabs[activeEditor]]
+		let	tab = editorStrip.activeTab()
 		let dataType = tab.properties.dataType
 		
 		if (Object.entries(FILE_TYPES[dataType].metadata).length > 0) {
@@ -224,19 +216,7 @@
 	
 	
 	async function autoSaveWindows() {
-		const serializedWindows = tabs.map(currentTabs => {
-			const serializedTabs = currentTabs.flatMap<SaveFile>(tab => {
-				const { dataType, binary } = tab.properties
-				
-				return tab.parentId ? [] : {
-					name: tab.name,
-					dataType,
-					isCompressed: tab.isCompressed,
-					content: serializeElfBinary(dataType, binary),
-				}
-			})
-			return serializedTabs
-		})
+		const serializedWindows = editorStrip.serialize(serializeElfBinary)
 		
 		console.log('serializedWindows', serializedWindows)
 		
@@ -255,12 +235,13 @@
 					return
 				}
 				
-				tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
+				let tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
 					Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
 				).filter(arr => arr.length > 0)
 				
-				if (tabs.length == 0)
-					tabs = [[]]
+				if (tabs.length != 0) {
+					editorStrip.load(tabs)
+				}
 				
 				afterUpdateHandlers = [...afterUpdateHandlers, () => {
 					$loadedAutosave = true
@@ -368,7 +349,7 @@ to me, the developer (Darxoon). Thanks.`
 		<TitleCard menu={menuItems} />
 	</div>
 	
-	<EditorStrip bind:this={editorStrip} bind:tabs={tabs} bind:activeEditor={activeEditor} bind:selectedTabs={selectedTabs}></EditorStrip>
+	<EditorStrip bind:this={editorStrip}></EditorStrip>
 </section>
 
 {#if $modalVisible}

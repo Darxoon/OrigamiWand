@@ -3,12 +3,14 @@
 
 	import EditorWindow from "./EditorWindow.svelte";
 	import type { Tab } from "./globalDragging";
+	import type { SaveFile } from "$lib/save/autosave";
 
-	export let tabs: Tab[][]
-	export let activeEditor: number
-	export let selectedTabs
+	let tabs: Tab[][] = [[]]
+	let selectedTabs = [0]
+	let activeEditor: number =  0
 	
 	let editorWindows: EditorWindow[] = []
+	
 	let isWide = false
 	
 	onMount(() => {
@@ -35,12 +37,50 @@
 		afterUpdateHandlers = []
 	})
 	
+	export function load(newTabs: Tab[][]) {
+		tabs = newTabs
+	}
+	
 	export function collapseAll() {
 		editorWindows[activeEditor].collapseAll()
 	}
 
 	export function expandAll() {
 		editorWindows[activeEditor].expandAll()
+	}
+	
+	export function reset() {
+		tabs = [[]]
+		selectedTabs = [0]
+	}
+	
+	export function appendTab(tab: Tab) {
+		selectedTabs[0] = tabs[0].length
+		
+		tabs[0] = [
+			...tabs[0],
+			tab
+		]
+	}
+	
+	export function activeTab(): Tab {
+		return tabs[activeEditor][selectedTabs[activeEditor]]
+	}
+	
+	export function serialize(serializer: (dataType, binary) => any) {
+		return tabs.map(currentTabs => {
+			const serializedTabs = currentTabs.flatMap<SaveFile>(tab => {
+				const { dataType, binary } = tab.properties
+				
+				return tab.parentId ? [] : {
+					name: tab.name,
+					dataType,
+					isCompressed: tab.isCompressed,
+					content: serializer(dataType, binary),
+				}
+			})
+			return serializedTabs
+		})
 	}
 </script>
 
