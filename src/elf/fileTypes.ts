@@ -376,7 +376,7 @@ Type type of the link. Possible values:
 * Dokan = pipe
 * 土管：下 = Vertical pipe
 `),
-		field_0x28: new Property("string", `No idea what this is for.\n\nExamples: "Bero0", "Door_WaitingArea", "Dokan1"`),
+		objectId: new Property("string", `This is for linking a map exit to a Mobj, BShape, or map collision`),
 		rotationDegrees: "float",
 		field_0x34: "int",
 		field_0x38: new Property("string", "Related to doors\n\nExample: \"Door_Goal\""),
@@ -387,7 +387,7 @@ to its collision area."),
 		field_0x48: "int",
 		field_0x4c: "int",
 		field_0x50: "string",
-		field_0x58: "int",
+		saveonExit: "int",
 		field_0x5c: "int",
 		direction: new Property("string", `
 The direction in which the link is facing. Possible values, among others:
