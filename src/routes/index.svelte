@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-	import EditorWindow from '$lib/editor/EditorWindow.svelte';
 	import ElfEditor from '$lib/editor/fileEditor/ElfEditor.svelte';
 	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
 	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
@@ -17,18 +16,20 @@
 	import TextAlert from '$lib/modal/TextAlert.svelte';
 	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/save/autosave';
 	import TitleCard from '$lib/TitleCard.svelte';
-	import { downloadBlob, map2d } from '$lib/util';
-	import { afterUpdate } from 'svelte';
+	import { compress, decompress, downloadBlob, loadFile, map2d } from '$lib/util';
 	import { onMount } from 'svelte/internal';
 	import type { Tab } from '$lib/editor/globalDragging';
 	import NoteViewer from '$lib/modals/NoteViewer.svelte';
 	import { loadedAutosave } from '$lib/stores';
 	
-	import { ZstdCodec } from 'zstd-codec'
+	import EditorStrip from '$lib/editor/EditorStrip.svelte';
+	import { getZstdMenu } from '$lib/zstdMenu';
+	import { getHelpMenu } from '$lib/helpMenu';
 	
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = []
 	let activeEditor = 0
+	let editorStrip: EditorStrip
 	
 	export const menuItems = [
 		{
@@ -36,7 +37,7 @@
 			items: [
 				{
 					name: "Close session",
-					onClick: () => {
+					onClick() {
 						let result = confirm("Do you want to close all tabs?")
 						
 						if (result) {
@@ -69,33 +70,17 @@
 				}
 			],
 		},
-		{
-			title: "Zstd",
-			items: [
-				{
-					name: "Decompress File",
-					onClick: decompressFileSelector,
-				},
-				{
-					name: "Compress File",
-					onClick: compressFileSelector,
-				},
-			],
-		},
+		getZstdMenu(),
 		{
 			title: "View",
 			items: [
 				{
 					name: "Collapse all",
-					onClick: () => {
-						collapseAll()
-					},
+					onClick: () => editorStrip.collapseAll(),
 				},
 				{
 					name: "Expand all",
-					onClick: () => {
-						expandAll()
-					},
+					onClick: () => editorStrip.expandAll(),
 				},
 				{
 					name: "View all User Notes...",
@@ -111,46 +96,8 @@
 				},
 			],
 		},
-		{
-			title: "Help",
-			items: [
-				{
-					name: "Open website",
-					onClick: () => {
-						let link = document.createElement('a')
-						link.target = "_blank"
-						link.rel = "noopener noreferrer"
-						link.href = "https://github.com/darxoon/origamiwand"
-						link.click()
-					}
-				},
-				{
-					name: "About",
-					onClick: () => {
-						showModal(TextAlert, {
-							title: "About Origami Wand",
-							content: `
-	Made by Darxoon
-
-	Additional help by [HunterXuman](https://twitter.com/HunterXuman/)
-
-	GitHub: [](https://github.com/darxoon/origamiwand)`
-						})
-					},
-				},
-			],
-		},
+		getHelpMenu(),
 	]
-
-	function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
-		return new Promise((resolve, reject) => {
-			ZstdCodec.run(zstd => {
-				const simple = new zstd.Simple();
-				
-				resolve(simple.decompress(new Uint8Array(buffer)).buffer)
-			})
-		})
-	}
 	
 	function openFileSelector() {
 		console.log("opening file")
@@ -200,47 +147,6 @@
 			]
 		})
 	}
-	
-	function decompressFileSelector() {
-		console.log("opening file to decompress")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
-			
-			const content = await loadFile(file)
-			const decompressed = await decompress(content)
-			
-			const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
-			
-			console.log('decompressing', file.name, newFileName)
-			
-			downloadBlob(decompressed, newFileName)
-			
-		})
-	}
-	function compressFileSelector() {
-		console.log("opening file to decompress")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
-			
-			const content = await loadFile(file)
-			const compressed = await compress(content)
-			
-			console.log('compressing', file.name, file.name + '.zst')
-			
-			downloadBlob(compressed, file.name + '.zst')
-			
-		})
-	}
 
 	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
 		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
@@ -281,35 +187,6 @@
 		selectedTabs[0] = tabs[0].length - 1
 	}
 	
-	function loadFile(file: File) {
-		return new Promise<ArrayBuffer>((resolve, reject) => {
-			const fileReader = new FileReader()
-			
-			fileReader.onload = function(e) {
-				console.log(fileReader.result)
-				
-				resolve(fileReader.result as ArrayBuffer)
-			}
-
-			fileReader.onerror = function(e) {
-				reject(e)
-			}
-			
-			fileReader.readAsArrayBuffer(file)
-		})
-	}
-	
-	function compress(buffer: ArrayBuffer) {
-		return new Promise<ArrayBuffer>((resolve, reject) => {
-			ZstdCodec.run(zstd => {
-				let simple = new zstd.Simple()
-				
-				console.log('compressing file with size of', buffer.byteLength)
-				resolve(simple.compress(new Uint8Array(buffer)).buffer)
-			})
-		})
-	}
-	
 	async function saveFile() {
 		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
 		
@@ -328,19 +205,9 @@
 		
 		downloadBlob(output, name)
 	}
-	
-	let editorWindows: EditorWindow[] = []
-
-	function collapseAll() {
-		editorWindows[activeEditor].collapseAll()
-	}
-
-	function expandAll() {
-		editorWindows[activeEditor].expandAll()
-	}
 
 	function viewAllDescriptions() {
-		let	 tab = tabs[activeEditor][selectedTabs[activeEditor]]
+		let	tab = tabs[activeEditor][selectedTabs[activeEditor]]
 		let dataType = tab.properties.dataType
 		
 		if (Object.entries(FILE_TYPES[dataType].metadata).length > 0) {
@@ -376,9 +243,6 @@
 		await createTemporarySave(serializedWindows)
 	}
 	
-	
-	let isWide = false
-	
 	onMount(() => {
 		init()
 			.then(async () => {
@@ -402,13 +266,6 @@
 					$loadedAutosave = true
 				}]
 			})
-		
-		let mediaQuery = window.matchMedia("(min-width: 1000px)")
-		mediaQuery.addEventListener('change', e => {
-			isWide = e.matches
-		})
-		
-		isWide = mediaQuery.matches
 
 		window.addEventListener('beforeunload', async e => {
 			await autoSaveWindows()
@@ -448,21 +305,7 @@ to me, the developer (Darxoon). Thanks.`
 		}
 	})
 	
-	let tabToAdd: Tab
-	let tabToAddEditorIndex = 0
-	
 	let afterUpdateHandlers: Function[] = []
-	
-	afterUpdate(() => {
-		if (tabToAdd) {
-			editorWindows[tabToAddEditorIndex].addTab(tabToAdd)
-			activeEditor = tabToAddEditorIndex
-			tabToAdd = null
-		}
-		
-		afterUpdateHandlers.forEach(fn => fn())
-		afterUpdateHandlers = []
-	})
 	
 	let draggingFile = false
 	
@@ -525,97 +368,7 @@ to me, the developer (Darxoon). Thanks.`
 		<TitleCard menu={menuItems} />
 	</div>
 	
-	<div class="editors">
-		{#each tabs as tabList, i}
-			<div on:mousedown|capture={e => activeEditor = i}>
-				<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}
-					bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
-					on:removeEditor={e => {
-						if (tabs.length > 1) {
-							editorWindows[i].setActive()
-							let newTabs = [...tabs]
-							newTabs.splice(i, 1)
-							tabs = newTabs
-						} else {
-							editorWindows[0].setActive()
-						}
-					}}
-					on:delete={e => {
-						let index = e.detail.index
-						if (typeof index === 'undefined') {
-							tabList[selectedTabs[i]].properties.objects.length = 0
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						} else {
-							tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 1)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						}
-					}}
-					on:addObject={e => {
-						let obj = e.detail.obj
-						if (typeof e.detail.index !== "undefined") {
-							// we have to mutate the original array here, because that is directly linked with the ElfBinary
-							tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 0, obj)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						} else {
-							tabList[selectedTabs[i]].properties.objects.push(obj)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						}
-					}}
-					on:dockTab={e => {
-						let { tab, isRight } = e.detail
-						tabs.splice(isRight ? i + 1 : i, 0, [tab])
-						tabs = tabs
-					}}
-					on:open={e => {
-						if (e.detail.type === "window") {
-							const { title, shortTitle, component, properties, isCompressed } = e.detail
-							
-							const childID = Symbol(`Tab ID ${title}`)
-							
-							tabList[selectedTabs[i]].children.push(childID)
-							
-							const parentId = tabList[selectedTabs[i]].id
-							
-							if (isWide) {
-								if (tabs.length < 2) {
-									tabs = [...tabs, []]
-								}
-								
-								tabToAddEditorIndex = 1
-								
-								tabToAdd = {
-									id: childID,
-									parentId,
-									name: title,
-									shortName: shortTitle,
-									component,
-									properties,
-									isCompressed: isCompressed ?? false,
-									children: [],
-								}
-							} else {
-								editorWindows[0].addTab({
-									id: childID,
-									parentId,
-									name: title,
-									shortName: shortTitle,
-									component,
-									properties,
-									isCompressed: isCompressed ?? false,
-									children: [],
-								})
-							}
-						} else
-							throw new Error(`Can't open ${JSON.stringify(e.detail.type)}, unknown type`)
-					}}
-					
-					on:valueChanged={e => {
-						console.log('valueChanged', e)
-					}}
-				/>
-			</div>
-		{/each}
-	</div>
+	<EditorStrip bind:this={editorStrip} bind:tabs={tabs} bind:activeEditor={activeEditor} bind:selectedTabs={selectedTabs}></EditorStrip>
 </section>
 
 {#if $modalVisible}
@@ -642,17 +395,6 @@ to me, the developer (Darxoon). Thanks.`
 	
 	.title_card {
 		padding: 1.5rem;
-	}
-	
-	.editors {
-		flex: 1;
-		
-		display: flex;
-		flex-direction: row;
-		
-		div {
-			flex: 1;
-		}
 	}
 	
 	.noOverflow {

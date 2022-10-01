@@ -1,3 +1,5 @@
+import { ZstdCodec } from "zstd-codec"
+
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		const fileSelector = document.createElement('input')
@@ -33,6 +35,24 @@ export function downloadBlob(data: Uint8Array | BlobPart, fileName: string, mime
 	}, 1000);
 };
 
+export function loadFile(file: File): Promise<ArrayBuffer> {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
+		const fileReader = new FileReader()
+		
+		fileReader.onload = function(e) {
+			console.log(fileReader.result)
+			
+			resolve(fileReader.result as ArrayBuffer)
+		}
+
+		fileReader.onerror = function(e) {
+			reject(e)
+		}
+		
+		fileReader.readAsArrayBuffer(file)
+	})
+}
+
 function downloadURL(url: string, fileName: string) {
 	console.log('downloading', url)
 	
@@ -44,6 +64,27 @@ function downloadURL(url: string, fileName: string) {
 	a.click();
 	a.remove();
 };
+
+export function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+	return new Promise((resolve, reject) => {
+		ZstdCodec.run(zstd => {
+			const simple = new zstd.Simple();
+			
+			resolve(simple.decompress(new Uint8Array(buffer)).buffer)
+		})
+	})
+}
+
+export function compress(buffer: ArrayBuffer) {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
+		ZstdCodec.run(zstd => {
+			let simple = new zstd.Simple()
+			
+			console.log('compressing file with size of', buffer.byteLength)
+			resolve(simple.compress(new Uint8Array(buffer)).buffer)
+		})
+	})
+}
 
 export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {
 	let newArr = [...arr]
