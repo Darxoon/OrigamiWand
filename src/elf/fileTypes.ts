@@ -1,4 +1,4 @@
-import { DataType, ElfBinary, Pointer } from "./elfBinary";
+import { dataDivisions, DataType, ElfBinary, Pointer } from "./elfBinary";
 import { Vector3 } from "./misc";
 
 export type Typedef<T> = {[fieldName: string]: T}
@@ -364,7 +364,7 @@ Please verify."),
 	},
 	
 	[DataType.Maplink]: {
-		__objectType: ElfBinary.ObjectType.MaplinkNodes,
+		__objectType: dataDivisions.maplinkNodes,
 		
 		stage: "string",
 		id: "string",
@@ -943,7 +943,7 @@ Usage unknown.
 		__displayName: "Asset Group",
 		__importantField: "fileName",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.AssetGroup,
+		__objectType: dataDivisions.assetGroup,
 		
 		modelFolder: "string",
 		fileName: "string",
@@ -960,7 +960,7 @@ Usage unknown.
 		__childFieldLabel: "faceArrays",
 		__childField: "substates",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.State,
+		__objectType: dataDivisions.state,
 		__childTypes: {
 			substates: DataType.NpcSubState,
 		},
@@ -982,7 +982,7 @@ Some commonly found translations:
 		__displayName: "Face Array",
 		__childField: "faces",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.SubState,
+		__objectType: dataDivisions.subState,
 		__childTypes: {
 			faces: DataType.NpcFace,
 		},
@@ -998,7 +998,7 @@ Some commonly found translations:
 		__displayName: "Face",
 		__childField: "animations",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Face,
+		__objectType: dataDivisions.face,
 		__childTypes: {
 			animations: DataType.NpcAnime,
 		},
@@ -1014,7 +1014,7 @@ Some commonly found translations:
 	[DataType.NpcAnime]: {
 		__displayName: "Animation",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Anime,
+		__objectType: dataDivisions.anime,
 		
 		description: "string",
 		id: "string",
@@ -1138,7 +1138,7 @@ The background music file that plays during the battle. It is found in romfs/sou
 		__displayName:  "Enemy",
 		__importantField: "type",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Element,
+		__objectType: dataDivisions.element,
 
 		type: new Property("string", `
 The type of the enemy. While it is similar to the NPC ID's (e. g. P_KNP, O_KUR, ...),
@@ -1353,7 +1353,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	
 	[DataType.ConfettiVersion]: {
 		__displayName: "General Information",
-		__objectType: ElfBinary.ObjectType.Version,
+		__objectType: dataDivisions.version,
 		
 		version: "long",
 	},
@@ -1361,7 +1361,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiData]: {
 		__displayName: "Data Header",
 		__nestedAllValues: false,
-		__objectType: ElfBinary.ObjectType.DataHeader,
+		__objectType: dataDivisions.dataHeader,
 
 		field_0x0: "int",
 		field_0x4: "int",
@@ -1373,7 +1373,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiMap]: {
 		__displayName: "Map",
 		__nestedAllValues: false,
-		__objectType: ElfBinary.ObjectType.Map,
+		__objectType: dataDivisions.map,
 		__childTypes: {
 			holes: DataType.ConfettiHole,
 		},
@@ -1387,7 +1387,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiHole]: {
 		__displayName: "Hole",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Hole,
+		__objectType: dataDivisions.hole,
 		
 		id: "string",
 		field_0x8: "int",
@@ -1488,7 +1488,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.DataUi]: {
 		__entryPoints: {
 			
-			[ElfBinary.ObjectType.Model]: {
+			[dataDivisions.model]: {
 				symbol: "wld::fld::data::s_uiModelData",
 				dataType: DataType.UiModel,
 				section: ".data",
@@ -1498,18 +1498,18 @@ might be the interaction function (called when pressing A; similar to talking).`
 						count: "propertyCount",
 						section: ".data",
 						dataType: DataType.UiModelProperty,
-						objectType: ElfBinary.ObjectType.ModelProperty,
+						objectType: dataDivisions.modelProperty,
 					}
 				}
 			},
 			
-			[ElfBinary.ObjectType.Msg]: {
+			[dataDivisions.msg]: {
 				symbol: "wld::fld::data::s_uiMessageData",
 				dataType: DataType.UiMsg,
 				section: ".data",
 			},
 			
-			[ElfBinary.ObjectType.Shop]: {
+			[dataDivisions.shop]: {
 				symbol: "wld::fld::data::s_shopData",
 				dataType: DataType.UiShop,
 				section: ".data",
@@ -1520,12 +1520,12 @@ might be the interaction function (called when pressing A; similar to talking).`
 						count: "soldItemCount",
 						section: ".data",
 						dataType: DataType.UiSellItem,
-						objectType: ElfBinary.ObjectType.SellItem,
+						objectType: dataDivisions.sellItem,
 					}
 				}
 			},
 			
-			[ElfBinary.ObjectType.SeaEntry]: {
+			[dataDivisions.seaEntry]: {
 				symbol: "wld::fld::data::s_uiSeaMapData",
 				dataType: DataType.UiSeaMap,
 				section: ".data",
@@ -1550,7 +1550,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiModelProperty]: {
 		__displayName: "Model Property",
-		__objectType: ElfBinary.ObjectType.ModelProperty,
+		__objectType: dataDivisions.modelProperty,
 		
 		id: "string",
 		model: "string",
@@ -1749,7 +1749,7 @@ interface FileTypeRegistry {
 	identifyingField: string
 	countSymbol: string
 	nestedAllValues: boolean
-	objectType: ElfBinary.ObjectType
+	objectType: keyof typeof dataDivisions
 	entryPoints: {[objectType: number]: any}
 	
 	instantiate(): object
@@ -1820,7 +1820,7 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 		countSymbol: extendedTypedef.__countSymbol as string | undefined,
 		
 		nestedAllValues: extendedTypedef.__nestedAllValues as boolean ?? false,
-		objectType: extendedTypedef.__objectType as ElfBinary.ObjectType ?? ElfBinary.ObjectType.Main,
+		objectType: extendedTypedef.__objectType ?? dataDivisions.main,
 		
 		entryPoints: extendedTypedef.__entryPoints ?? {},
 		

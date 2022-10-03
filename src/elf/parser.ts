@@ -1,4 +1,4 @@
-import { DataType, ElfBinary, Pointer } from "./elfBinary";
+import { dataDivisions, DataType, ElfBinary, Pointer } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
 import type { Struct } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
@@ -100,7 +100,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	// as an array of structs. However, for some file formats (like maplink and data_npc_model),
 	// there are multiple file formats
 	
-	let data: Map<ElfBinary.ObjectType, any[]>
+	let data: {[division in keyof typeof dataDivisions]?: any[]}
 	let modelSymbolReference: WeakMap<any | any[], string>
 	
 	
@@ -636,7 +636,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	}
 	
 	console.log('data', data)
-	// @ts-ignore
+	
 	return new ElfBinary(sections, data, symbolTable, modelSymbolReference)
 	
 	
