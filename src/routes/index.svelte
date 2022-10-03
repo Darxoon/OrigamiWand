@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte/internal';
+	import { afterUpdate, onMount } from 'svelte';
 	
 	import parseElfBinary from 'paper-mario-elfs/parser';
 	import serializeElfBinary from 'paper-mario-elfs/serializer';
@@ -66,9 +66,7 @@
 				editorStrip.load(tabs)
 			}
 			
-			afterUpdateHandlers = [...afterUpdateHandlers, () => {
-				$loadedAutosave = true
-			}]
+			$loadedAutosave = true
 		})
 
 		window.addEventListener('beforeunload', async e => {
@@ -92,8 +90,6 @@ to me, the developer (Darxoon). Thanks.`
 			localStorage.beta = 1
 		}
 	})
-	
-	let afterUpdateHandlers: Function[] = []
 	
 	let draggingFile = false
 	
