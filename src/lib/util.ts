@@ -1,4 +1,4 @@
-import { DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
+import { dataDivisions, DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
 import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
 import { ZstdCodec } from "zstd-codec"
 import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
@@ -116,9 +116,9 @@ export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isC
                 objectTitle: FILE_TYPES[dataType].displayName,
                 binary,
                 objects: dataType === DataType.Maplink
-                    ? binary.data.get(ElfBinary.ObjectType.MaplinkNodes)
-                    : binary.data.get(ElfBinary.ObjectType.Main),
-                headerObject: dataType === DataType.Maplink ? binary.data.get(ElfBinary.ObjectType.Main)[0] : undefined,
+                    ? binary.data[dataDivisions.maplinkNodes]
+                    : binary.data[dataDivisions.main],
+                headerObject: dataType === DataType.Maplink ? binary.data[dataDivisions.main][0] : undefined,
                 importantFieldName: FILE_TYPES[dataType].identifyingField,
                 dataType,
             },
