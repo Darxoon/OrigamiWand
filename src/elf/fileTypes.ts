@@ -1,4 +1,4 @@
-import { DataType, ElfBinary, Pointer } from "./elfBinary";
+import { dataDivisions, DataType, ElfBinary, Pointer } from "./elfBinary";
 import { Vector3 } from "./misc";
 
 export type Typedef<T> = {[fieldName: string]: T}
@@ -277,13 +277,13 @@ Please verify."),
 		field_0x40: "string",
 		field_0x48: "int",
 		field_0x4c: "int",
-		field_0x50: "string",
+		item: "string",
 		field_0x58: "int",
 		field_0x5c: "int",
-		field_0x60: "string",
+		item2: "string",
 		field_0x68: "int",
 		field_0x6c: "int",
-		field_0x70: "string",
+		item3: "string",
 		field_0x78: "int",
 		field_0x7c: "int",
 		field_0x80: "int",
@@ -355,7 +355,7 @@ Please verify."),
 		position: "Vector3",
 		rotation: "Vector3",
 		field_0x28: "int",
-		field_0x2C: "Vector3",
+		cubeSize: "Vector3",
 		field_0x38: "float",
 		field_0x3C: "int",
 		field_0x40: "string",
@@ -364,20 +364,19 @@ Please verify."),
 	},
 	
 	[DataType.Maplink]: {
-		__objectType: ElfBinary.ObjectType.MaplinkNodes,
+		__objectType: dataDivisions.maplinkNodes,
 		
 		stage: "string",
 		id: "string",
 		destinationStage: "string",
 		destinationId: "string",
-		// TODO string enums
 		type: new Property("string", `
 Type type of the link. Possible values:
 
 * Dokan = pipe
 * 土管：下 = Vertical pipe
 `),
-		field_0x28: new Property("string", `No idea what this is for.\n\nExamples: "Bero0", "Door_WaitingArea", "Dokan1"`),
+		objectId: new Property("string", `This is for linking a map exit to a Mobj, BShape, or map collision`),
 		rotationDegrees: "float",
 		field_0x34: "int",
 		field_0x38: new Property("string", "Related to doors\n\nExample: \"Door_Goal\""),
@@ -388,7 +387,7 @@ to its collision area."),
 		field_0x48: "int",
 		field_0x4c: "int",
 		field_0x50: "string",
-		field_0x58: "int",
+		saveOnExit: "int",
 		field_0x5c: "int",
 		direction: new Property("string", `
 The direction in which the link is facing. Possible values, among others:
@@ -444,16 +443,14 @@ Example: "Cam_Dokan"`),
 		rotationBehavior: new Property("int", `
 Determines how the NPC rotates. Possible values:
 
-* 0 - the object's rotation is only modified by scripts.
-* 1 - the object always faces either forwards or backwards and tries to use back sprites (basically Pera).
-* 2 - the object always faces the player when they get close or talk to the NPC
-but otherwise behaves like 0.
-* everything bigger just behaves like 2`),
+* 0 - the object's rotation is only modified by scripts. allows 360° rotation.
+* 1 - the object's rotation is locked into left, right and the back facing variations (which try to use back sprites).
+* 2 - the object faces the player when they get close or interact. allows 360° rotation.
+* everything else behaves like 2`),
 		field_0x14: "int",
 		textureSubclass: "string",
 		alwaysFacesFront: new Property("bool32", `
-If set to true, the NPC will only use its front sprites
-and won't turn flip around when going into the direction that the camera faces.`),
+If set to true, the NPC will not turn backwards or forwards but only turn horizontally.`),
 		field_0x24: "int",
 		instanceScriptFilename: "string",
 		instanceScriptNamespace: new Property("string", `
@@ -594,29 +591,21 @@ Some examples of functions that are in this namespace:
 		field_0x34: "int",
 		field_0x38: "int",
 		field_0x3c: "int",
-		field_0x40: "int",
-		field_0x44: "int",
-		field_0x48: "int",
-		field_0x4c: "int",
-		field_0x50: "int",
-		field_0x54: "int",
-		field_0x58: "int",
+		walkRadius: "Vector3",
+		walkDistance: "Vector3",
+		field_0x58: "float",
 		field_0x5c: "int",
-		field_0x60: "int",
-		field_0x64: "int",
-		field_0x68: "int",
-		field_0x6c: "int",
+		field_0x60: "float",
+		field_0x64: "float",
+		field_0x68: "float",
+		field_0x6c: "float",
 		field_0x70: "int",
 		field_0x74: "int",
 		field_0x78: "int",
 		field_0x7c: "int",
-		field_0x80: "int",
-		field_0x84: "int",
-		field_0x88: "int",
-		field_0x8c: "int",
-		field_0x90: "int",
-		field_0x94: "int",
-		field_0x98: "int",
+		chaseRadius: "Vector3",
+		chaseDistance: "Vector3",
+		field_0x98: "float",
 		field_0x9c: "int",
 		field_0xa0: "string",
 		field_0xa8: "int",
@@ -954,7 +943,7 @@ Usage unknown.
 		__displayName: "Asset Group",
 		__importantField: "fileName",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.AssetGroup,
+		__objectType: dataDivisions.assetGroup,
 		
 		modelFolder: "string",
 		fileName: "string",
@@ -971,7 +960,7 @@ Usage unknown.
 		__childFieldLabel: "faceArrays",
 		__childField: "substates",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.State,
+		__objectType: dataDivisions.state,
 		__childTypes: {
 			substates: DataType.NpcSubState,
 		},
@@ -993,7 +982,7 @@ Some commonly found translations:
 		__displayName: "Face Array",
 		__childField: "faces",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.SubState,
+		__objectType: dataDivisions.subState,
 		__childTypes: {
 			faces: DataType.NpcFace,
 		},
@@ -1009,7 +998,7 @@ Some commonly found translations:
 		__displayName: "Face",
 		__childField: "animations",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Face,
+		__objectType: dataDivisions.face,
 		__childTypes: {
 			animations: DataType.NpcAnime,
 		},
@@ -1025,7 +1014,7 @@ Some commonly found translations:
 	[DataType.NpcAnime]: {
 		__displayName: "Animation",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Anime,
+		__objectType: dataDivisions.anime,
 		
 		description: "string",
 		id: "string",
@@ -1149,7 +1138,7 @@ The background music file that plays during the battle. It is found in romfs/sou
 		__displayName:  "Enemy",
 		__importantField: "type",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Element,
+		__objectType: dataDivisions.element,
 
 		type: new Property("string", `
 The type of the enemy. While it is similar to the NPC ID's (e. g. P_KNP, O_KUR, ...),
@@ -1364,7 +1353,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	
 	[DataType.ConfettiVersion]: {
 		__displayName: "General Information",
-		__objectType: ElfBinary.ObjectType.Version,
+		__objectType: dataDivisions.version,
 		
 		version: "long",
 	},
@@ -1372,7 +1361,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiData]: {
 		__displayName: "Data Header",
 		__nestedAllValues: false,
-		__objectType: ElfBinary.ObjectType.DataHeader,
+		__objectType: dataDivisions.dataHeader,
 
 		field_0x0: "int",
 		field_0x4: "int",
@@ -1384,7 +1373,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiMap]: {
 		__displayName: "Map",
 		__nestedAllValues: false,
-		__objectType: ElfBinary.ObjectType.Map,
+		__objectType: dataDivisions.map,
 		__childTypes: {
 			holes: DataType.ConfettiHole,
 		},
@@ -1398,7 +1387,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	[DataType.ConfettiHole]: {
 		__displayName: "Hole",
 		__nestedAllValues: true,
-		__objectType: ElfBinary.ObjectType.Hole,
+		__objectType: dataDivisions.hole,
 		
 		id: "string",
 		field_0x8: "int",
@@ -1496,7 +1485,53 @@ might be the interaction function (called when pressing A; similar to talking).`
 		field_0xb8: "string",
 	},
 	
-	[DataType.DataUi]: {},
+	[DataType.DataUi]: {
+		__entryPoints: {
+			
+			[dataDivisions.model]: {
+				symbol: "wld::fld::data::s_uiModelData",
+				dataType: DataType.UiModel,
+				section: ".data",
+				
+				children: {
+					properties: {
+						count: "propertyCount",
+						section: ".data",
+						dataType: DataType.UiModelProperty,
+						objectType: dataDivisions.modelProperty,
+					}
+				}
+			},
+			
+			[dataDivisions.msg]: {
+				symbol: "wld::fld::data::s_uiMessageData",
+				dataType: DataType.UiMsg,
+				section: ".data",
+			},
+			
+			[dataDivisions.shop]: {
+				symbol: "wld::fld::data::s_shopData",
+				dataType: DataType.UiShop,
+				section: ".data",
+				cutoff: 1,
+				
+				children: {
+					soldItems: {
+						count: "soldItemCount",
+						section: ".data",
+						dataType: DataType.UiSellItem,
+						objectType: dataDivisions.sellItem,
+					}
+				}
+			},
+			
+			[dataDivisions.seaEntry]: {
+				symbol: "wld::fld::data::s_uiSeaMapData",
+				dataType: DataType.UiSeaMap,
+				section: ".data",
+			}
+		}
+	},
 	
 	[DataType.UiModel]: {
 		__displayName: "Model",
@@ -1506,15 +1541,16 @@ might be the interaction function (called when pressing A; similar to talking).`
 		
 		id: "string",
 		modelFolder: "string",
-		modelId: new Property("string", `
+		modelFileName: new Property("string", `
 Not sure what this is for. It seems like it's the same as \`id\`.`),
 		properties: new Property("pointer", undefined, {tabName: "Model Properties of {id}"}),
-		propertyCount: "int",
+		propertyCount: new Property("int", undefined, {hidden: true}),
 		field_0x24: "int",
 	},
 	
 	[DataType.UiModelProperty]: {
 		__displayName: "Model Property",
+		__objectType: dataDivisions.modelProperty,
 		
 		id: "string",
 		model: "string",
@@ -1713,7 +1749,8 @@ interface FileTypeRegistry {
 	identifyingField: string
 	countSymbol: string
 	nestedAllValues: boolean
-	objectType: ElfBinary.ObjectType
+	objectType: keyof typeof dataDivisions
+	entryPoints: {[objectType: number]: any}
 	
 	instantiate(): object
 }
@@ -1783,7 +1820,9 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 		countSymbol: extendedTypedef.__countSymbol as string | undefined,
 		
 		nestedAllValues: extendedTypedef.__nestedAllValues as boolean ?? false,
-		objectType: extendedTypedef.__objectType as ElfBinary.ObjectType ?? ElfBinary.ObjectType.Main,
+		objectType: extendedTypedef.__objectType ?? dataDivisions.main,
+		
+		entryPoints: extendedTypedef.__entryPoints ?? {},
 		
 		instantiate(): object {
 			let result = {}

@@ -5,13 +5,13 @@ import type { Section, Symbol } from "./types"
  */
 export class ElfBinary {
 	private sections: Section[]
-	data: Map<ElfBinary.ObjectType, any[]>
+	data: {[division in keyof typeof dataDivisions]?: any[]}
 	symbolTable: Symbol[]
 	modelSymbolReference: WeakMap<object[]|object, string>
 	
-	private constructor(
+	constructor(
 		sections: Section[], 
-		data: Map<ElfBinary.ObjectType, object[]>, 
+		data: {[division in keyof typeof dataDivisions]?: any[]}, 
 		symbolTable: Symbol[], 
 		modelSymbolReference: WeakMap<any | any[], string>,
 	) {
@@ -20,6 +20,36 @@ export class ElfBinary {
 		this.symbolTable = symbolTable
 		this.modelSymbolReference = modelSymbolReference
 	}
+}
+
+export const dataDivisions = {
+	main: "main",
+	maplinkNodes: "maplinkNodes",
+
+	assetGroup: "assetGroup",
+	state: "state",
+	subState: "subState",
+	face: "face",
+	anime: "anime",
+
+	element: "element",
+	map: "map",
+
+	dataHeader: "dataHeader",
+	hole: "hole",
+	version: "version",
+
+	category: "category",
+
+	model: "model",
+	modelProperty: "modelProperty",
+	msg: "msg",
+	shop: "shop",
+	sellItem: "sellItem",
+	seaEntry: "seaEntry",
+	menu: "menu",
+	announcement: "announcement",
+	announcementExclude: "announcementExclude",
 }
 
 export namespace ElfBinary {

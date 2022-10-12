@@ -1,3 +1,10 @@
+import { dataDivisions, DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
+import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
+import { ZstdCodec } from "zstd-codec"
+import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
+import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
+import type { Tab } from "./editor/globalDragging"
+
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		const fileSelector = document.createElement('input')
@@ -33,6 +40,24 @@ export function downloadBlob(data: Uint8Array | BlobPart, fileName: string, mime
 	}, 1000);
 };
 
+export function loadFile(file: File): Promise<ArrayBuffer> {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
+		const fileReader = new FileReader()
+		
+		fileReader.onload = function(e) {
+			console.log(fileReader.result)
+			
+			resolve(fileReader.result as ArrayBuffer)
+		}
+
+		fileReader.onerror = function(e) {
+			reject(e)
+		}
+		
+		fileReader.readAsArrayBuffer(file)
+	})
+}
+
 function downloadURL(url: string, fileName: string) {
 	console.log('downloading', url)
 	
@@ -44,6 +69,62 @@ function downloadURL(url: string, fileName: string) {
 	a.click();
 	a.remove();
 };
+
+export function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+	return new Promise((resolve, reject) => {
+		ZstdCodec.run(zstd => {
+			const simple = new zstd.Simple();
+			
+			resolve(simple.decompress(new Uint8Array(buffer)).buffer)
+		})
+	})
+}
+
+export function compress(buffer: ArrayBuffer) {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
+		ZstdCodec.run(zstd => {
+			let simple = new zstd.Simple()
+			
+			console.log('compressing file with size of', buffer.byteLength)
+			resolve(simple.compress(new Uint8Array(buffer)).buffer)
+		})
+	})
+}
+
+export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
+    if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
+        return {
+            id: Symbol(),
+            name: fileName,
+            component: SpecialElfEditor,
+            children: [],
+            isCompressed,
+            properties: {
+                dataType,
+                binary,
+                fileName,
+            },
+        }
+    } else {
+        return {
+            id: Symbol(),
+            name: fileName,
+            component: ElfEditor,
+            children: [],
+            isCompressed,
+            properties: {
+                objectTitle: FILE_TYPES[dataType].displayName,
+                binary,
+                objects: dataType === DataType.Maplink
+                    ? binary.data[dataDivisions.maplinkNodes]
+                    : binary.data[dataDivisions.main],
+                headerObject: dataType === DataType.Maplink ? binary.data[dataDivisions.main][0] : undefined,
+                importantFieldName: FILE_TYPES[dataType].identifyingField,
+                dataType,
+            },
+        }
+    }
+}
 
 export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {
 	let newArr = [...arr]
@@ -86,4 +167,21 @@ export function toReadableString(camelCaseStr: string) {
 	}
 	
 	return output.trim()
+}
+
+export function trimStr(str: string, ch: string) {
+    var start = 0, 
+        end = str.length;
+
+    while(start < end && str[start] === ch)
+        ++start;
+
+    while(end > start && str[end - 1] === ch)
+        --end;
+
+    return (start > 0 || end < str.length) ? str.substring(start, end) : str;
+}
+
+export function arrayLastElement<T>(arr: T[]): T {
+	return arr[arr.length - 1]
 }

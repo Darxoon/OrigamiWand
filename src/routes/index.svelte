@@ -3,58 +3,31 @@
 </script>
 
 <script lang="ts">
-	import EditorWindow from '$lib/editor/EditorWindow.svelte';
-	import ElfEditor from '$lib/editor/fileEditor/ElfEditor.svelte';
-	import SpecialElfEditor from '$lib/editor/fileEditor/SpecialElfEditor.svelte';
-	import { DataType, ElfBinary } from 'paper-mario-elfs/elfBinary';
-	import { FILE_TYPES } from 'paper-mario-elfs/fileTypes';
-	import parseElfBinary, { EmptyFileError } from 'paper-mario-elfs/parser';
+	import { afterUpdate, onMount } from 'svelte';
+	
+	import parseElfBinary from 'paper-mario-elfs/parser';
 	import serializeElfBinary from 'paper-mario-elfs/serializer';
-	import DataTypePrompt from '$lib/modals/DataTypePrompt.svelte';
-	import DescriptionViewer from '$lib/modals/DescriptionViewer.svelte';
+	
 	import { currentModal, modalVisible, showModal } from '$lib/modal/modal';
 	import Modal from '$lib/modal/Modal.svelte';
 	import TextAlert from '$lib/modal/TextAlert.svelte';
-	import { createTemporarySave, getLatestSave, init, type SaveFile } from '$lib/autosave';
+	import { createTemporarySave, getLatestSave, initializeAutosaves } from '$lib/save/autosave';
+	import EditorStrip from '$lib/editor/EditorStrip.svelte';
+	import { getZstdMenu } from '$lib/menu/zstdMenu';
+	import { getHelpMenu } from '$lib/menu/helpMenu';
+	import { getFileMenu } from '$lib/menu/fileMenu';
+	import { getViewMenu } from '$lib/menu/viewMenu';
+	import { globalEditorStrip, loadedAutosave } from '$lib/stores';
+	import { loadFile, map2d, Tab } from '$lib/util';
+	
 	import TitleCard from '$lib/TitleCard.svelte';
-	import { downloadBlob, map2d } from '$lib/util';
-	import { afterUpdate } from 'svelte';
-	import { onMount } from 'svelte/internal';
-	import type { Tab } from '$lib/editor/globalDragging';
-	import NoteViewer from '$lib/modals/NoteViewer.svelte';
-	import { loadedAutosave } from '$lib/stores';
 	
-	import { ZstdCodec } from 'zstd-codec'
+	let editorStrip: EditorStrip
 	
-	let tabs: Tab[][] = [[]]
-	let selectedTabs = []
-	let activeEditor = 0
+	$: globalEditorStrip.set(editorStrip)
 	
 	export const menuItems = [
-		{
-			title: "File",
-			items: [
-				{
-					name: "Close session",
-					onClick: () => {
-						let result = confirm("Do you want to close all tabs?")
-						
-						if (result) {
-							$loadedAutosave = true
-							tabs = [[]]
-						}
-					}
-				},
-				{
-					name: "Open...",
-					onClick: openFileSelector
-				},
-				{
-					name: "Save...",
-					onClick: saveFile
-				},
-			],
-		},
+		getFileMenu(),
 		{
 			title: "Edit",
 			items: [
@@ -69,365 +42,35 @@
 				}
 			],
 		},
-		{
-			title: "Zstd",
-			items: [
-				{
-					name: "Decompress File",
-					onClick: decompressFileSelector,
-				},
-				{
-					name: "Compress File",
-					onClick: compressFileSelector,
-				},
-			],
-		},
-		{
-			title: "View",
-			items: [
-				{
-					name: "Collapse all",
-					onClick: () => {
-						collapseAll()
-					},
-				},
-				{
-					name: "Expand all",
-					onClick: () => {
-						expandAll()
-					},
-				},
-				{
-					name: "View all User Notes...",
-					onClick: () => {
-						showModal(NoteViewer, {})
-					}
-				},
-				{
-					name: "View all Descriptions...",
-					onClick: () => {
-						viewAllDescriptions()
-					}
-				},
-			],
-		},
-		{
-			title: "Help",
-			items: [
-				{
-					name: "Open website",
-					onClick: () => {
-						let link = document.createElement('a')
-						link.target = "_blank"
-						link.rel = "noopener noreferrer"
-						link.href = "https://github.com/darxoon/origamiwand"
-						link.click()
-					}
-				},
-				{
-					name: "About",
-					onClick: () => {
-						showModal(TextAlert, {
-							title: "About Origami Wand",
-							content: `
-	Made by Darxoon
-
-	Additional help by [HunterXuman](https://twitter.com/HunterXuman/)
-
-	GitHub: [](https://github.com/darxoon/origamiwand)`
-						})
-					},
-				},
-			],
-		},
+		getZstdMenu(),
+		getViewMenu(),
+		getHelpMenu(),
 	]
-
-	function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
-		return new Promise((resolve, reject) => {
-			ZstdCodec.run(zstd => {
-				const simple = new zstd.Simple();
-				
-				resolve(simple.decompress(new Uint8Array(buffer)).buffer)
-			})
-		})
-	}
 	
-	function openFileSelector() {
-		console.log("opening file")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
+	onMount(() => {
+		initializeAutosaves().then(async () => {
+			let save = await getLatestSave()
 			
-			const contentPromise = loadFile(file)
+			console.log('loading save', save)
 			
-			const {dataType, isCompressed} = await showModal(DataTypePrompt, {
-				fileName: file.name,
-			})
-
-			if (!dataType) {
+			if (!save) {
+				$loadedAutosave = true
 				return
 			}
 			
-			const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
+			let tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
+				Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
+			).filter(arr => arr.length > 0)
 			
-			let binary 
-			try {
-				binary = parseElfBinary(dataType, content)
-			} catch (e) {
-				if (e instanceof EmptyFileError) {
-					showModal(TextAlert, {
-						title: "Opening File",
-						content: "File is empty. Generating a new file instead."
-					})
-						.then(() => {
-							showModal(TextAlert, {
-								title: "Error",
-								content: "Error: Not implemented yet."
-							})
-						})
-				}
-				
-				throw e
-			}
-
-			tabs[0] = [
-				...tabs[0], 
-				Tab(file.name, binary, dataType, isCompressed),
-			]
-		})
-	}
-	
-	function decompressFileSelector() {
-		console.log("opening file to decompress")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
-			
-			const content = await loadFile(file)
-			const decompressed = await decompress(content)
-			
-			const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
-			
-			console.log('decompressing', file.name, newFileName)
-			
-			downloadBlob(decompressed, newFileName)
-			
-		})
-	}
-	function compressFileSelector() {
-		console.log("opening file to decompress")
-
-		const fileSelector = document.createElement('input')
-		fileSelector.setAttribute('type', 'file')
-		fileSelector.click()
-		
-		fileSelector.addEventListener('change', async (e: any) => {
-			const file: File = e.target.files[0]
-			
-			const content = await loadFile(file)
-			const compressed = await compress(content)
-			
-			console.log('compressing', file.name, file.name + '.zst')
-			
-			downloadBlob(compressed, file.name + '.zst')
-			
-		})
-	}
-
-	function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-		if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
-			return {
-				id: Symbol(),
-				name: fileName,
-				shortName: fileName,
-				component: SpecialElfEditor,
-				children: [],
-				isCompressed,
-				properties: {
-					dataType,
-					binary,
-					fileName,
-				},
-			}
-		} else {
-			return {
-				id: Symbol(),
-				name: fileName,
-				shortName: fileName,
-				component: ElfEditor,
-				children: [],
-				isCompressed,
-				properties: {
-					objectTitle: FILE_TYPES[dataType].displayName,
-					binary,
-					objects: dataType === DataType.Maplink
-						? binary.data.get(ElfBinary.ObjectType.MaplinkNodes)
-						: binary.data.get(ElfBinary.ObjectType.Main),
-					headerObject: dataType === DataType.Maplink ? binary.data.get(ElfBinary.ObjectType.Main)[0] : undefined,
-					importantFieldName: FILE_TYPES[dataType].identifyingField,
-					dataType,
-				},
-			}
-		}
-		
-		selectedTabs[0] = tabs[0].length - 1
-	}
-	
-	function loadFile(file: File) {
-		return new Promise<ArrayBuffer>((resolve, reject) => {
-			const fileReader = new FileReader()
-			
-			fileReader.onload = function(e) {
-				console.log(fileReader.result)
-				
-				resolve(fileReader.result as ArrayBuffer)
-			}
-
-			fileReader.onerror = function(e) {
-				reject(e)
+			if (tabs.length != 0) {
+				editorStrip.load(tabs)
 			}
 			
-			fileReader.readAsArrayBuffer(file)
+			$loadedAutosave = true
 		})
-	}
-	
-	function compress(buffer: ArrayBuffer) {
-		return new Promise<ArrayBuffer>((resolve, reject) => {
-			ZstdCodec.run(zstd => {
-				let simple = new zstd.Simple()
-				
-				console.log('compressing file with size of', buffer.byteLength)
-				resolve(simple.compress(new Uint8Array(buffer)).buffer)
-			})
-		})
-	}
-	
-	async function saveFile() {
-		let tab = tabs[activeEditor][selectedTabs[activeEditor]]
-		
-		if (tab.parentId) {
-			showModal(TextAlert, {
-				title: "Cannot Save",
-				content: "Try saving the parent file instead."
-			})
-			return
-		}
-
-		const { name, isCompressed, properties: { dataType, binary } } = tab
-		
-		let serialized = serializeElfBinary(dataType, binary)
-		let output = isCompressed ? await compress(serialized) : serialized
-		
-		downloadBlob(output, name)
-	}
-	
-	let editorWindows: EditorWindow[] = []
-
-	function collapseAll() {
-		editorWindows[activeEditor].collapseAll()
-	}
-
-	function expandAll() {
-		editorWindows[activeEditor].expandAll()
-	}
-
-	function viewAllDescriptions() {
-		let	 tab = tabs[activeEditor][selectedTabs[activeEditor]]
-		let dataType = tab.properties.dataType
-		
-		if (Object.entries(FILE_TYPES[dataType].metadata).length > 0) {
-			showModal(DescriptionViewer, {
-				typeMetadata: FILE_TYPES[dataType].metadata,
-			})
-		} else {
-			showModal(TextAlert, {
-				title: "No Descriptions",
-				content: "This file format contains no field descriptions.",
-			})
-		}
-	}
-	
-	
-	async function autoSaveWindows() {
-		const serializedWindows = tabs.map(currentTabs => {
-			const serializedTabs = currentTabs.flatMap<SaveFile>(tab => {
-				const { dataType, binary } = tab.properties
-				
-				return tab.parentId ? [] : {
-					name: tab.name,
-					dataType,
-					isCompressed: tab.isCompressed,
-					content: serializeElfBinary(dataType, binary),
-				}
-			})
-			return serializedTabs
-		})
-		
-		console.log('serializedWindows', serializedWindows)
-		
-		await createTemporarySave(serializedWindows)
-	}
-	
-	
-	let isWide = false
-	
-	onMount(() => {
-		init()
-			.then(async () => {
-				let save = await getLatestSave()
-				
-				console.log('loading save', save)
-				
-				if (!save) {
-					$loadedAutosave = true
-					return
-				}
-				
-				tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
-					Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
-				).filter(arr => arr.length > 0)
-				
-				if (tabs.length == 0)
-					tabs = [[]]
-				
-				afterUpdateHandlers = [...afterUpdateHandlers, () => {
-					$loadedAutosave = true
-				}]
-			})
-		
-		let mediaQuery = window.matchMedia("(min-width: 1000px)")
-		mediaQuery.addEventListener('change', e => {
-			isWide = e.matches
-		})
-		
-		isWide = mediaQuery.matches
 
 		window.addEventListener('beforeunload', async e => {
-			await autoSaveWindows()
-		})
-
-		window.addEventListener('keydown', e => {
-			if (e.ctrlKey) {
-				switch (e.key) {
-					// doesn't work because file input gets blocked
-					//case "o":
-					//	e.preventDefault()
-					//	openFileSelector()
-					//	break
-					case "s":
-						e.preventDefault()
-						saveFile()
-						break
-				}
-			}
+			await createTemporarySave(editorStrip.serialize(serializeElfBinary))
 		})
 		
 		let betaBannerShown = !!localStorage.beta
@@ -446,22 +89,6 @@ to me, the developer (Darxoon). Thanks.`
 			
 			localStorage.beta = 1
 		}
-	})
-	
-	let tabToAdd: Tab
-	let tabToAddEditorIndex = 0
-	
-	let afterUpdateHandlers: Function[] = []
-	
-	afterUpdate(() => {
-		if (tabToAdd) {
-			editorWindows[tabToAddEditorIndex].addTab(tabToAdd)
-			activeEditor = tabToAddEditorIndex
-			tabToAdd = null
-		}
-		
-		afterUpdateHandlers.forEach(fn => fn())
-		afterUpdateHandlers = []
 	})
 	
 	let draggingFile = false
@@ -525,97 +152,7 @@ to me, the developer (Darxoon). Thanks.`
 		<TitleCard menu={menuItems} />
 	</div>
 	
-	<div class="editors">
-		{#each tabs as tabList, i}
-			<div on:mousedown|capture={e => activeEditor = i}>
-				<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}
-					bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
-					on:removeEditor={e => {
-						if (tabs.length > 1) {
-							editorWindows[i].setActive()
-							let newTabs = [...tabs]
-							newTabs.splice(i, 1)
-							tabs = newTabs
-						} else {
-							editorWindows[0].setActive()
-						}
-					}}
-					on:delete={e => {
-						let index = e.detail.index
-						if (typeof index === 'undefined') {
-							tabList[selectedTabs[i]].properties.objects.length = 0
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						} else {
-							tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 1)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						}
-					}}
-					on:addObject={e => {
-						let obj = e.detail.obj
-						if (typeof e.detail.index !== "undefined") {
-							// we have to mutate the original array here, because that is directly linked with the ElfBinary
-							tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 0, obj)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						} else {
-							tabList[selectedTabs[i]].properties.objects.push(obj)
-							tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-						}
-					}}
-					on:dockTab={e => {
-						let { tab, isRight } = e.detail
-						tabs.splice(isRight ? i + 1 : i, 0, [tab])
-						tabs = tabs
-					}}
-					on:open={e => {
-						if (e.detail.type === "window") {
-							const { title, shortTitle, component, properties, isCompressed } = e.detail
-							
-							const childID = Symbol(`Tab ID ${title}`)
-							
-							tabList[selectedTabs[i]].children.push(childID)
-							
-							const parentId = tabList[selectedTabs[i]].id
-							
-							if (isWide) {
-								if (tabs.length < 2) {
-									tabs = [...tabs, []]
-								}
-								
-								tabToAddEditorIndex = 1
-								
-								tabToAdd = {
-									id: childID,
-									parentId,
-									name: title,
-									shortName: shortTitle,
-									component,
-									properties,
-									isCompressed: isCompressed ?? false,
-									children: [],
-								}
-							} else {
-								editorWindows[0].addTab({
-									id: childID,
-									parentId,
-									name: title,
-									shortName: shortTitle,
-									component,
-									properties,
-									isCompressed: isCompressed ?? false,
-									children: [],
-								})
-							}
-						} else
-							throw new Error(`Can't open ${JSON.stringify(e.detail.type)}, unknown type`)
-					}}
-					
-					on:valueChanged={e => {
-						console.log('valueChanged', e)
-					}}
-				/>
-			</div>
-		{/each}
-	</div>
+	<EditorStrip bind:this={editorStrip}></EditorStrip>
 </section>
 
 {#if $modalVisible}
@@ -642,17 +179,6 @@ to me, the developer (Darxoon). Thanks.`
 	
 	.title_card {
 		padding: 1.5rem;
-	}
-	
-	.editors {
-		flex: 1;
-		
-		display: flex;
-		flex-direction: row;
-		
-		div {
-			flex: 1;
-		}
 	}
 	
 	.noOverflow {

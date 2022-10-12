@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MenuStripItem from "./MenuStripItem.svelte";
+	import MenuStripItem from "./menu/MenuStripItem.svelte";
 	import type { MenuStripEntry } from "./types";
 	
 	export let menu: {title: string, items: MenuStripEntry[]}[] = []

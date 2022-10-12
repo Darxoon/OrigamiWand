@@ -23,11 +23,11 @@ export function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, con
 		for (const [fieldName, fieldValue] of Object.entries(obj)) {
 			const fieldType = FILE_TYPES[dataType].typedef[fieldName]
 			
-			if (fieldType === "pointer") {
+			if (fieldType === "pointer" && fieldValue != null) {
 				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
 				let childObjectType = FILE_TYPES[childDataType].objectType
 				
-				let clonedChild = duplicateElfObject(binary, childDataType, binary.data.get(childObjectType), fieldValue, false)
+				let clonedChild = duplicateElfObject(binary, childDataType, binary.data[childObjectType], fieldValue, false)
 				clone[fieldName] = clonedChild
 			}
 		}

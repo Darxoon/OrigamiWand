@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { dataDivisions, DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import Expander from "$lib/editor/fileEditor/Expander.svelte";
 	import { createEventDispatcher } from "svelte";
@@ -53,13 +53,13 @@
 	{#if dataType === DataType.DataBtlSet}
 		<Expander title="Special Map Names">
 			<div class="maps">
-				{#each binary.data.get(ElfBinary.ObjectType.Map) as mapName}
+				{#each binary.data[dataDivisions.map] as mapName}
 					<div><pre>{mapName}</pre></div>
 				{/each}
 			</div>
 		</Expander>
 		
-		{#each binary.data.get(ElfBinary.ObjectType.Main) as obj}
+		{#each binary.data[dataDivisions.main] as obj}
 			<Expander title={obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)} showButtons={true}>
 				<div class="category">
 					<div class="card set_data" on:click={e => {
@@ -103,13 +103,13 @@
 	{/if}
 	
 	{#if dataType === DataType.DataConfettiTotalHoleInfo}
-		<ObjectEditor title="General Information" obj={binary.data.get(ElfBinary.ObjectType.Version)[0]}
+		<ObjectEditor title="General Information" obj={binary.data[dataDivisions.version][0]}
 				dataType={DataType.ConfettiVersion} showButtons={false} binary={binary} />
 		
-		<ObjectEditor title="Data Header" obj={binary.data.get(ElfBinary.ObjectType.DataHeader)[0]}
+		<ObjectEditor title="Data Header" obj={binary.data[dataDivisions.dataHeader][0]}
 				dataType={DataType.ConfettiData} showButtons={false} binary={binary} />
 		
-		{#each binary.data.get(ElfBinary.ObjectType.Map) as map}
+		{#each binary.data[dataDivisions.map] as map}
 			<ObjectEditor title={map.id} dataType={DataType.ConfettiMap} obj={map} on:open binary={binary} />
 		{/each}
 	{/if}
@@ -122,7 +122,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiModel].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.Model),
+					objects: binary.data[dataDivisions.model],
 					importantFieldName: FILE_TYPES[DataType.UiModel].identifyingField,
 					dataType: DataType.UiModel,
 					parent: self,
@@ -143,7 +143,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiMsg].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.Msg),
+					objects: binary.data[dataDivisions.msg],
 					importantFieldName: FILE_TYPES[DataType.UiMsg].identifyingField,
 					dataType: DataType.UiMsg,
 					parent: self,
@@ -164,7 +164,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiShop].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.Shop),
+					objects: binary.data[dataDivisions.shop],
 					importantFieldName: FILE_TYPES[DataType.UiShop].identifyingField,
 					dataType: DataType.UiShop,
 					parent: self,
@@ -185,7 +185,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiSeaMap].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.SeaEntry),
+					objects: binary.data[dataDivisions.seaEntry],
 					importantFieldName: FILE_TYPES[DataType.UiSeaMap].identifyingField,
 					dataType: DataType.UiSeaMap,
 					parent: self,
@@ -206,7 +206,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiMenu].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.Menu),
+					objects: binary.data[dataDivisions.menu],
 					importantFieldName: FILE_TYPES[DataType.UiMenu].identifyingField,
 					dataType: DataType.UiMenu,
 					parent: self,
@@ -227,7 +227,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiAnnouncement].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.Announcement),
+					objects: binary.data[dataDivisions.announcement],
 					importantFieldName: FILE_TYPES[DataType.UiAnnouncement].identifyingField,
 					dataType: DataType.UiAnnouncement,
 					parent: self,
@@ -248,7 +248,7 @@
 				component: ElfEditor,
 				properties: {
 					objectTitle: FILE_TYPES[DataType.UiAnnouncementExclude].displayName,
-					objects: binary.data.get(ElfBinary.ObjectType.AnnouncementExclude),
+					objects: binary.data[dataDivisions.announcementExclude],
 					importantFieldName: FILE_TYPES[DataType.UiAnnouncementExclude].identifyingField,
 					dataType: DataType.UiAnnouncementExclude,
 					parent: self,

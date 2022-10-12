@@ -15,7 +15,7 @@ export interface SaveFile {
 	isCompressed: boolean
 }
 
-export async function init() {
+export async function initializeAutosaves() {
 	if (!window.indexedDB) {
 		console.error("Your browser doesn't support a stable version of IndexedDB. Consider updating your browser.")
 	}
@@ -49,7 +49,7 @@ export async function createTemporarySave(windows: SaveFile[][]) {
 	let saveId = latestSave.id
 	console.log(saveId)
 	
-	db.overview.put({ id: 0, timestamp: performance.now(), saveId })
+	db.overview.put({ id: 0, timestamp: Date.now(), saveId })
 }
 
 export async function getLatestSave() {

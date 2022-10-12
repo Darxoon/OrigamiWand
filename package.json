@@ -1,34 +1,38 @@
 {
-  "name": "origamiwand-",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
-    "preview": "svelte-kit preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-static": "^1.0.0-next.28",
-    "@sveltejs/kit": "next",
-    "@tsconfig/svelte": "^3.0.0",
-    "@types/cookie": "^0.4.1",
-    "node-sass": "^7.0.1",
-    "sass": "^1.42.1",
-    "svelte": "^3.34.0",
-    "svelte-check": "^2.2.6",
-    "svelte-preprocess": "^4.9.4",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.5"
-  },
-  "type": "module",
-  "dependencies": {
-    "@lukeed/uuid": "^2.0.0",
-    "cookie": "^0.4.1",
-    "dexie": "^3.0.3",
-    "events": "^3.3.0",
-    "fuzzysort": "^1.2.1",
-    "typesafe-event-emitter": "^1.1.0",
-    "zstd-codec": "^0.1.4"
-  }
+	"name": "origamiwand-",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"package": "svelte-kit package",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^1.0.0-next.38",
+		"@sveltejs/kit": "next",
+		"@tsconfig/svelte": "^3.0.0",
+		"@types/cookie": "^0.4.1",
+		"node-sass": "^7.0.1",
+		"sass": "^1.54.0",
+		"svelte": "^3.49.0",
+		"svelte-check": "^2.8.0",
+		"svelte-preprocess": "^4.10.7",
+		"tslib": "^2.4.0",
+		"typesafe-event-emitter": "^1.1.0",
+		"typescript": "^4.7.4",
+		"vite": "^3.0.3"
+	},
+	"type": "module",
+	"dependencies": {
+		"@types/path-browserify": "^1.0.0",
+		"cookie": "^0.4.1",
+		"dexie": "^3.2.2",
+		"events": "^3.3.0",
+		"fuzzysort": "^1.9.0",
+		"path-browserify": "^1.0.1",
+		"zstd-codec": "^0.1.4"
+	}
 }

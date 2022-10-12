@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { openedMenu } from "./stores";
-import type { MenuStripEntry } from "./types";
-	
+	import type { MenuStripEntry } from "$lib/types";
+	import { openedMenu } from "$lib/stores";
+
 	export let name: string
 	export let items: MenuStripEntry[] = []
 	
