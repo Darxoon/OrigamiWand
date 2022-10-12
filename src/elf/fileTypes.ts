@@ -1726,6 +1726,10 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		field_0x10: "int",
 		field_0x14: "int",
 	},
+	
+	[DataType.DataBtl]: {},
+	
+	
 }
 
 export type Struct<T extends number> = {[p in keyof (typeof typedefs)[T]]: any}
