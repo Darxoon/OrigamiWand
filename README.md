@@ -2,7 +2,7 @@
 
 An advanced Data Editor for Paper Mario: The Origami King
 
---> <https://darxoon.github.io/OrigamiWand/> <--
+--> <https://darxoon.neocities.org/OrigamiWand/> <--
 
 <img width="52%" align="right" src="https://i.imgur.com/XmxVLVD.png" alt="Image of creation made with Origami Wand">
 
