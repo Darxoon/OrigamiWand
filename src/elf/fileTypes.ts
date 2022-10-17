@@ -158,7 +158,7 @@ Previously called 'Collision Flag', but this is not a boolean.`),
 		field_0x30: "string",
 		field_0x38: "int",
 		field_0x3c: "int",
-		field_0x40: "int",
+		field_0x40: "float",
 		field_0x44: "int",
 		field_0x48: "int",
 		field_0x4c: "int",
@@ -810,9 +810,9 @@ The type of the item which determines how it behaves. Possible values:
 * "Collectable" - trophy, collectibleModelId determines displayed mesh (probably misspelling of Collectible)
 `),
 		modelId: "string",
-		field_0x20: "string",
+		textureId: "string",
 		collectibleModelId: "string",
-		field_0x30: new Property("int", `
+		itemGrade: new Property("int", `
 I don't know what this does but this is a pattern that I noticed:
 
 * 0 - everything else
