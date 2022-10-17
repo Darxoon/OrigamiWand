@@ -5,6 +5,7 @@
 	import { showModal } from "$lib/modal/modal";
 	import TextAlert from "$lib/modal/TextAlert.svelte";
 	import { toReadableString } from "$lib/util";
+    import { onMount } from "svelte";
 	
     export let fieldName: string
 	export let dataType: DataType | undefined = undefined
@@ -17,16 +18,21 @@
         })
     }
     
+    onMount(() => {
+        // @ts-ignore
+        feather.replace()
+    })
+    
     $: fieldDescription = FILE_TYPES[dataType].metadata[fieldName]?.description?.trim()
 </script>
 
 <div class="buttons" class:shown={shown}>
     <div class="button description" class:hidden={fieldDescription == undefined} on:click={showDescription}>
-        <i class="fa fa-info-circle"></i>
+        <i data-feather="info"></i>
     </div>
     
     <div class="button options" on:click={e => showFieldOptionEvent.emit('show', { fieldName, dataType })}>
-        <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+        <i data-feather="more-horizontal"></i>
     </div>
 </div>
 
@@ -50,6 +56,13 @@
             transition: color 0.1s;
             
             &:hover { color: #777a80 }
+            
+            :global(svg) {
+                width: 18px;
+                height: 18px;
+                transform: translateY(1px);
+                stroke-width: 3px;
+            }
         }
     }
     

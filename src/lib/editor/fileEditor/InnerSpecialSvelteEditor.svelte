@@ -26,26 +26,29 @@
 	export function applyChangedValue(instance: any) {
 		binary = binary
 	}
+	
+	function addObject() {
+		dispatch('addObject', {
+			obj: FILE_TYPES[dataType].instantiate(),
+		})
+	}
+	
+	function deleteAll() {
+		dispatch('delete', {})
+	}
 </script>
 
 <div class="editor">
 	<div class="toolbar">
-		<div class="card btn addObject" on:click={e => {
-			dispatch('addObject', {
-				obj: FILE_TYPES[dataType].instantiate(),
-			})
-		}}>
-			<img src="/static/x-button.svg" alt="">
-			Add new Object
+		<div class="card btn" on:click={addObject}>
+			<div class="icon" style="margin-top: -1;"><i data-feather="plus"></i></div>
+			<span>Add new Object</span>
 		</div>
-		<div class="card btn deleteAll" on:click={e => {
-			dispatch('delete', {})
-		}}>
-			<img src="/static/x-button.svg" alt="">
+		<div class="card btn" on:click={deleteAll}>
+			<div class="icon"><i data-feather="x"></i></div>
 			Delete all Objects
 		</div>
 		<div class="card search">
-			<i class="fa fa-search" aria-hidden="true"></i>
 			Search Coming Soon...
 		</div>
 	</div>
@@ -131,7 +134,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Models
 			</div>
 		</div>
@@ -152,7 +154,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Messages
 			</div>
 		</div>
@@ -173,7 +174,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Shops
 			</div>
 		</div>
@@ -194,7 +194,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Sea Map
 			</div>
 		</div>
@@ -215,7 +214,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Menus
 			</div>
 		</div>
@@ -236,7 +234,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Announcements
 			</div>
 		</div>
@@ -257,7 +254,6 @@
 			})
 		}}>
 			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
 				Announcement Excludes
 			</div>
 		</div>
@@ -292,23 +288,27 @@
 			margin-right: 0.5rem;
 		}
 		
+		.btn {
+			height: 20px;
+			
+			.icon {
+				float: left;
+				height: 24px;
+				width: 24px;
+				margin: -2px 0 0 0;
+			}
+			
+			span {
+				margin-top: -1px;
+			}
+		}
+		
 		.btn:hover {
 			background: #d2d2d2;
 		}
 		
 		.btn:active, .btn:focus {
 			background: #808080;
-		}
-		
-		img {
-			--size: 16px;
-			
-			pointer-events: none;
-			
-			transform: translateY(2px);
-			
-			height: var(--size);
-			width: var(--size);
 		}
 	}
 	
@@ -350,10 +350,6 @@
 				font-size: 18px;
 			}
 		}
-	}
-	
-	.addObject img {
-		transform: translateY(1.5px) rotateZ(45deg);
 	}
 	
 	.search {

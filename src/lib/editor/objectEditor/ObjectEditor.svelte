@@ -83,8 +83,8 @@
 <div class="card editor" style="--bg-card: {backgroundColor}; --bg-label-highlight: {labelHighlightColor}" bind:this={editor} 
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
-	<div class="title" on:click={() => {open = !open; initialized = true}}>
-		<img src={open ? '/static/up.svg' : '/static/down.svg'} alt="V" class="expander_icon"><span>{title}</span>
+	<div class="title" class:rotated={open} on:click={() => {open = !open; initialized = true}}>
+		<i data-feather="chevron-down"></i><span class="titleLabel">{title}</span>
 		
 		{#if showButtons}
 			<ButtonStrip on:duplicate on:delete></ButtonStrip>
@@ -102,7 +102,7 @@
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 					{toReadableString(field)}
 					
-					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)}></FieldIcons>
+					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)} />
 				</div>
 				
 				<!-- Value Input -->
@@ -126,7 +126,9 @@
 	{#if FILE_TYPES[dataType].childField}
 		<div class="child_container" class:invisible={!open}>
 			<div class="showChildren" on:click={e => childrenOpen = !childrenOpen}>
-				<img src="/static/down.svg" alt="V" class:rotated={childrenOpen}>
+				<div class:rotated={childrenOpen}>
+					<i data-feather="chevron-down"></i>
+				</div>
 				<span>{toReadableString(FILE_TYPES[dataType].childFieldLabel ?? FILE_TYPES[dataType].childField)}</span>
 			</div>
 			{#if childrenOpen}
@@ -150,25 +152,28 @@
 	.editor {
 		margin: 1rem auto;
 		max-width: 56rem;
-		
-		.expander_icon {
-			position: relative;
-			
-			user-select: none;
-			pointer-events: none;
-			
-			height: 1rem;
-			width: 1rem;
-			
-			margin-right: 4px;
-			
-			top: 2px;
-		}
 	}
 	
 	.title {
 		position: relative;
 		user-select: none;
+		height: 20px;
+		
+		:global(svg) {
+			float: left;
+			
+			margin-top: -1px;
+			margin-right: 1px;
+		}
+		
+		&.rotated :global(svg) {
+			transform: rotate(180deg);
+		}
+		
+		.titleLabel {
+			transform: translateY(-1px);
+			display: inline-block;
+		}
 	}
 	
 	.content {
@@ -207,17 +212,19 @@
 			cursor: pointer;
 			user-select: none;
 			
-			img {
-				width: 1em;
-				height: 1em;
-				
-				padding: 0.2em;
-				
-				transition: transform 0.4s;
+			div {
+				width: 29px;
+				height: 29px;
 			}
 			
-			img.rotated {
+			.rotated {
 				transform: rotate(180deg);
+			}
+			
+			:global(svg) {
+				width: 29px;
+				height: 29px;
+				stroke-width: 1.8px;
 			}
 		}
 	}

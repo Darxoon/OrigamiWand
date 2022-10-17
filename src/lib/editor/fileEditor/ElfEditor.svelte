@@ -73,6 +73,9 @@
 	}
 	
 	afterUpdate(() => {
+		// @ts-ignore
+		feather.replace()
+		
 		if (objectToClone) {
 			console.warn('cloning', DataType[dataType], objectToClone.id)
 			let clone = duplicateElfObject(binary, dataType, backupObjects, objectToClone)
@@ -112,24 +115,28 @@
 			obj, 
 			searchResults.filter(result => result.obj == obj).map(result => result.field),
 		]))
+	
+	function addObject() {
+		dispatch('addObject', {
+			obj: FILE_TYPES[dataType].instantiate(),
+		})
+		
+		addingNewObject = true
+	}
+	
+	function deleteAll() {
+		dispatch('delete', {})
+	}
 </script>
 
 <div class="editor">
 	<div class="toolbar">
-		<div class="card btn addObject" on:click={e => {
-			dispatch('addObject', {
-				obj: FILE_TYPES[dataType].instantiate(),
-			})
-			
-			addingNewObject = true
-		}}>
-			<img src="/static/x-button.svg" alt="">
-			Add new Object
+		<div class="card btn" on:click={addObject}>
+			<div class="icon"><i data-feather="plus"></i></div>
+			<span>Add new Object</span>
 		</div>
-		<div class="card btn deleteAll" on:click={e => {
-			dispatch('delete', {})
-		}}>
-			<img src="/static/x-button.svg" alt="">
+		<div class="card btn" on:click={deleteAll}>
+			<div class="icon"><i data-feather="x"></i></div>
 			Delete all Objects
 		</div>
 		<SearchBar index={index} bind:results={searchResults} />
@@ -195,23 +202,28 @@
 			margin-right: 0;
 		}
 		
+		.btn {
+			height: 20px;
+			
+			.icon {
+				float: left;
+				height: 24px;
+				width: 24px;
+				// margin: -2px 0 0 0;
+				margin: -1px 0 0 -5px;
+			}
+			
+			span {
+				margin-top: -1px;
+			}
+		}
+		
 		.btn:hover {
 			background: #d2d2d2;
 		}
 		
 		.btn:active, .btn:focus {
 			background: #808080;
-		}
-		
-		img {
-			--size: 16px;
-			
-			pointer-events: none;
-			
-			transform: translateY(2px);
-			
-			height: var(--size);
-			width: var(--size);
 		}
 	}
 	
@@ -224,9 +236,5 @@
 	
 	.listing {
 		min-height: var(--content-height);
-	}
-	
-	.addObject img {
-		transform: translateY(1.5px) rotateZ(45deg);
 	}
 </style>
