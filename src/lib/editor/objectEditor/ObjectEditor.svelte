@@ -159,14 +159,14 @@
 		user-select: none;
 		height: 20px;
 		
-		:global(svg) {
+		& > :global(svg) {
 			float: left;
 			
 			margin-top: -1px;
 			margin-right: 1px;
 		}
 		
-		&.rotated :global(svg) {
+		&.rotated > :global(svg) {
 			transform: rotate(180deg);
 		}
 		
