@@ -291,7 +291,7 @@ Do you want to close those too?`,
 				
 				<span class="tabName">{tab.name}</span>
 				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation on:click={closeTabPrompt.bind(undefined, tab, i)}>
-					<i data-feather="x"></i>
+					<i data-feather="x" class="icon-close"></i>
 				</div>
 			</li>
 		{/each}
@@ -300,7 +300,7 @@ Do you want to close those too?`,
 			{draggedTab?.name}
 			<!-- decoration only -->
 			<div class="close_button white-x">
-				<i data-feather="x"></i>
+				<i data-feather="x" class="icon-close"></i>
 			</div>
 		</li>
 	</ul>
@@ -318,11 +318,11 @@ Do you want to close those too?`,
 		{/each}
 		
 		<div class="card dockArea dockLeft" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, false)}>
-			<i data-feather="chevron-left"></i>
+			<i data-feather="chevron-left" class="icon-dock"></i>
 		</div>
 		
 		<div class="card dockArea dockRight" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, true)}>
-			<i data-feather="chevron-right"></i>
+			<i data-feather="chevron-right" class="icon-dock"></i>
 		</div>
 	</div>
 	
@@ -413,7 +413,7 @@ Do you want to close those too?`,
 				color: white;
 			}
 			
-			:global(svg) {
+			.icon-close {
 				width: 100%;
 				height: 100%;
 				stroke-width: 2.5px;
@@ -456,7 +456,7 @@ Do you want to close those too?`,
 				pointer-events: none;
 			}
 			
-			:global(svg) {
+			.icon-dock {
 				width: 100%;
 				height: 100%;
 			}

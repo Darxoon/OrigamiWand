@@ -102,7 +102,7 @@
 				}
 			})
 		}}>
-			<i data-feather="external-link"></i>
+			<i data-feather="external-link" class="icon-link"></i>
 			<div style="user-select: none">
 				{name}
 			</div>
@@ -151,12 +151,12 @@
 		margin: 1rem auto;
 		max-width: 56rem;
 		height: 20px;
-	}
-	
-	.link > :global(svg) {
-		float: left;
-		margin-top: -2px;
-		margin-right: 6px;
+		
+		.icon-link {
+			float: left;
+			margin-top: -2px;
+			margin-right: 6px;
+		}
 	}
 	
 	.search {
