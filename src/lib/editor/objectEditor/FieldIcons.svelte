@@ -28,11 +28,11 @@
 
 <div class="buttons" class:shown={shown}>
     <div class="button description" class:hidden={fieldDescription == undefined} on:click={showDescription}>
-        <i data-feather="info"></i>
+        <i data-feather="info" class="icon-field"></i>
     </div>
     
     <div class="button options" on:click={e => showFieldOptionEvent.emit('show', { fieldName, dataType })}>
-        <i data-feather="more-horizontal"></i>
+        <i data-feather="more-horizontal" class="icon-field"></i>
     </div>
 </div>
 
@@ -57,7 +57,7 @@
             
             &:hover { color: #777a80 }
             
-            :global(svg) {
+            .icon-field {
                 width: 18px;
                 height: 18px;
                 transform: translateY(1px);

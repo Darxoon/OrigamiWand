@@ -84,7 +84,7 @@
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
 	<div class="title" class:rotated={open} on:click={() => {open = !open; initialized = true}}>
-		<i data-feather="chevron-down"></i><span class="titleLabel">{title}</span>
+		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{title}</span>
 		
 		{#if showButtons}
 			<ButtonStrip on:duplicate on:delete></ButtonStrip>
@@ -127,7 +127,7 @@
 		<div class="child_container" class:invisible={!open}>
 			<div class="showChildren" on:click={e => childrenOpen = !childrenOpen}>
 				<div class:rotated={childrenOpen}>
-					<i data-feather="chevron-down"></i>
+					<i data-feather="chevron-down" class="icon-children-arrow"></i>
 				</div>
 				<span>{toReadableString(FILE_TYPES[dataType].childFieldLabel ?? FILE_TYPES[dataType].childField)}</span>
 			</div>
@@ -159,14 +159,14 @@
 		user-select: none;
 		height: 20px;
 		
-		:global(svg) {
+		.icon-arrow {
 			float: left;
 			
 			margin-top: -1px;
 			margin-right: 1px;
 		}
 		
-		&.rotated :global(svg) {
+		&.rotated .icon-arrow {
 			transform: rotate(180deg);
 		}
 		
@@ -221,7 +221,7 @@
 				transform: rotate(180deg);
 			}
 			
-			:global(svg) {
+			.icon-children-arrow {
 				width: 29px;
 				height: 29px;
 				stroke-width: 1.8px;
