@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { dataDivisions, DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import ElfEditor from "./ElfEditor.svelte";
 
 	const dispatch = createEventDispatcher()
@@ -24,6 +24,11 @@
 	export function applyChangedValue(instance: any) {
 		binary = binary
 	}
+	
+	onMount(() => {
+		// @ts-ignore
+		feather.replace()
+	})
 	
 	function addObject() {
 		dispatch('addObject', {
@@ -97,7 +102,8 @@
 				}
 			})
 		}}>
-			<div style="dislay: flex; user-select: none">
+			<i data-feather="external-link"></i>
+			<div style="user-select: none">
 				{name}
 			</div>
 		</div>
@@ -144,6 +150,13 @@
 	.link {
 		margin: 1rem auto;
 		max-width: 56rem;
+		height: 20px;
+	}
+	
+	.link > :global(svg) {
+		float: left;
+		margin-top: -2px;
+		margin-right: 6px;
 	}
 	
 	.search {
