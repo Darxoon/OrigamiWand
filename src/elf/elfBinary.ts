@@ -50,6 +50,13 @@ export const dataDivisions = {
 	menu: "menu",
 	announcement: "announcement",
 	announcementExclude: "announcementExclude",
+	
+	part: "part",
+	unit: "unit",
+	attackRangeHeader: "attackRangeHeader",
+	attackRange: "attackRange",
+	attack: "attack",
+	eventCamera: "eventCamera",
 }
 
 export namespace ElfBinary {

@@ -613,6 +613,62 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			break
 		}
 		
+		case DataType.DataBtl: {
+			const dataSection = findSection('.data')
+			const stringSection = findSection('.rodata.str1.1')
+			const rodataSection = findSection('.rodata')
+			
+			data = {}
+			
+			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
+			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel)
+			data[dataDivisions.model] = models
+			
+			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
+			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart)
+			data[dataDivisions.part] = parts
+			
+			let unitSymbol = findSymbol("wld::btl::data::s_unitData")
+			let units = parseSymbol(dataSection, stringSection, unitSymbol, DataType.BtlUnit)
+			data[dataDivisions.unit] = units
+			
+			// attack range
+			let attackRangeHeaderSymbol = findSymbol("wld::btl::data::s_weaponRangeDataTable")
+			let attackRangeHeader = parseSymbol(dataSection, stringSection, attackRangeHeaderSymbol, DataType.BtlAttackRangeHeader)
+			data[dataDivisions.attackRangeHeader] = attackRangeHeader
+			
+			let attackRanges = []
+			
+			for (const headerNode of attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
+				let [ item ] = applyStrings(
+					headerNode.weaponRange, DataType.BtlAttackRange, stringSection, 
+					allRelocations.get('.data'), 
+					
+					parseRawDataSection(dataSection, 1, headerNode.weaponRange, FILE_TYPES[DataType.BtlAttackRange].typedef), 
+				)
+				
+				let attackRange = {
+					symbolName: `wld::btl::data::s_weaponRangeData_${headerNode.id}`,
+					item,
+				}
+				
+				attackRanges.push(attackRange)
+				headerNode.weaponRange = attackRange
+			}
+			
+			data[dataDivisions.attackRange] = attackRanges
+			
+			let weaponSymbol = findSymbol("wld::btl::data::s_weaponData")
+			let weapons = parseSymbol(dataSection, stringSection, weaponSymbol, DataType.BtlAttack)
+			data[dataDivisions.attack] = weapons
+			
+			let eventCameraSymbol = findSymbol("wld::btl::data::s_eventCameraData")
+			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera)
+			data[dataDivisions.eventCamera] = eventCameras
+			
+			break
+		}
+		
 		// parse .data section by data type
 		default: {
 			const dataSection = findSection('.data')
@@ -639,6 +695,16 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	return new ElfBinary(sections, data, symbolTable, modelSymbolReference)
 	
+	
+	function parseSymbol(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: DataType, count?: number) {
+		count = count ?? symbol.size / FILE_TYPES[dataType].size
+		
+		return applyStrings(
+			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), 
+			
+			parseRawDataSection(containingSection, count, symbol.location, FILE_TYPES[dataType].typedef),
+		)
+	}
 	
 	
 	function applyStrings(baseOffsetPointer: Pointer, dataType: DataType, stringSection: Section, relocationTable: Map<number, Relocation>, objects: object[]) {
