@@ -57,6 +57,13 @@ export const dataDivisions = {
 	attackRange: "attackRange",
 	attack: "attack",
 	eventCamera: "eventCamera",
+	bossAttack: "bossAttack",
+	puzzleLevel: "puzzleLevel",
+	cheerTerm: "cheerTerm",
+	cheer: "cheer",
+	resourceField: "resourceField",
+	resource: "resource",
+	config: "config",
 }
 
 export namespace ElfBinary {

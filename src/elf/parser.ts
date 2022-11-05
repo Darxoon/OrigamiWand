@@ -279,6 +279,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			// this file type doesn't contain any standalone information. everything is clearly marked
 			// by symbols. Examples include s_setElementData_W0C1_CG_KUR_01.
 			
+			// update: it does? wld::btl::data::s_setDataTable
+			// wow. I def. have to remake this parser. it is awful
+			// and the editor too
 			
 			let symbolOffsets: {[symbolName: string]: {offset: Pointer, size: number}} = {}
 			let childSymbols: string[] = []
@@ -508,6 +511,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			
 			// automated parsing
+			// this is awful
+			// TODO: undo this
 			for (const [dataDivision, entryPoint] of Object.entries(FILE_TYPES[dataType].entryPoints)) {
 				let symbol = findSymbol(entryPoint.symbol)
 				let count = entryPoint.count ?? symbol.size / FILE_TYPES[entryPoint.dataType].size
@@ -665,6 +670,53 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let eventCameraSymbol = findSymbol("wld::btl::data::s_eventCameraData")
 			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera)
 			data[dataDivisions.eventCamera] = eventCameras
+			
+			let bossAttackSymbol = findSymbol("wld::btl::data::s_godHandData")
+			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack)
+			data[dataDivisions.bossAttack] = bossAttacks
+			
+			let puzzleLevelSymbol = findSymbol("wld::btl::data::s_puzzleLevelData")
+			let puzzleLevels = parseSymbol(dataSection, stringSection, puzzleLevelSymbol, DataType.BtlPuzzleLevel)
+			data[dataDivisions.puzzleLevel] = puzzleLevels
+			
+			let cheerTermsSymbol = findSymbol("wld::btl::data::s_cheerTermsData")
+			let cheerTerms = parseSymbol(dataSection, stringSection, cheerTermsSymbol, DataType.BtlCheerTerms)
+			data[dataDivisions.cheerTerm] = cheerTerms
+			
+			let cheerSymbol = findSymbol("wld::btl::data::s_cheerData")
+			let cheers = parseSymbol(dataSection, stringSection, cheerSymbol, DataType.BtlCheer)
+			data[dataDivisions.cheer] = cheers
+			
+			// resources
+			let resourceFieldSymbol = findSymbol("wld::btl::data::s_resourceData")
+			let resourceFields = parseSymbol(dataSection, stringSection, resourceFieldSymbol, DataType.BtlResourceField)
+			data[dataDivisions.resourceField] = resourceFields
+			
+			let allResources = []
+			
+			for (const resourceField of resourceFields as Struct<DataType.BtlResourceField>[]) {
+				let resources = applyStrings(
+					resourceField.resources, DataType.BtlResource, stringSection, 
+					allRelocations.get('.data'), 
+					
+					parseRawDataSection(dataSection, resourceField.resourceCount, resourceField.resources,
+						FILE_TYPES[DataType.BtlResource].typedef), 
+				)
+				
+				let resourcesObj = {
+					symbolName: `wld::btl::data::s_weaponRangeData_${resourceField.id}`,
+					resources,
+				}
+				
+				allResources.push(resourcesObj)
+				resourceField.resources = resourcesObj
+			}
+			
+			data[dataDivisions.resource] = allResources
+			
+			let configSymbol = findSymbol("wld::btl::data::s_configData")
+			let configs = parseSymbol(dataSection, stringSection, configSymbol, DataType.BtlConfig)
+			data[dataDivisions.config] = configs
 			
 			break
 		}
