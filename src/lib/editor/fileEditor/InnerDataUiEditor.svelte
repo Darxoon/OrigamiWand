@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { dataDivisions, DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { createEventDispatcher, onMount } from "svelte";
+    import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";
 	import ElfEditor from "./ElfEditor.svelte";
 
 	const dispatch = createEventDispatcher()
@@ -40,36 +41,7 @@
 		dispatch('delete', {})
 	}
 	
-	let items = Object.entries({
-		"Models": {
-			dataType: DataType.UiModel,
-			dataDivision: dataDivisions.model,
-		},
-		"Messages": {
-			dataType: DataType.UiMsg,
-			dataDivision: dataDivisions.msg,
-		},
-		"Shops": {
-			dataType: DataType.UiShop,
-			dataDivision: dataDivisions.shop,
-		},
-		"Sea Map": {
-			dataType: DataType.UiSeaMap,
-			dataDivision: dataDivisions.seaEntry,
-		},
-		"Menus": {
-			dataType: DataType.UiMenu,
-			dataDivision: dataDivisions.menu,
-		},
-		"Announcements": {
-			dataType: DataType.UiAnnouncement,
-			dataDivision: dataDivisions.announcement,
-		},
-		"Announcement Excludes": {
-			dataType: DataType.UiAnnouncementExclude,
-			dataDivision: dataDivisions.announcementExclude,
-		},
-	})
+	$: items = Object.entries(dataTypeExtensions(DataTypeExtension.ComplexEditorCategory, dataType))
 </script>
 
 <div class="editor">

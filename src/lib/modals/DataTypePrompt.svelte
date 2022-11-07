@@ -55,6 +55,7 @@
 		"data_mapLinkZoom": DataType.DataMaplinkZoom,
 		"data_party": DataType.DataParty,
 		"data_ui": DataType.DataUi,
+		"data_btl": DataType.DataBtl,
 	}
 	
 	onMount(() => {
@@ -129,6 +130,7 @@
 		<option value="DataMaplinkZoom">data_mapLinkZoom</option>
 		<option value="DataParty">Party Member Registry (data_party)</option>
 		<option value="DataUi">User Interface Registry (data_ui)</option>
+		<option value="DataBtl">Diverse Battle Registry (data_btl)</option>
 	</select>
 	
 	<div class="checkbox" style="margin-top: 0.3rem;">
