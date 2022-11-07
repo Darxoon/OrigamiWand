@@ -626,6 +626,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			
 			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
+			// TODO: generalize first 2 arguments into class SectionSource
 			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel)
 			data[dataDivisions.model] = models
 			
@@ -695,13 +696,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let allResources = []
 			
 			for (const resourceField of resourceFields as Struct<DataType.BtlResourceField>[]) {
-				let resources = applyStrings(
-					resourceField.resources, DataType.BtlResource, stringSection, 
-					allRelocations.get('.data'), 
-					
-					parseRawDataSection(dataSection, resourceField.resourceCount, resourceField.resources,
-						FILE_TYPES[DataType.BtlResource].typedef), 
-				)
+				if (resourceField.resources == undefined)
+					continue
+				
+				let resourceSymbol = findSymbol(resourceField.resources)
+				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceField.resourceCount)
 				
 				let resourcesObj = {
 					symbolName: `wld::btl::data::s_weaponRangeData_${resourceField.id}`,
