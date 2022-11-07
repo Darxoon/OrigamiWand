@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import ElfEditor from "../fileEditor/ElfEditor.svelte";
 
 	const dispatch = createEventDispatcher()
@@ -12,28 +12,42 @@
 	export let label: string
 	export let objectId: string
 	export let tabTitle: string
-	export let targetObjects: object[]
+	export let targetObjects: any[] | {symbolName: string, children: any[]}
 	export let binary: ElfBinary = undefined
 	
-	
-</script>
-
-<input type="text" value={label} readonly on:click={e => {
-	let title = tabTitle.replaceAll('{id}', objectId).replaceAll('{type}', FILE_TYPES[sourceDataType].displayName)
-	dispatch("open", {
-		type: "window",
-		title,
-		shortTitle: title.replaceAll(/\[.+?\]/g, ""),
-		component: ElfEditor,
-		properties: {
-			objectTitle: FILE_TYPES[targetDataType].displayName,
-			objects: targetObjects,
-			importantFieldName: FILE_TYPES[targetDataType].identifyingField,
-			dataType: targetDataType,
-			binary,
+	onMount(() => {
+		if (tabTitle == undefined) {
+			console.error(`Missing tabTitle metadata on link to ${DataType[targetDataType]} from ${DataType[sourceDataType]}`)
 		}
 	})
-}} />
+	
+	function click() {
+		let title = tabTitle.replaceAll('{id}', objectId).replaceAll('{type}', FILE_TYPES[sourceDataType].displayName)
+		let objects: any[]
+		
+		if (!(targetObjects instanceof Array) && "children" in targetObjects) {
+			objects = (targetObjects as any).children
+		} else {
+			objects = targetObjects
+		}
+		
+		dispatch("open", {
+			type: "window",
+			title,
+			shortTitle: title.replaceAll(/\[.+?\]/g, ""),
+			component: ElfEditor,
+			properties: {
+				objectTitle: FILE_TYPES[targetDataType].displayName,
+				objects: objects,
+				importantFieldName: FILE_TYPES[targetDataType].identifyingField,
+				dataType: targetDataType,
+				binary,
+			}
+		})
+	}
+</script>
+
+<input type="text" value={label} readonly on:click={click} />
 
 <style lang="scss">
 	input {

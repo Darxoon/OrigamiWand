@@ -1741,6 +1741,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	},
 	
 	[DataType.BtlPart]: {
+		__displayName: "Part",
+		
 		id: "string",
 		field_0x8: new Property("string", `
 I am sure that I marked too many fields as strings.
@@ -1815,6 +1817,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlUnit]: {
+		__displayName: "Unit",
+		
 		id: "string",
 		field_0x8: "string",
 		field_0x10: "string",
@@ -1914,11 +1918,18 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlAttackRangeHeader]: {
+		__displayName: "Attack Range Header",
+		__childTypes: {
+			attackRange: DataType.BtlAttackRange,
+		},
+		
 		id: "string",
-		weaponRange: "pointer",
+		attackRange: new Property("pointer", undefined, {tabName: "Attack Range of {id}"}),
 	},
 	
 	[DataType.BtlAttackRange]: {
+		__displayName: "Attack Range",
+		
 		field_0x0: "string",
 		field_0x8: "int",
 		field_0xc: "int",
@@ -1952,6 +1963,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlAttack]: {
+		__displayName: "Attack",
+		
 		id: "string",
 		field_0x8: "string",
 		commonVariant: "string",
@@ -2011,6 +2024,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlEventCamera]: {
+		__displayName: "Event Camera",
+		
 		id: "string",
 		field_0x8: "int",
 		field_0xc: "float",
@@ -2043,6 +2058,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlBossAttack]: {
+		__displayName: "Boss Attack",
+		
 		id: "string",
 		field_0x8: "int",
 		field_0xc: "int",
@@ -2064,6 +2081,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlPuzzleLevel]: {
+		__displayName: "Puzzle Level",
+		
 		id: "int",
 		field_0x4: "int",
 		field_0x8: "string",
@@ -2074,6 +2093,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlCheerTerms]: {
+		__displayName: "Cheer Term",
+		
 		id: "string",
 		field_0x8: "string",
 		field_0x10: "string",
@@ -2205,6 +2226,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlCheer]: {
+		__displayName: "Cheer",
+		
 		id: "string",
 		field_0x8: "string",
 		field_0x10: "string",
@@ -2293,14 +2316,20 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlResourceField]: {
+		__displayName: "Resource Field",
+		__childTypes: {
+			"resources": DataType.BtlResource,
+		},
+		
 		id: "string",
 		description: "string",
-		resources: "symbol",
-		resourceCount: "int",
+		resources: new Property("symbol", undefined, {tabName: "Resources of {id}"}),
+		resourceCount: new Property("int", undefined, {hidden: true}),
 		field_0x1c: "int",
 	},
 	
 	[DataType.BtlResource]: {
+		__displayName: "Resource",
 		__importantField: "assetName",
 		
 		field_0x0: "int",
@@ -2310,6 +2339,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlConfig]: {
+		__displayName: "Setting",
+		
 		id: "string",
 		value: "float",
 		field_0xc: "int",
