@@ -1732,6 +1732,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	[DataType.BtlModel]: {
 		__displayName: "Battle Model",
 		__countSymbol: "wld::btl::data::modelBattle_num",
+		__objectType: dataDivisions.model,
 		__childTypes: {
 			assetGroups: DataType.NpcFiles,
 			states: DataType.NpcState,
@@ -1742,6 +1743,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.BtlPart]: {
 		__displayName: "Part",
+		__objectType: dataDivisions.part,
 		
 		id: "string",
 		field_0x8: new Property("string", `
@@ -1818,6 +1820,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlUnit]: {
 		__displayName: "Unit",
+		__objectType: dataDivisions.unit,
 		
 		id: "string",
 		field_0x8: "string",
@@ -1919,6 +1922,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlAttackRangeHeader]: {
 		__displayName: "Attack Range Header",
+		__objectType: dataDivisions.attackRangeHeader,
 		__childTypes: {
 			attackRange: DataType.BtlAttackRange,
 		},
@@ -1929,6 +1933,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlAttackRange]: {
 		__displayName: "Attack Range",
+		__objectType: dataDivisions.attackRange,
 		
 		field_0x0: "string",
 		field_0x8: "int",
@@ -1964,6 +1969,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlAttack]: {
 		__displayName: "Attack",
+		__objectType: dataDivisions.attack,
 		
 		id: "string",
 		field_0x8: "string",
@@ -2025,6 +2031,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlEventCamera]: {
 		__displayName: "Event Camera",
+		__objectType: dataDivisions.eventCamera,
 		
 		id: "string",
 		field_0x8: "int",
@@ -2059,6 +2066,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlBossAttack]: {
 		__displayName: "Boss Attack",
+		__objectType: dataDivisions.bossAttack,
 		
 		id: "string",
 		field_0x8: "int",
@@ -2082,6 +2090,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlPuzzleLevel]: {
 		__displayName: "Puzzle Level",
+		__objectType: dataDivisions.puzzleLevel,
 		
 		id: "int",
 		field_0x4: "int",
@@ -2094,6 +2103,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlCheerTerms]: {
 		__displayName: "Cheer Term",
+		__objectType: dataDivisions.cheerTerm,
 		
 		id: "string",
 		field_0x8: "string",
@@ -2227,6 +2237,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlCheer]: {
 		__displayName: "Cheer",
+		__objectType: dataDivisions.cheer,
 		
 		id: "string",
 		field_0x8: "string",
@@ -2317,6 +2328,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlResourceField]: {
 		__displayName: "Resource Field",
+		__objectType: dataDivisions.resourceField,
 		__childTypes: {
 			"resources": DataType.BtlResource,
 		},
@@ -2331,6 +2343,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	[DataType.BtlResource]: {
 		__displayName: "Resource",
 		__importantField: "assetName",
+		__objectType: dataDivisions.resource,
 		
 		field_0x0: "int",
 		field_0x4: "int",
@@ -2340,6 +2353,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	
 	[DataType.BtlConfig]: {
 		__displayName: "Setting",
+		__objectType: dataDivisions.config,
 		
 		id: "string",
 		value: "float",

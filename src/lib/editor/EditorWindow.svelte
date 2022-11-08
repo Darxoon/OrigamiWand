@@ -290,7 +290,7 @@ Do you want to close those too?`,
 				>
 				
 				<span class="tabName">{tab.name}</span>
-				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation on:click={closeTabPrompt.bind(undefined, tab, i)}>
+				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation on:click={() => closeTabPrompt(tab, i)}>
 					<i data-feather="x" class="icon-close"></i>
 				</div>
 			</li>

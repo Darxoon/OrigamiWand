@@ -92,9 +92,14 @@
 				on:removeEditor={e => {
 					if (tabs.length > 1) {
 						editorWindows[i].setActive()
+						
 						let newTabs = [...tabs]
 						newTabs.splice(i, 1)
-						tabs = newTabs
+						
+						tabs = []
+						afterUpdateHandlers.push(() => {
+							tabs = newTabs
+						})
 					} else {
 						editorWindows[0]?.setActive()
 					}
