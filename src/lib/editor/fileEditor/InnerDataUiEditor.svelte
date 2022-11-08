@@ -31,34 +31,10 @@
 		feather.replace()
 	})
 	
-	function addObject() {
-		dispatch('addObject', {
-			obj: FILE_TYPES[dataType].instantiate(),
-		})
-	}
-	
-	function deleteAll() {
-		dispatch('delete', {})
-	}
-	
 	$: items = Object.entries(dataTypeExtensions(DataTypeExtension.ComplexEditorCategory, dataType))
 </script>
 
 <div class="editor">
-	<div class="toolbar">
-		<div class="card btn" on:click={addObject}>
-			<div class="icon" style="margin-top: -1;"><i data-feather="plus"></i></div>
-			<span>Add new Object</span>
-		</div>
-		<div class="card btn" on:click={deleteAll}>
-			<div class="icon"><i data-feather="x"></i></div>
-			Delete all Objects
-		</div>
-		<div class="card search">
-			Search Coming Soon...
-		</div>
-	</div>
-	
 	{#each items as [name, {dataType, dataDivision}]}
 		<div class="card link" on:click={e => {
 			dispatch("open", {
@@ -84,42 +60,6 @@
 </div>
 
 <style lang="scss">
-	.toolbar {
-		margin: 1rem auto 2rem auto;
-		max-width: 54rem;
-		
-		display: flex;
-		
-		user-select: none;
-				
-		div {
-			margin-right: 0.5rem;
-		}
-		
-		.btn {
-			height: 20px;
-			
-			.icon {
-				float: left;
-				height: 24px;
-				width: 24px;
-				margin: -2px 0 0 0;
-			}
-			
-			span {
-				margin-top: -1px;
-			}
-		}
-		
-		.btn:hover {
-			background: #d2d2d2;
-		}
-		
-		.btn:active, .btn:focus {
-			background: #808080;
-		}
-	}
-	
 	.link {
 		margin: 1rem auto;
 		max-width: 56rem;
@@ -130,10 +70,5 @@
 			margin-top: -2px;
 			margin-right: 6px;
 		}
-	}
-	
-	.search {
-		flex: 1;
-		cursor: not-allowed;
 	}
 </style>

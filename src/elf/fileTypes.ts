@@ -1535,6 +1535,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 	
 	[DataType.UiModel]: {
 		__displayName: "Model",
+		__objectType: dataDivisions.model,
 		__childTypes: {
 			properties: DataType.UiModelProperty,
 		},
@@ -1567,6 +1568,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiMsg]: {
 		__displayName: "Message",
+		__objectType: dataDivisions.msg,
 		
 		id: "string",
 		modelAsset: "string",
@@ -1596,6 +1598,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiShop]: {
 		__displayName: "Shop",
+		__objectType: dataDivisions.shop,
 		__childTypes: {
 			soldItems: DataType.UiSellItem,
 		},
@@ -1608,6 +1611,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiSellItem]: {
 		__displayName: "Sold Item",
+		__objectType: dataDivisions.sellItem,
 		
 		id: "string",
 		itemGiven: "string",
@@ -1634,6 +1638,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiSeaMap]: {
 		__displayName: "Map Entry",
+		__objectType: dataDivisions.seaEntry,
 		
 		id: "string",
 		group: "string",
@@ -1651,6 +1656,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiMenu]: {
 		__displayName: "Menu",
+		__objectType: dataDivisions.menu,
 		
 		stage: "string",
 		id: "string",
@@ -1705,6 +1711,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiAnnouncement]: {
 		__displayName: "Announcement",
+		__objectType: dataDivisions.announcement,
 		
 		number: "int",
 		field_0x4: "int",
@@ -1719,6 +1726,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	
 	[DataType.UiAnnouncementExclude]: {
 		__displayName: "Announcement Exclude",
+		__objectType: dataDivisions.announcementExclude,
 		
 		id: "string",
 		field_0x8: "int",
