@@ -85,9 +85,9 @@
 </script>
 
 <div class="editors">
-	{#each tabs as tabList, i}
+	{#each tabs as tabList, i (tabList)}
 		<div on:mousedown|capture={e => activeEditor = i}>
-			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}
+			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0} debugIndex={i}
 				bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
 				on:removeEditor={e => {
 					if (tabs.length > 1) {
@@ -96,10 +96,7 @@
 						let newTabs = [...tabs]
 						newTabs.splice(i, 1)
 						
-						tabs = []
-						afterUpdateHandlers.push(() => {
-							tabs = newTabs
-						})
+						tabs = newTabs
 					} else {
 						editorWindows[0]?.setActive()
 					}

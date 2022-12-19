@@ -1,15 +1,9 @@
 <script lang="ts">
-	import { DataType } from "paper-mario-elfs/elfBinary";
-
-	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-
-	import { showFieldOptionEvent } from "$lib/util/events";
-	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
 	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";
 	import { loadedAutosave } from "$lib/stores";
 	
-	import { insertIntoArrayPure, resizeArray, toReadableString } from "$lib/util";
+	import { insertIntoArrayPure, resizeArray } from "$lib/util";
 	
 	import { createEventDispatcher, onMount } from "svelte";
 	import { globalDragEndEvent, globalDraggedTab, wasDraggingGlobally, type Tab } from "./globalDragging";
@@ -18,6 +12,7 @@
 	export let selectedIndex: number = 0
 	export let isActive = true
 	export let showBugReporter: boolean = false
+	export let debugIndex: number = -1
 	
 	const dispatch = createEventDispatcher()
 	
@@ -32,8 +27,6 @@
 	let draggingVertically = false
 	let mouseOutside = false
 	let startedDragging = false
-	
-	$: isActive
 	
 	let tabBar: HTMLUListElement
 	let tabElements: HTMLLIElement[] = []
@@ -116,26 +109,7 @@
 	}
 	
 	onMount(() => {
-		showFieldOptionEvent.on('show', ({ fieldName, dataType }) => {
-			if (isActive) {
-				console.log('tabs', DataType[dataType], selectedIndex, tabs)
-				console.log('tabs[selectedIndex]', tabs[selectedIndex])
-				
-				const { binary } = tabs[selectedIndex].properties
-				
-				const objects = binary.data[FILE_TYPES[dataType].objectType]
-				
-				showModal(FieldOptionAlert, {
-					title: `Field '${toReadableString(fieldName)}'`,
-					fieldName,
-					
-					dataType,
-					binary,
-					objects,
-				})
-			}
-		})
-		
+		// TODO: organize better
 		document.addEventListener('mousedown', e => {
 			if (draggedTab == undefined) {
 				startedDragging = false

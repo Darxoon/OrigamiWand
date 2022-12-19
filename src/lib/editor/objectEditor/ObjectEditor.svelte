@@ -10,6 +10,8 @@
 	import { hexFields } from "./viewAsHex";
 	import ButtonStrip from './ButtonStrip.svelte';
 	import FieldIcons from './FieldIcons.svelte';
+    import { showModal } from "$lib/modal/modal";
+    import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	
 	const dispatch = createEventDispatcher()
 
@@ -69,6 +71,19 @@
 				?.getBoundingClientRect()?.y || entryLabelElements.length - 1 <= i);
 	}
 	
+	function showFieldMenu(dataType, fieldName) {
+		const objects = binary.data[FILE_TYPES[dataType].objectType]
+		
+		showModal(FieldOptionAlert, {
+			title: `Field '${toReadableString(fieldName)}'`,
+			fieldName,
+			
+			dataType,
+			binary,
+			objects,
+		})
+	}
+	
 	let hasEnteredViewport = false
 	
 	let childrenOpen = false
@@ -102,7 +117,8 @@
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 					{toReadableString(field)}
 					
-					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)} />
+					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)} 
+						on:showMenu={e => showFieldMenu(dataType, field)} />
 				</div>
 				
 				<!-- Value Input -->

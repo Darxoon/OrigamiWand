@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { DataType } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-	import { showFieldOptionEvent } from "$lib/util/events";
 	import { showModal } from "$lib/modal/modal";
 	import TextAlert from "$lib/modal/TextAlert.svelte";
 	import { toReadableString } from "$lib/util";
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
 	
+    const dispatch = createEventDispatcher()
+    
     export let fieldName: string
 	export let dataType: DataType | undefined = undefined
     export let shown: boolean
@@ -31,7 +32,7 @@
         <i data-feather="info" class="icon-field"></i>
     </div>
     
-    <div class="button options" on:click={e => showFieldOptionEvent.emit('show', { fieldName, dataType })}>
+    <div class="button options" on:click={e => dispatch('showMenu', { fieldName, dataType })}>
         <i data-feather="more-horizontal" class="icon-field"></i>
     </div>
 </div>
