@@ -628,20 +628,20 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
 			// TODO: generalize first 2 arguments into class SectionSource
 			// TODO: optional count argument == -1 <=> trim last object
-			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel)
+			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel, -1)
 			data[dataDivisions.model] = models
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
-			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart)
+			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
 			data[dataDivisions.part] = parts
 			
 			let unitSymbol = findSymbol("wld::btl::data::s_unitData")
-			let units = parseSymbol(dataSection, stringSection, unitSymbol, DataType.BtlUnit)
+			let units = parseSymbol(dataSection, stringSection, unitSymbol, DataType.BtlUnit, -1)
 			data[dataDivisions.unit] = units
 			
 			// attack range
 			let attackRangeHeaderSymbol = findSymbol("wld::btl::data::s_weaponRangeDataTable")
-			let attackRangeHeader = parseSymbol(dataSection, stringSection, attackRangeHeaderSymbol, DataType.BtlAttackRangeHeader)
+			let attackRangeHeader = parseSymbol(dataSection, stringSection, attackRangeHeaderSymbol, DataType.BtlAttackRangeHeader, -1)
 			data[dataDivisions.attackRangeHeader] = attackRangeHeader
 			
 			let attackRanges = []
@@ -666,32 +666,32 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data[dataDivisions.attackRange] = attackRanges
 			
 			let weaponSymbol = findSymbol("wld::btl::data::s_weaponData")
-			let weapons = parseSymbol(dataSection, stringSection, weaponSymbol, DataType.BtlAttack)
+			let weapons = parseSymbol(dataSection, stringSection, weaponSymbol, DataType.BtlAttack, -1)
 			data[dataDivisions.attack] = weapons
 			
 			let eventCameraSymbol = findSymbol("wld::btl::data::s_eventCameraData")
-			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera)
+			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera, -1)
 			data[dataDivisions.eventCamera] = eventCameras
 			
 			let bossAttackSymbol = findSymbol("wld::btl::data::s_godHandData")
-			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack)
+			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack, -1)
 			data[dataDivisions.bossAttack] = bossAttacks
 			
 			let puzzleLevelSymbol = findSymbol("wld::btl::data::s_puzzleLevelData")
-			let puzzleLevels = parseSymbol(dataSection, stringSection, puzzleLevelSymbol, DataType.BtlPuzzleLevel)
+			let puzzleLevels = parseSymbol(dataSection, stringSection, puzzleLevelSymbol, DataType.BtlPuzzleLevel, -1)
 			data[dataDivisions.puzzleLevel] = puzzleLevels
 			
 			let cheerTermsSymbol = findSymbol("wld::btl::data::s_cheerTermsData")
-			let cheerTerms = parseSymbol(dataSection, stringSection, cheerTermsSymbol, DataType.BtlCheerTerms)
+			let cheerTerms = parseSymbol(dataSection, stringSection, cheerTermsSymbol, DataType.BtlCheerTerms, -1)
 			data[dataDivisions.cheerTerm] = cheerTerms
 			
 			let cheerSymbol = findSymbol("wld::btl::data::s_cheerData")
-			let cheers = parseSymbol(dataSection, stringSection, cheerSymbol, DataType.BtlCheer)
+			let cheers = parseSymbol(dataSection, stringSection, cheerSymbol, DataType.BtlCheer, -1)
 			data[dataDivisions.cheer] = cheers
 			
 			// resources
 			let resourceFieldSymbol = findSymbol("wld::btl::data::s_resourceData")
-			let resourceFields = parseSymbol(dataSection, stringSection, resourceFieldSymbol, DataType.BtlResourceField)
+			let resourceFields = parseSymbol(dataSection, stringSection, resourceFieldSymbol, DataType.BtlResourceField, -1)
 			data[dataDivisions.resourceField] = resourceFields
 			
 			let allResources = []
@@ -715,7 +715,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data[dataDivisions.resource] = allResources
 			
 			let configSymbol = findSymbol("wld::btl::data::s_configData")
-			let configs = parseSymbol(dataSection, stringSection, configSymbol, DataType.BtlConfig)
+			let configs = parseSymbol(dataSection, stringSection, configSymbol, DataType.BtlConfig, -1)
 			data[dataDivisions.config] = configs
 			
 			break
@@ -749,7 +749,15 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	
 	function parseSymbol(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: DataType, count?: number) {
-		count = count ?? symbol.size / FILE_TYPES[dataType].size
+		// if count is smaller than zero, calculate size like normal and subtract negative value from it
+		let subtract = 0
+		
+		if (count < 0) {
+			subtract = Math.abs(count)
+			count = undefined
+		}
+		
+		count = count ?? symbol.size / FILE_TYPES[dataType].size - subtract
 		
 		return applyStrings(
 			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), 
