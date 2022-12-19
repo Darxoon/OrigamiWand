@@ -84,6 +84,17 @@
 		})
 	}
 	
+	function length(arrayOrObj) {
+		if (arrayOrObj instanceof Array)
+			return arrayOrObj.length
+		else if ("children" in arrayOrObj)
+			return arrayOrObj.children.length
+		else {
+			console.error(new Error(`Argument is not an array, ${arrayOrObj}`))
+			return NaN
+		}
+	}
+	
 	let hasEnteredViewport = false
 	
 	let childrenOpen = false
@@ -124,7 +135,7 @@
 				<!-- Value Input -->
 				<div class="value">
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
-						<CrossObjectLink label={`Click to open (${value.length} item${value.length > 1 ? 's' : ''})`} binary={binary}
+						<CrossObjectLink label={`Click to open (${length(value)} item${length(value) < 2 ? '' : 's'})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
 								sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
 					{:else}
