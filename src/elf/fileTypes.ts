@@ -1929,19 +1929,21 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlAttackRangeHeader]: {
-		__displayName: "Attack Range Header",
+		__displayName: "Attack Range",
 		__objectType: dataDivisions.attackRangeHeader,
+		__childField: "attackRange",
+		__childFieldLabel: "content",
 		__childTypes: {
 			attackRange: DataType.BtlAttackRange,
 		},
 		
 		id: "string",
 		// TODO: maybe add a "reference" type that determines on context whether it's a pointer or a symbol?
-		attackRange: new Property("symbol", undefined, {tabName: "Attack Range of {id}"}),
+		attackRange: new Property("symbol", undefined, {tabName: "Attack Range of {id}", hidden: true}),
 	},
 	
 	[DataType.BtlAttackRange]: {
-		__displayName: "Attack Range",
+		__displayName: "Attack Range Data",
 		__objectType: dataDivisions.attackRange,
 		
 		field_0x0: "int",

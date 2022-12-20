@@ -99,6 +99,7 @@ const extensions = {
 	[DataTypeExtension.ComplexEditorCategory]: complexEditorCategories,
 }
 
+// TODO: this is totally overengineered, just make a different function for every category
 export function dataTypeExtensions(extension: DataTypeExtension.HasComplexEditor, dataType: DataType): boolean;
 export function dataTypeExtensions(extension: DataTypeExtension.ComplexEditorCategory, dataType: DataType): {[name: string]: any};
 

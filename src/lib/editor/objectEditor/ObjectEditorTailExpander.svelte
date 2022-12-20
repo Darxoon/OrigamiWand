@@ -1,6 +1,6 @@
 <script lang="ts">
     import { toReadableString } from "$lib/util";
-    import type { DataType } from "paper-mario-elfs/elfBinary";
+    import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
     import { afterUpdate } from "svelte";
     import ObjectEditor from "./ObjectEditor.svelte";
@@ -8,6 +8,7 @@
 	export let dataType: DataType
 	export let visible: boolean
 	export let child: any
+	export let binary: ElfBinary = undefined
 	
 	$: console.log('child', child)
 	$: console.log('childContent', childContent)
@@ -51,11 +52,11 @@
 							dataType={childDataType} obj={child2} />
 					{/each}
 				{:else}
-					<ObjectEditor title={`${FILE_TYPES[childDataType].displayName}`
+					<ObjectEditor dataType={childDataType} obj={childContent} title={`${FILE_TYPES[childDataType].displayName}`
 						+ (childContent[FILE_TYPES[dataType].identifyingField] 
 							? `: ${childContent[FILE_TYPES[dataType].identifyingField]}` 
 							: "")
-						} dataType={childDataType} obj={childContent} />
+						} open={true} binary={binary} />
 				{/if}
 			</div>
 		{/if}

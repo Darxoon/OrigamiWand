@@ -99,7 +99,6 @@
 	let editor: HTMLDivElement
 	
 	let hasEnteredViewport = false
-	
 </script>
 
 <svelte:options accessors={true} />
@@ -148,7 +147,7 @@
 		</div>
 		
 		{#if FILE_TYPES[dataType].childField}
-			<ObjectEditorTailExpander dataType={dataType} visible={open} child={obj[FILE_TYPES[dataType].childField]} />
+			<ObjectEditorTailExpander dataType={dataType} visible={open} child={obj[FILE_TYPES[dataType].childField]} binary={binary} />
 		{/if}
 	{/if}	
 </div>
