@@ -627,7 +627,6 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
 			// TODO: generalize first 2 arguments into class SectionSource
-			// TODO: optional count argument == -1 <=> trim last object
 			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel, -1)
 			data[dataDivisions.model] = models
 			
@@ -647,11 +646,14 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let attackRanges = []
 			
 			for (const headerNode of attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
+				let attackRangeSymbol = findSymbol(headerNode.attackRange)
+				let offset = attackRangeSymbol.location
+				
 				let [ item ] = applyStrings(
-					headerNode.attackRange, DataType.BtlAttackRange, stringSection, 
+					offset, DataType.BtlAttackRange, stringSection, 
 					allRelocations.get('.data'), 
 					
-					parseRawDataSection(dataSection, 1, headerNode.attackRange, FILE_TYPES[DataType.BtlAttackRange].typedef), 
+					parseRawDataSection(dataSection, 1, offset, FILE_TYPES[DataType.BtlAttackRange].typedef), 
 				)
 				
 				let attackRange = {

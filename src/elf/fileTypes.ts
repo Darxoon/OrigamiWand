@@ -1936,14 +1936,16 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		},
 		
 		id: "string",
-		attackRange: new Property("pointer", undefined, {tabName: "Attack Range of {id}"}),
+		// TODO: maybe add a "reference" type that determines on context whether it's a pointer or a symbol?
+		attackRange: new Property("symbol", undefined, {tabName: "Attack Range of {id}"}),
 	},
 	
 	[DataType.BtlAttackRange]: {
 		__displayName: "Attack Range",
 		__objectType: dataDivisions.attackRange,
 		
-		field_0x0: "string",
+		field_0x0: "int",
+		field_0x4: "int",
 		field_0x8: "int",
 		field_0xc: "int",
 		field_0x10: "int",
@@ -1970,7 +1972,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0x64: "int",
 		field_0x68: "int",
 		field_0x6c: "int",
-		field_0x70: "string",
+		field_0x70: "int",
+		field_0x74: "int",
 		field_0x78: "int",
 		field_0x7c: "int",
 	},
