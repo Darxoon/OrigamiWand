@@ -12,6 +12,8 @@ echo
 
 git tag -a "$tag" -m "$message"
 
+git push --tag > /dev/null
+
 if [ $? != 0 ]; then
     exit
 fi
