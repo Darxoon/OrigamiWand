@@ -105,7 +105,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	
 	// Parses the .rodata section from a data_x_model file, since these are always the same and can be reused
-	function parseModelRodata(data: {[division in keyof typeof dataDivisions]?: any[]}, rodataSection: Section, modelFilesIndices: [Pointer, number][], stateIndices: [Pointer, number][]) {
+	function parseModelRodata(data: {[division in keyof typeof dataDivisions]?: any[]}, mainDataDivision: string, modelFilesIndices: [Pointer, number][], stateIndices: [Pointer, number][]) {
+		const rodataSection = findSection('.rodata')
 		const dataStringSection = findSection('.rodata.str1.1')
 		
 		// Why have I been doing it like this anyway?
@@ -113,6 +114,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		// then link them back to the original model and then do this recursively for all child objects?
 		// Not even necessarily recursively, just nested instead of this very linear approach
 		// So kind of like how I've been doing it in the serializer
+		
+		// wouldn't that be way too much nesting? no thanks
+		
 		function parseObjectsByIndices(dataType: DataType, indices: [Pointer, number][], offsetReference?: Map<number, any>) {
 			return indices.map(([ offset, count ]) => {
 				let result = applyStrings(
@@ -136,7 +140,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		data[dataDivisions.assetGroup] = modelFiles
 		
 		// Replace pointers in Main with the objects they're pointing to
-		for (const instance of data[dataDivisions.main]) {
+		for (const instance of data[mainDataDivision]) {
 			instance.assetGroups = modelFilesByOffset.get((instance.assetGroups as Pointer).value)
 		}
 		
@@ -146,7 +150,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		data[dataDivisions.state] = states
 		
-		for (const instance of data[dataDivisions.main]) {
+		for (const instance of data[mainDataDivision]) {
 			instance.states = statesByOffset.get(instance.states.value)
 		}
 		
@@ -266,7 +270,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
 			let stateIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.states, obj.stateCount])
 			
-			parseModelRodata(data, rodataSection, modelFilesIndices, stateIndices)
+			parseModelRodata(data, dataDivisions.main, modelFilesIndices, stateIndices)
 			
 			break
 		}
@@ -629,6 +633,12 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			// TODO: generalize first 2 arguments into class SectionSource
 			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel, -1)
 			data[dataDivisions.model] = models
+			
+			// model rodata stuff (same as in data_npc_model.elf)
+			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
+			let stateIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.states, obj.stateCount])
+			
+			parseModelRodata(data, dataDivisions.model, modelFilesIndices, stateIndices)
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
 			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
