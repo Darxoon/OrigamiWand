@@ -10,6 +10,7 @@
 	import { hexFields } from "./viewAsHex";
 	import ButtonStrip from './ButtonStrip.svelte';
 	import FieldIcons from './FieldIcons.svelte';
+	import ObjectEditorTailExpander from './ObjectEditorTailExpander.svelte';
     import { showModal } from "$lib/modal/modal";
     import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	
@@ -95,13 +96,10 @@
 		}
 	}
 	
-	let hasEnteredViewport = false
-	
-	let childrenOpen = false
-	
 	let editor: HTMLDivElement
 	
-	$: childDataType = dataType ? FILE_TYPES[dataType].childTypes[FILE_TYPES[dataType].childField] : undefined
+	let hasEnteredViewport = false
+	
 </script>
 
 <svelte:options accessors={true} />
@@ -148,27 +146,11 @@
 			{/if}
 			{/each}
 		</div>
+		
+		{#if FILE_TYPES[dataType].childField}
+			<ObjectEditorTailExpander dataType={dataType} visible={open} child={obj[FILE_TYPES[dataType].childField]} />
+		{/if}
 	{/if}	
-	
-	{#if FILE_TYPES[dataType].childField}
-		<div class="child_container" class:invisible={!open}>
-			<div class="showChildren" on:click={e => childrenOpen = !childrenOpen}>
-				<div class:rotated={childrenOpen}>
-					<i data-feather="chevron-down" class="icon-children-arrow"></i>
-				</div>
-				<span>{toReadableString(FILE_TYPES[dataType].childFieldLabel ?? FILE_TYPES[dataType].childField)}</span>
-			</div>
-			{#if childrenOpen}
-				<div class="children">
-					{#each obj[FILE_TYPES[dataType].childField] as child, i}
-						<svelte:self title={`${FILE_TYPES[childDataType].displayName} ${i}`
-							+ (child[FILE_TYPES[dataType].identifyingField] ? `: ${child[FILE_TYPES[dataType].identifyingField]}` : "")}
-							dataType={childDataType} obj={child} />
-					{/each}
-				</div>
-			{/if}
-		</div>
-	{/if}
 </div>
 
 <style lang="scss">
@@ -226,33 +208,6 @@
 		:nth-child(4n-1) {
 			background: var(--bg-label-highlight);
 			border-radius: 3px;
-		}
-	}
-	
-	.child_container {
-		margin-top: 0.3em;
-		
-		.showChildren {
-			display: flex;
-			
-			font-size: 20px;
-			cursor: pointer;
-			user-select: none;
-			
-			div {
-				width: 29px;
-				height: 29px;
-			}
-			
-			.rotated {
-				transform: rotate(180deg);
-			}
-			
-			.icon-children-arrow {
-				width: 29px;
-				height: 29px;
-				stroke-width: 1.8px;
-			}
 		}
 	}
 	
