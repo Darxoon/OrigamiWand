@@ -10,6 +10,9 @@
 	import { hexFields } from "./viewAsHex";
 	import ButtonStrip from './ButtonStrip.svelte';
 	import FieldIcons from './FieldIcons.svelte';
+	import ObjectEditorTailExpander from './ObjectEditorTailExpander.svelte';
+    import { showModal } from "$lib/modal/modal";
+    import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	
 	const dispatch = createEventDispatcher()
 
@@ -69,13 +72,33 @@
 				?.getBoundingClientRect()?.y || entryLabelElements.length - 1 <= i);
 	}
 	
-	let hasEnteredViewport = false
+	function showFieldMenu(dataType, fieldName) {
+		const objects = binary.data[FILE_TYPES[dataType].objectType]
+		
+		showModal(FieldOptionAlert, {
+			title: `Field '${toReadableString(fieldName)}'`,
+			fieldName,
+			
+			dataType,
+			binary,
+			objects,
+		})
+	}
 	
-	let childrenOpen = false
+	function length(arrayOrObj) {
+		if (arrayOrObj instanceof Array)
+			return arrayOrObj.length
+		else if ("children" in arrayOrObj)
+			return arrayOrObj.children.length
+		else {
+			console.error(new Error(`Argument is not an array, ${arrayOrObj}`))
+			return NaN
+		}
+	}
 	
 	let editor: HTMLDivElement
 	
-	$: childDataType = dataType ? FILE_TYPES[dataType].childTypes[FILE_TYPES[dataType].childField] : undefined
+	let hasEnteredViewport = false
 </script>
 
 <svelte:options accessors={true} />
@@ -83,8 +106,8 @@
 <div class="card editor" style="--bg-card: {backgroundColor}; --bg-label-highlight: {labelHighlightColor}" bind:this={editor} 
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
-	<div class="title" on:click={() => {open = !open; initialized = true}}>
-		<img src={open ? "/OrigamiWand/static/up.svg" : "/OrigamiWand/static/down.svg"} alt="V" class="expander_icon"><span>{title}</span>
+	<div class="title" class:rotated={open} on:click={() => {open = !open; initialized = true}}>
+		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{title}</span>
 		
 		{#if showButtons}
 			<ButtonStrip on:duplicate on:delete></ButtonStrip>
@@ -102,13 +125,14 @@
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 					{toReadableString(field)}
 					
-					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)}></FieldIcons>
+					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)} 
+						on:showMenu={e => showFieldMenu(dataType, field)} />
 				</div>
 				
 				<!-- Value Input -->
 				<div class="value">
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
-						<CrossObjectLink label={`Click to open (${value.length} item${value.length > 1 ? 's' : ''})`} binary={binary}
+						<CrossObjectLink label={`Click to open (${length(value)} item${length(value) < 2 ? '' : 's'})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
 								sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
 					{:else}
@@ -121,25 +145,11 @@
 			{/if}
 			{/each}
 		</div>
+		
+		{#if FILE_TYPES[dataType].childField}
+			<ObjectEditorTailExpander dataType={dataType} visible={open} child={obj[FILE_TYPES[dataType].childField]} binary={binary} />
+		{/if}
 	{/if}	
-	
-	{#if FILE_TYPES[dataType].childField}
-		<div class="child_container" class:invisible={!open}>
-			<div class="showChildren" on:click={e => childrenOpen = !childrenOpen}>
-				<img src="/OrigamiWand/static/down.svg" alt="V" class:rotated={childrenOpen}>
-				<span>{toReadableString(FILE_TYPES[dataType].childFieldLabel ?? FILE_TYPES[dataType].childField)}</span>
-			</div>
-			{#if childrenOpen}
-				<div class="children">
-					{#each obj[FILE_TYPES[dataType].childField] as child, i}
-						<svelte:self title={`${FILE_TYPES[childDataType].displayName} ${i}`
-							+ (child[FILE_TYPES[dataType].identifyingField] ? `: ${child[FILE_TYPES[dataType].identifyingField]}` : "")}
-							dataType={childDataType} obj={child} />
-					{/each}
-				</div>
-			{/if}
-		</div>
-	{/if}
 </div>
 
 <style lang="scss">
@@ -150,25 +160,28 @@
 	.editor {
 		margin: 1rem auto;
 		max-width: 56rem;
-		
-		.expander_icon {
-			position: relative;
-			
-			user-select: none;
-			pointer-events: none;
-			
-			height: 1rem;
-			width: 1rem;
-			
-			margin-right: 4px;
-			
-			top: 2px;
-		}
 	}
 	
 	.title {
 		position: relative;
 		user-select: none;
+		height: 20px;
+		
+		.icon-arrow {
+			float: left;
+			
+			margin-top: -1px;
+			margin-right: 1px;
+		}
+		
+		&.rotated .icon-arrow {
+			transform: rotate(180deg);
+		}
+		
+		.titleLabel {
+			transform: translateY(-1px);
+			display: inline-block;
+		}
 	}
 	
 	.content {
@@ -194,31 +207,6 @@
 		:nth-child(4n-1) {
 			background: var(--bg-label-highlight);
 			border-radius: 3px;
-		}
-	}
-	
-	.child_container {
-		margin-top: 0.3em;
-		
-		.showChildren {
-			display: flex;
-			
-			font-size: 20px;
-			cursor: pointer;
-			user-select: none;
-			
-			img {
-				width: 1em;
-				height: 1em;
-				
-				padding: 0.2em;
-				
-				transition: transform 0.4s;
-			}
-			
-			img.rotated {
-				transform: rotate(180deg);
-			}
 		}
 	}
 	

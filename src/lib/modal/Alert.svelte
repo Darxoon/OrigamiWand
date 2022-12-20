@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from "svelte";
 	import { hideActiveModal } from "./modal";
 
 	export let title: string
@@ -6,11 +7,16 @@
 	function close() {
 		hideActiveModal(false)
 	}
+	
+	onMount(() => {
+		// @ts-ignore
+		feather.replace()
+	})
 </script>
 
 <div class="alert">
 	<div class="closeButton" on:click={close}>
-		<img src="/OrigamiWand/static/x-button.svg" alt="x" />
+		<i data-feather="x"></i>
 	</div>
 	
 	<h2>{title}</h2>
@@ -32,14 +38,6 @@
 	.closeButton {
 		position: absolute;
 		right: 0;
-		padding: 6px;
-		width: 16px;
-		height: 16px;
-	}
-	
-	.closeButton img {
-		user-select: none;
-		pointer-events: none;
 	}
 	
 	h2 {

@@ -279,6 +279,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			// this file type doesn't contain any standalone information. everything is clearly marked
 			// by symbols. Examples include s_setElementData_W0C1_CG_KUR_01.
 			
+			// update: it does? wld::btl::data::s_setDataTable
+			// wow. I def. have to remake this parser. it is awful
+			// and the editor too
 			
 			let symbolOffsets: {[symbolName: string]: {offset: Pointer, size: number}} = {}
 			let childSymbols: string[] = []
@@ -508,6 +511,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			
 			// automated parsing
+			// this is awful
+			// TODO: undo this
 			for (const [dataDivision, entryPoint] of Object.entries(FILE_TYPES[dataType].entryPoints)) {
 				let symbol = findSymbol(entryPoint.symbol)
 				let count = entryPoint.count ?? symbol.size / FILE_TYPES[entryPoint.dataType].size
@@ -613,6 +618,111 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			break
 		}
 		
+		case DataType.DataBtl: {
+			const dataSection = findSection('.data')
+			const stringSection = findSection('.rodata.str1.1')
+			const rodataSection = findSection('.rodata')
+			
+			data = {}
+			
+			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
+			// TODO: generalize first 2 arguments into class SectionSource
+			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel, -1)
+			data[dataDivisions.model] = models
+			
+			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
+			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
+			data[dataDivisions.part] = parts
+			
+			let unitSymbol = findSymbol("wld::btl::data::s_unitData")
+			let units = parseSymbol(dataSection, stringSection, unitSymbol, DataType.BtlUnit, -1)
+			data[dataDivisions.unit] = units
+			
+			// attack range
+			let attackRangeHeaderSymbol = findSymbol("wld::btl::data::s_weaponRangeDataTable")
+			let attackRangeHeader = parseSymbol(dataSection, stringSection, attackRangeHeaderSymbol, DataType.BtlAttackRangeHeader, -1)
+			data[dataDivisions.attackRangeHeader] = attackRangeHeader
+			
+			let attackRanges = []
+			
+			for (const headerNode of attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
+				let attackRangeSymbol = findSymbol(headerNode.attackRange)
+				let offset = attackRangeSymbol.location
+				
+				let [ item ] = applyStrings(
+					offset, DataType.BtlAttackRange, stringSection, 
+					allRelocations.get('.data'), 
+					
+					parseRawDataSection(dataSection, 1, offset, FILE_TYPES[DataType.BtlAttackRange].typedef), 
+				)
+				
+				let attackRange = {
+					symbolName: `wld::btl::data::s_weaponRangeData_${headerNode.id}`,
+					item,
+				}
+				
+				attackRanges.push(attackRange)
+				headerNode.attackRange = attackRange
+			}
+			
+			data[dataDivisions.attackRange] = attackRanges
+			
+			let weaponSymbol = findSymbol("wld::btl::data::s_weaponData")
+			let weapons = parseSymbol(dataSection, stringSection, weaponSymbol, DataType.BtlAttack, -1)
+			data[dataDivisions.attack] = weapons
+			
+			let eventCameraSymbol = findSymbol("wld::btl::data::s_eventCameraData")
+			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera, -1)
+			data[dataDivisions.eventCamera] = eventCameras
+			
+			let bossAttackSymbol = findSymbol("wld::btl::data::s_godHandData")
+			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack, -1)
+			data[dataDivisions.bossAttack] = bossAttacks
+			
+			let puzzleLevelSymbol = findSymbol("wld::btl::data::s_puzzleLevelData")
+			let puzzleLevels = parseSymbol(dataSection, stringSection, puzzleLevelSymbol, DataType.BtlPuzzleLevel, -1)
+			data[dataDivisions.puzzleLevel] = puzzleLevels
+			
+			let cheerTermsSymbol = findSymbol("wld::btl::data::s_cheerTermsData")
+			let cheerTerms = parseSymbol(dataSection, stringSection, cheerTermsSymbol, DataType.BtlCheerTerms, -1)
+			data[dataDivisions.cheerTerm] = cheerTerms
+			
+			let cheerSymbol = findSymbol("wld::btl::data::s_cheerData")
+			let cheers = parseSymbol(dataSection, stringSection, cheerSymbol, DataType.BtlCheer, -1)
+			data[dataDivisions.cheer] = cheers
+			
+			// resources
+			let resourceFieldSymbol = findSymbol("wld::btl::data::s_resourceData")
+			let resourceFields = parseSymbol(dataSection, stringSection, resourceFieldSymbol, DataType.BtlResourceField, -1)
+			data[dataDivisions.resourceField] = resourceFields
+			
+			let allResources = []
+			
+			for (const resourceField of resourceFields as Struct<DataType.BtlResourceField>[]) {
+				if (resourceField.resources == undefined)
+					continue
+				
+				let resourceSymbol = findSymbol(resourceField.resources)
+				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceField.resourceCount)
+				
+				let resourcesObj = {
+					symbolName: `wld::btl::data::s_weaponRangeData_${resourceField.id}`,
+					children: resources,
+				}
+				
+				allResources.push(resourcesObj)
+				resourceField.resources = resourcesObj
+			}
+			
+			data[dataDivisions.resource] = allResources
+			
+			let configSymbol = findSymbol("wld::btl::data::s_configData")
+			let configs = parseSymbol(dataSection, stringSection, configSymbol, DataType.BtlConfig, -1)
+			data[dataDivisions.config] = configs
+			
+			break
+		}
+		
 		// parse .data section by data type
 		default: {
 			const dataSection = findSection('.data')
@@ -639,6 +749,24 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	return new ElfBinary(sections, data, symbolTable, modelSymbolReference)
 	
+	
+	function parseSymbol(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: DataType, count?: number) {
+		// if count is smaller than zero, calculate size like normal and subtract negative value from it
+		let subtract = 0
+		
+		if (count < 0) {
+			subtract = Math.abs(count)
+			count = undefined
+		}
+		
+		count = count ?? symbol.size / FILE_TYPES[dataType].size - subtract
+		
+		return applyStrings(
+			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), 
+			
+			parseRawDataSection(containingSection, count, symbol.location, FILE_TYPES[dataType].typedef),
+		)
+	}
 	
 	
 	function applyStrings(baseOffsetPointer: Pointer, dataType: DataType, stringSection: Section, relocationTable: Map<number, Relocation>, objects: object[]) {

@@ -1,15 +1,9 @@
 <script lang="ts">
-	import { DataType } from "paper-mario-elfs/elfBinary";
-
-	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-
-	import { showFieldOptionEvent } from "$lib/util/events";
-	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	import { showModal } from "$lib/modal/modal";
 	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";
 	import { loadedAutosave } from "$lib/stores";
 	
-	import { insertIntoArrayPure, resizeArray, toReadableString } from "$lib/util";
+	import { insertIntoArrayPure, resizeArray } from "$lib/util";
 	
 	import { createEventDispatcher, onMount } from "svelte";
 	import { globalDragEndEvent, globalDraggedTab, wasDraggingGlobally, type Tab } from "./globalDragging";
@@ -18,6 +12,7 @@
 	export let selectedIndex: number = 0
 	export let isActive = true
 	export let showBugReporter: boolean = false
+	export let debugIndex: number = -1
 	
 	const dispatch = createEventDispatcher()
 	
@@ -32,8 +27,6 @@
 	let draggingVertically = false
 	let mouseOutside = false
 	let startedDragging = false
-	
-	$: isActive
 	
 	let tabBar: HTMLUListElement
 	let tabElements: HTMLLIElement[] = []
@@ -116,26 +109,7 @@
 	}
 	
 	onMount(() => {
-		showFieldOptionEvent.on('show', ({ fieldName, dataType }) => {
-			if (isActive) {
-				console.log('tabs', DataType[dataType], selectedIndex, tabs)
-				console.log('tabs[selectedIndex]', tabs[selectedIndex])
-				
-				const { binary } = tabs[selectedIndex].properties
-				
-				const objects = binary.data.get(FILE_TYPES[dataType].objectType)
-				
-				showModal(FieldOptionAlert, {
-					title: `Field '${toReadableString(fieldName)}'`,
-					fieldName,
-					
-					dataType,
-					binary,
-					objects,
-				})
-			}
-		})
-		
+		// TODO: organize better
 		document.addEventListener('mousedown', e => {
 			if (draggedTab == undefined) {
 				startedDragging = false
@@ -220,6 +194,30 @@
 		
 		draggedTab = tab
 	}
+	
+	async function closeTabPrompt(tab: Tab, tabIndex: number) {
+		if (tab.children.length > 0) {
+			let result = await showModal(TernaryPrompt, {
+				title: "Close all child tabs?",
+				content: `
+Closing this tab will render all of its child tabs useless.
+Do you want to close those too?`,
+			})
+			
+			if (result == null)
+				return
+			
+			if (result == true) {
+				// TODO close tabs by id
+				
+				for (const tabId of tabs[tabIndex].children) {
+					alert(`(Todo) Closing tab ${tabId.toString()}`)
+				}
+			}
+		}
+		
+		closeTab(tabIndex)
+	}
 </script>
 
 <svelte:options accessors={true} />
@@ -266,36 +264,18 @@
 				>
 				
 				<span class="tabName">{tab.name}</span>
-				<img class="close_button" src={draggedSelectedIndex == i ? "/OrigamiWand/static/x-button-white.svg" : "/OrigamiWand/static/x-button.svg"} alt="x" on:mousedown|stopPropagation={() => {}}
-					on:click={async () => {
-						if (tab.children.length > 0) {
-							let result = await showModal(TernaryPrompt, {
-								title: "Close all child tabs?",
-								content: `
-Closing this tab will render all of its child tabs useless.
-Do you want to close those too?`,
-							})
-							
-							if (result == null)
-								return
-							
-							if (result == true) {
-								// TODO close tabs by id
-								
-								for (const tabId of tabs[i].children) {
-									alert(`(Todo) Closing tab ${tabId.toString()}`)
-								}
-							}
-						}
-						
-						closeTab(i)
-					}}>
+				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation on:click={() => closeTabPrompt(tab, i)}>
+					<i data-feather="x" class="icon-close"></i>
+				</div>
 			</li>
 		{/each}
 		
 		<li class="dragged_tab_overlay" class:invisible={draggedTab == undefined || draggingVertically} bind:this={draggedTabOverlay}>
 			{draggedTab?.name}
-			<!-- decoration only --><img class="close_button" src="/OrigamiWand/static/x-button-white.svg" alt="x">
+			<!-- decoration only -->
+			<div class="close_button white-x">
+				<i data-feather="x" class="icon-close"></i>
+			</div>
 		</li>
 	</ul>
 	
@@ -312,11 +292,11 @@ Do you want to close those too?`,
 		{/each}
 		
 		<div class="card dockArea dockLeft" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, false)}>
-			<img src="/OrigamiWand/static/down.svg" alt="V">
+			<i data-feather="chevron-left" class="icon-dock"></i>
 		</div>
 		
 		<div class="card dockArea dockRight" class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside} on:mouseup|stopPropagation={dockMouseUp.bind(undefined, true)}>
-			<img src="/OrigamiWand/static/down.svg" alt="V">
+			<i data-feather="chevron-right" class="icon-dock"></i>
 		</div>
 	</div>
 	
@@ -390,11 +370,27 @@ Do you want to close those too?`,
 			
 			top: 2px;
 			
-			width: 16px;
-			height: 16px;
+			width: 20px;
+			height: 20px;
+			float: right;
+			
+			margin-right: -4px;
+			margin-left: 2px;
+			
+			color: black;
 			
 			&:hover {
 				background: #ffffff4f;
+			}
+			
+			&.white-x {
+				color: white;
+			}
+			
+			.icon-close {
+				width: 100%;
+				height: 100%;
+				stroke-width: 2.5px;
 			}
 		}
 	}
@@ -434,25 +430,18 @@ Do you want to close those too?`,
 				pointer-events: none;
 			}
 			
-			img {
-				pointer-events: none;
+			.icon-dock {
+				width: 100%;
+				height: 100%;
 			}
 		}
 		
 		.dockLeft {
 			left: 4rem;
-			
-			img {
-				transform: translateX(-4px) rotateZ(90deg);
-			}
 		}
 		
 		.dockRight {
 			right: 4rem;
-			
-			img {
-				transform: translateX(4px) rotateZ(-90deg);
-			}
 		}
 	}
 	

@@ -46,6 +46,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const objectOffsets: WeakMap<object, Pointer> = new WeakMap()
 	
 	const symbolLocationReference: Map<string, Pointer> = new Map()
+	// TODO: use this everywhere
 	const symbolNameOverrides: Map<string, string> = new Map()
 	
 	function findSection(sectionName: string): Section {

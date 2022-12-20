@@ -18,9 +18,8 @@
 </script>
 
 <div class="card search" on:click={() => searchInput.click()}>
-    <label for="searchInput"><i class="fa fa-search" aria-hidden="true"></i></label>
     &nbsp;
-    <input type="text" class="input" id="searchInput" placeholder="Search" size="1"
+    <input type="text" class="input" placeholder="Search" size="1"
         bind:this={searchInput} bind:value={searchTerm}>
 </div>
 
@@ -38,15 +37,9 @@
         background: #d2d2d2;
     }
 
-    label {
-        cursor: text;
-        padding: 12px 0;
-        
-        height: min-content;
-        margin: auto 0;
-    }
-
     .input {
+        height: 44px;
+        
         flex: 1;
         
         border: 0;

@@ -92,7 +92,8 @@ export function compress(buffer: ArrayBuffer) {
 }
 
 export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-    if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi) {
+	// TODO: this is awful
+    if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi || dataType === DataType.DataBtl) {
         return {
             id: Symbol(),
             name: fileName,

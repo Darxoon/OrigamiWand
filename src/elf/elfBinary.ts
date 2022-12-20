@@ -50,6 +50,20 @@ export const dataDivisions = {
 	menu: "menu",
 	announcement: "announcement",
 	announcementExclude: "announcementExclude",
+	
+	part: "part",
+	unit: "unit",
+	attackRangeHeader: "attackRangeHeader",
+	attackRange: "attackRange",
+	attack: "attack",
+	eventCamera: "eventCamera",
+	bossAttack: "bossAttack",
+	puzzleLevel: "puzzleLevel",
+	cheerTerm: "cheerTerm",
+	cheer: "cheer",
+	resourceField: "resourceField",
+	resource: "resource",
+	config: "config",
 }
 
 export namespace ElfBinary {
@@ -135,6 +149,7 @@ export enum DataType {
 	DataMaplinkZoom,
 	DataParty,
 	DataUi,
+	DataBtl,
 	
 	// this is the end of the actual file types
 	TypeAmount,
@@ -165,6 +180,21 @@ export enum DataType {
 	UiMenu,
 	UiAnnouncement,
 	UiAnnouncementExclude,
+	
+	BtlModel,
+	BtlPart,
+	BtlUnit,
+	BtlAttackRangeHeader,
+	BtlAttackRange,
+	BtlAttack,
+	BtlEventCamera,
+	BtlBossAttack,
+	BtlPuzzleLevel,
+	BtlCheerTerms,
+	BtlCheer,
+	BtlResourceField,
+	BtlResource,
+	BtlConfig,
 }
 
 

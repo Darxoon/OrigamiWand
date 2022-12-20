@@ -7,10 +7,10 @@
 <div class="buttons">
     <div class="icon duplicate" on:click|stopPropagation={() => {
         dispatch('duplicate')
-    }}><i class="fa fa-clone"></i></div>
+    }}><i data-feather="copy"></i></div>
     <div class="icon delete" on:click|stopPropagation={() => {
         dispatch('delete')
-    }}><img src="/static/x-button.svg" alt="x"></div>
+    }}><i data-feather="x"></i></div>
 </div>
 
 <style>
@@ -20,20 +20,16 @@
         
         top: 0;
         right: 0;
-        
-        margin-right: 6px;
     }
     
     .icon {
-        --size: 18px;
+        --size: 24px;
         
         height: var(--size);
         width: var(--size);
         margin-left: 2px;
-    }
-    
-    img {
-        margin-top: 2px;
+        
+        margin-top: -2px;
     }
 </style>
 

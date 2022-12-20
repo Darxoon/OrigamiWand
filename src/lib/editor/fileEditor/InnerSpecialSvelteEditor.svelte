@@ -26,26 +26,29 @@
 	export function applyChangedValue(instance: any) {
 		binary = binary
 	}
+	
+	function addObject() {
+		dispatch('addObject', {
+			obj: FILE_TYPES[dataType].instantiate(),
+		})
+	}
+	
+	function deleteAll() {
+		dispatch('delete', {})
+	}
 </script>
 
 <div class="editor">
 	<div class="toolbar">
-		<div class="card btn addObject" on:click={e => {
-			dispatch('addObject', {
-				obj: FILE_TYPES[dataType].instantiate(),
-			})
-		}}>
-			<img src="/OrigamiWand/static/x-button.svg" alt="">
-			Add new Object
+		<div class="card btn" on:click={addObject}>
+			<div class="icon" style="margin-top: -1;"><i data-feather="plus"></i></div>
+			<span>Add new Object</span>
 		</div>
-		<div class="card btn deleteAll" on:click={e => {
-			dispatch('delete', {})
-		}}>
-			<img src="/OrigamiWand/static/x-button.svg" alt="">
+		<div class="card btn" on:click={deleteAll}>
+			<div class="icon"><i data-feather="x"></i></div>
 			Delete all Objects
 		</div>
 		<div class="card search">
-			<i class="fa fa-search" aria-hidden="true"></i>
 			Search Coming Soon...
 		</div>
 	</div>
@@ -113,165 +116,6 @@
 			<ObjectEditor title={map.id} dataType={DataType.ConfettiMap} obj={map} on:open binary={binary} />
 		{/each}
 	{/if}
-	
-	{#if dataType === DataType.DataUi}
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Models (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiModel].displayName,
-					objects: binary.data[dataDivisions.model],
-					importantFieldName: FILE_TYPES[DataType.UiModel].identifyingField,
-					dataType: DataType.UiModel,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Models
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Messages (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiMsg].displayName,
-					objects: binary.data[dataDivisions.msg],
-					importantFieldName: FILE_TYPES[DataType.UiMsg].identifyingField,
-					dataType: DataType.UiMsg,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Messages
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Shops (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiShop].displayName,
-					objects: binary.data[dataDivisions.shop],
-					importantFieldName: FILE_TYPES[DataType.UiShop].identifyingField,
-					dataType: DataType.UiShop,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Shops
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Sea Map (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiSeaMap].displayName,
-					objects: binary.data[dataDivisions.seaEntry],
-					importantFieldName: FILE_TYPES[DataType.UiSeaMap].identifyingField,
-					dataType: DataType.UiSeaMap,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Sea Map
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Menus (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiMenu].displayName,
-					objects: binary.data[dataDivisions.menu],
-					importantFieldName: FILE_TYPES[DataType.UiMenu].identifyingField,
-					dataType: DataType.UiMenu,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Menus
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Announcements (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiAnnouncement].displayName,
-					objects: binary.data[dataDivisions.announcement],
-					importantFieldName: FILE_TYPES[DataType.UiAnnouncement].identifyingField,
-					dataType: DataType.UiAnnouncement,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Announcements
-			</div>
-		</div>
-		
-		<div class="card link" on:click={e => {
-			dispatch("open", {
-				type: "window",
-				title: `Announcement Excludes (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					objectTitle: FILE_TYPES[DataType.UiAnnouncementExclude].displayName,
-					objects: binary.data[dataDivisions.announcementExclude],
-					importantFieldName: FILE_TYPES[DataType.UiAnnouncementExclude].identifyingField,
-					dataType: DataType.UiAnnouncementExclude,
-					parent: self,
-					binary,
-				}
-			})
-		}}>
-			<div style="dislay: flex; user-select: none">
-				<i class="fa fa-external-link" aria-hidden="true" style="position: relative; top: 1px; margin: 0 0 0 3px"></i>
-				Announcement Excludes
-			</div>
-		</div>
-	{/if}
-	
-	<!-- {#each objects as obj, i}
-		<ObjectEditor bind:this={editorElements[i]} title="{objectTitle} {i}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
-			on:duplicate={() => duplicateObject(i)} on:delete={() => deleteObject(i)} on:open />
-	{/each}
-	
-	{#if dataType === DataType.MaplinkNode}
-		<ObjectEditor bind:this={editorElements[objects.length]} title={`Maplink Header (Advanced)`} bind:obj={headerObject} 
-			dataType={DataType.Maplink} showButtons={false} />
-	{/if} -->
 </div>
 
 <style lang="scss">
@@ -292,6 +136,21 @@
 			margin-right: 0.5rem;
 		}
 		
+		.btn {
+			height: 20px;
+			
+			.icon {
+				float: left;
+				height: 24px;
+				width: 24px;
+				margin: -2px 0 0 0;
+			}
+			
+			span {
+				margin-top: -1px;
+			}
+		}
+		
 		.btn:hover {
 			background: #d2d2d2;
 		}
@@ -299,22 +158,6 @@
 		.btn:active, .btn:focus {
 			background: #808080;
 		}
-		
-		img {
-			--size: 16px;
-			
-			pointer-events: none;
-			
-			transform: translateY(2px);
-			
-			height: var(--size);
-			width: var(--size);
-		}
-	}
-	
-	.link {
-		margin: 1rem auto;
-		max-width: 56rem;
 	}
 	
 	.category {
@@ -350,10 +193,6 @@
 				font-size: 18px;
 			}
 		}
-	}
-	
-	.addObject img {
-		transform: translateY(1.5px) rotateZ(45deg);
 	}
 	
 	.search {

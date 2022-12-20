@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from "svelte";
-
-	const dispatch = createEventDispatcher()
+	import { onMount } from "svelte";
+    import ButtonStrip from "../objectEditor/ButtonStrip.svelte";
 	
 	export let title: string
 	export let initialize: boolean = false
@@ -18,17 +17,12 @@
 </script>
 
 <div class="card expander" style="--bg-card: {backgroundColor}">
-	<div class="title" on:click={() => {open = !open; initialized = true}}>
-		<!-- TODO: export these paths into one global location, to make changing them easier -->
-		<img src={open ? '/OrigamiWand/static/up.svg' : '/OrigamiWand/static/down.svg'} alt="V" class="expander_icon"><span>{title}</span>
-		{#if showButtons}<div class="buttons">
-			<div class="duplicate" on:click|stopPropagation={() => {
-				dispatch("duplicate")
-			}}><i class="fa fa-clone"></i></div>
-			<div class="delete" on:click|stopPropagation={() => {
-				dispatch("delete")
-			}}><img src="/OrigamiWand/static/x-button.svg" alt="x"></div>
-		</div>{/if}
+	<div class="title" class:rotated={open} on:click={() => {open = !open; initialized = true}}>
+		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{title}</span>
+		
+		{#if showButtons}
+			<ButtonStrip on:delete on:duplicate />
+		{/if}
 	</div>
 	
 	<div class="content" class:invisible={!open}>
@@ -43,55 +37,27 @@
 		margin: 1rem auto;
 		
 		max-width: 56rem;
-		
-		.expander_icon {
-			position: relative;
-			
-			user-select: none;
-			pointer-events: none;
-			
-			height: 1rem;
-			width: 1rem;
-			
-			margin-right: 4px;
-			
-			top: 2px;
-		}
 	}
 	
 	.title {
 		position: relative;
-		
 		user-select: none;
-		-webkit-user-select: none;
-		-moz-user-select: none;
-		-ms-user-select: none;
+		height: 20px;
 		
-		.buttons {
-			position: absolute;
-			display: flex;
+		.icon-arrow {
+			float: left;
 			
-			top: 0;
-			right: 0;
-			
-			margin-right: 6px;
-			
-			div {
-				--size: 18px;
-				
-				height: var(--size);
-				width: var(--size);
-				margin-left: 2px;
-			}
-			
-			img {
-				margin-top: 2px;
-			}
-			
-			.spinner img {
-				animation: rotating 0.4s linear infinite;
-			}
-			
+			margin-top: -1px;
+			margin-right: 1px;
+		}
+		
+		&.rotated .icon-arrow {
+			transform: rotate(180deg);
+		}
+		
+		.titleLabel {
+			transform: translateY(-1px);
+			display: inline-block;
 		}
 	}
 	
