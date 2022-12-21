@@ -1831,11 +1831,11 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		__objectType: dataDivisions.unit,
 		
 		id: "string",
-		modelId: "string",
-		field_0x10: "string",
-		characterDescripton: "string",
-		nameEntry: "string",
-		globalFunction: "string",
+		modelId: new Property("string", "The model found in the 'Models' tab."),
+		field_0x10: new Property("string", "A sort of variant of the model? But I'm not sure what it influences exactly"),
+		description: "string",
+		textId: new Property("string", "The name of the item. Before it is displayed, it is looked up in `glossary.msbt`."),
+		hasBeenKilledSwitch: new Property("string", "Switch in the save file for whether this enemy type has been killed at least once"),
 		healthPoints: "int",
 		field_0x34: "int",
 		panelType: "string",
@@ -1986,7 +1986,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0x8: "string",
 		attackRangeId: "string",
 		bossBattleVariant: "string",
-		attackName: "string",
+		// TODO: give field name "textId" a global description, similar to field names like id, position, etc.
+		textId: new Property("string", "The name of the attack. Before it is displayed, it is looked up in `glossary.msbt`."),
 		field_0x28: "int",
 		field_0x2c: "int",
 		field_0x30: "int",
@@ -2033,8 +2034,24 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0xd4: "int",
 		field_0xd8: "int",
 		field_0xdc: "int",
-		attackTier: "string",
-		elementType: "int",
+		attackTier: new Property("string", `
+The tier of the attack. Possible values:
+
+* null - normal
+* "kira" - Shiny
+* "kirakira" - Flashy
+* "legend" - Legendary
+
+For some reason, the naming scheme of the attacks themselves does not say much about the tier.
+Many with the tier 'kirakira' only have 'kira' in their name while many 'kira' attacks do not have
+any indicator in ther name.`),
+		elementType: new Property("int", `
+Bit field for the element type. Possible values:
+
+* 2 - normal
+* 512 - fire
+* 1024 - ice
+* ...`),
 		field_0xec: "int",
 		scriptPath: "string",
 		attackFunction: "string",
