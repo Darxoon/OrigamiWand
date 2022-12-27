@@ -1,4 +1,4 @@
-import { dataDivisions, DataType, ElfBinary, Pointer } from "./elfBinary";
+import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { Vector3 } from "./misc";
 
 export type Typedef<T> = {[fieldName: string]: T}
@@ -2447,7 +2447,7 @@ interface FileTypeRegistry {
 	identifyingField: string
 	countSymbol: string
 	nestedAllValues: boolean
-	objectType: keyof typeof dataDivisions
+	objectType: DataDivision
 	entryPoints: {[objectType: number]: any}
 	
 	instantiate(): object

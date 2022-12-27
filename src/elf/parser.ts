@@ -1,4 +1,4 @@
-import { dataDivisions, DataType, ElfBinary, Pointer } from "./elfBinary";
+import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
 import type { Struct } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
@@ -100,12 +100,12 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	// as an array of structs. However, for some file formats (like maplink and data_npc_model),
 	// there are multiple file formats
 	
-	let data: {[division in keyof typeof dataDivisions]?: any[]}
+	let data: {[division in DataDivision]?: any[]}
 	let modelSymbolReference: WeakMap<any | any[], string>
 	
 	
 	// Parses the .rodata section from a data_x_model file, since these are always the same and can be reused
-	function parseModelRodata(data: {[division in keyof typeof dataDivisions]?: any[]}, mainDataDivision: string, modelFilesIndices: [Pointer, number][], stateIndices: [Pointer, number][]) {
+	function parseModelRodata(data: {[division in DataDivision]?: any[]}, mainDataDivision: DataDivision, modelFilesIndices: [Pointer, number][], stateIndices: [Pointer, number][]) {
 		const rodataSection = findSection('.rodata')
 		const dataStringSection = findSection('.rodata.str1.1')
 		
@@ -270,7 +270,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
 			let stateIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.states, obj.stateCount])
 			
-			parseModelRodata(data, dataDivisions.main, modelFilesIndices, stateIndices)
+			parseModelRodata(data, 'main', modelFilesIndices, stateIndices)
 			
 			break
 		}
@@ -638,7 +638,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
 			let stateIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.states, obj.stateCount])
 			
-			parseModelRodata(data, dataDivisions.model, modelFilesIndices, stateIndices)
+			parseModelRodata(data, 'model', modelFilesIndices, stateIndices)
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
 			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
