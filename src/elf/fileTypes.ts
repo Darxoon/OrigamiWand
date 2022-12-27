@@ -1850,9 +1850,10 @@ TODO: verify that every field that is marked as a string is actually a string`),
 This uses models listed in the Parts section.
 These are all the models that an actor uses in battle, and can weapon models like a Snifit Bullet, or a form change like a paratroopa turning into a regular koopa.
 
-Examples:
+Example:
 
-*First Part: PAT *Second Part: NOK.`),
+* First Part: PAT 
+* Second Part: NOK`),
 		secondPart: "string",
 		thirdPart: "string",
 		fourthPart: "string",
