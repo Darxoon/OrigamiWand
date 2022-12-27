@@ -1827,7 +1827,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 	},
 	
 	[DataType.BtlUnit]: {
-		__displayName: "Unit",
+		__displayName: "Actor",
 		__objectType: dataDivisions.unit,
 		
 		id: "string",
