@@ -117,9 +117,9 @@ export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isC
                 objectTitle: FILE_TYPES[dataType].displayName,
                 binary,
                 objects: dataType === DataType.Maplink
-                    ? binary.data[dataDivisions.maplinkNodes]
-                    : binary.data[dataDivisions.main],
-                headerObject: dataType === DataType.Maplink ? binary.data[dataDivisions.main][0] : undefined,
+                    ? binary.data.maplinkNodes
+                    : binary.data.main,
+                headerObject: dataType === DataType.Maplink ? binary.data.main[0] : undefined,
                 importantFieldName: FILE_TYPES[dataType].identifyingField,
                 dataType,
             },

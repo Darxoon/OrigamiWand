@@ -1,4 +1,4 @@
-import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
+import { DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
 import type { Struct } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
@@ -137,7 +137,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		let modelFilesByOffset: Map<number, any> = new Map()
 		let modelFiles = parseObjectsByIndices(DataType.NpcFiles, modelFilesIndices, modelFilesByOffset)
 		
-		data[dataDivisions.assetGroup] = modelFiles
+		data.assetGroup = modelFiles
 		
 		// Replace pointers in Main with the objects they're pointing to
 		for (const instance of data[mainDataDivision]) {
@@ -148,7 +148,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		let statesByOffset = new Map()
 		let states = parseObjectsByIndices(DataType.NpcState, stateIndices, statesByOffset)
 		
-		data[dataDivisions.state] = states
+		data.state = states
 		
 		for (const instance of data[mainDataDivision]) {
 			instance.states = statesByOffset.get(instance.states.value)
@@ -160,7 +160,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		let substates = parseObjectsByIndices(DataType.NpcSubState, substateIndices, substatesByOffset)
 		
-		data[dataDivisions.subState] = substates
+		data.subState = substates
 		
 		for (const instance of states.flat()) {
 			instance.substates = substatesByOffset.get(instance.substates.value)
@@ -173,7 +173,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		let faces = parseObjectsByIndices(DataType.NpcFace, faceIndices, facesByOffset)
 		
-		data[dataDivisions.face] = faces
+		data.face = faces
 		
 		for (const instance of substates.flat()) {
 			instance.faces = facesByOffset.get(instance.faces.value)
@@ -185,7 +185,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		let animes = parseObjectsByIndices(DataType.NpcAnime, animeIndices, animesByOffset)
 		
-		data[dataDivisions.anime] = animes
+		data.anime = animes
 		
 		for (const instance of faces.flat()) {
 			instance.animations = animesByOffset.get(instance.animations.value)
@@ -224,9 +224,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(dataSection, 1, headerOffset.value, FILE_TYPES[DataType.MaplinkHeader].typedef)
 			)
 			
-			data[dataDivisions.main] = header
+			data.main = header
 			
-			data[dataDivisions.maplinkNodes] = applyStrings(
+			data.maplinkNodes = applyStrings(
 				Pointer.ZERO,
 				DataType.Maplink,
 				dataStringSection,
@@ -258,17 +258,17 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			const dataCount = Number(rodataView.getBigInt64(countSymbol.location.value, true))
 			
 			data = {}
-			data[dataDivisions.main] = applyStrings(
+			data.main = applyStrings(
 				Pointer.ZERO, dataType, dataStringSection, 
 				allRelocations.get('.data'), 
 				
 				parseRawDataSection(dataSection, dataCount, 0, FILE_TYPES[dataType].typedef), 
 			)
 			
-			modelSymbolReference = new WeakMap(data[dataDivisions.main].map(obj => [obj, obj.id as string]))
+			modelSymbolReference = new WeakMap(data.main.map(obj => [obj, obj.id as string]))
 			
-			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
-			let stateIndices: [Pointer, number][] = data[dataDivisions.main].map((obj: any) => [obj.states, obj.stateCount])
+			let modelFilesIndices: [Pointer, number][] = data.main.map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
+			let stateIndices: [Pointer, number][] = data.main.map((obj: any) => [obj.states, obj.stateCount])
 			
 			parseModelRodata(data, 'main', modelFilesIndices, stateIndices)
 			
@@ -372,9 +372,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			console.log('elementObjects', elementObjects)
 			
 			data = {}
-			data[dataDivisions.main] = setDataObjects
-			data[dataDivisions.element] = elementObjects
-			data[dataDivisions.map] = mapSymbols
+			data.main = setDataObjects
+			data.element = elementObjects
+			data.map = mapSymbols
 			
 			break
 		}
@@ -388,7 +388,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let count: number = dataSection.size / FILE_TYPES[dataType].size - 1
 			
 			data = {}
-			data[dataDivisions.main] = applyStrings(
+			data.main = applyStrings(
 				Pointer.ZERO, dataType, dataStringSection, 
 				allRelocations.get('.data'), 
 				
@@ -411,7 +411,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			const versionSymbol = findSymbol("confetti::data::hole::s_version")
 			const version = Number(rodataView.getBigInt64(versionSymbol.location.value, true))
 			
-			data[dataDivisions.version] = [{ version }]
+			data.version = [{ version }]
 			
 			// data is the main entry point for this file type
 			const dataSymbol = findSymbol("confetti::data::hole::data")
@@ -422,7 +422,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(rodataSection, 1, dataSymbol.location.value, FILE_TYPES[DataType.ConfettiData].typedef), 
 			)
 			
-			data[dataDivisions.dataHeader] = dataArray
+			data.dataHeader = dataArray
 			
 			// map list
 			const { maps: mapListOffset, mapCount } = dataArray[0]
@@ -435,7 +435,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			)
 			console.log(maps)
 			
-			data[dataDivisions.map] = maps
+			data.map = maps
 			dataArray[0].maps = maps
 			
 			// holes
@@ -454,7 +454,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				return result
 			})
 			
-			data[dataDivisions.hole] = holes
+			data.hole = holes
 			
 			// fix references to holes
 			for (const map of maps) {
@@ -485,7 +485,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			}
 			
 			data = {}
-			data[dataDivisions.category] = categories
+			data.category = categories
 			
 			
 			// .rodata contains actual main data (under symbol dataSymbol)
@@ -500,7 +500,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(rodataSection, dataCount, dataSymbol.location.value, FILE_TYPES[dataType].typedef), 
 			)
 			
-			data[dataDivisions.main] = dataObjects
+			data.main = dataObjects
 			
 			break
 		}
@@ -586,7 +586,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(dataSection, menuCount, menuDataSymbol.location, FILE_TYPES[DataType.UiMenu].typedef),
 			)
 			
-			data[dataDivisions.menu] = menus
+			data.menu = menus
 			
 			// announcement data
 			let announcementCountSymbol = findSymbol("wld::fld::data::kAnnounceDataCount")
@@ -601,7 +601,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(dataSection, announcementCount, announcementSymbol.location, FILE_TYPES[DataType.UiAnnouncement].typedef),
 			)
 			
-			data[dataDivisions.announcement] = announcements
+			data.announcement = announcements
 			
 			// announcement excludes
 			let announcementExcludeCountSymbol = findSymbol("wld::fld::data::kAnnounceExcludeDataCount")
@@ -617,7 +617,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					FILE_TYPES[DataType.UiAnnouncementExclude].typedef),
 			)
 			
-			data[dataDivisions.announcementExclude] = announcementExcludes
+			data.announcementExclude = announcementExcludes
 			
 			break
 		}
@@ -632,26 +632,26 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelSymbol = findSymbol("wld::btl::data::s_modelBattle")
 			// TODO: generalize first 2 arguments into class SectionSource
 			let models = parseSymbol(dataSection, stringSection, modelSymbol, DataType.BtlModel, -1)
-			data[dataDivisions.model] = models
+			data.model = models
 			
 			// model rodata stuff (same as in data_npc_model.elf)
-			let modelFilesIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
-			let stateIndices: [Pointer, number][] = data[dataDivisions.model].map((obj: any) => [obj.states, obj.stateCount])
+			let modelFilesIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
+			let stateIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.states, obj.stateCount])
 			
 			parseModelRodata(data, 'model', modelFilesIndices, stateIndices)
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
 			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
-			data[dataDivisions.part] = parts
+			data.part = parts
 			
 			let unitSymbol = findSymbol("wld::btl::data::s_unitData")
 			let units = parseSymbol(dataSection, stringSection, unitSymbol, DataType.BtlUnit, -1)
-			data[dataDivisions.unit] = units
+			data.unit = units
 			
 			// attack range
 			let attackRangeHeaderSymbol = findSymbol("wld::btl::data::s_weaponRangeDataTable")
 			let attackRangeHeader = parseSymbol(dataSection, stringSection, attackRangeHeaderSymbol, DataType.BtlAttackRangeHeader, -1)
-			data[dataDivisions.attackRangeHeader] = attackRangeHeader
+			data.attackRangeHeader = attackRangeHeader
 			
 			let attackRanges = []
 			
@@ -675,36 +675,36 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				headerNode.attackRange = attackRange
 			}
 			
-			data[dataDivisions.attackRange] = attackRanges
+			data.attackRange = attackRanges
 			
 			let weaponSymbol = findSymbol("wld::btl::data::s_weaponData")
 			let weapons = parseSymbol(dataSection, stringSection, weaponSymbol, DataType.BtlAttack, -1)
-			data[dataDivisions.attack] = weapons
+			data.attack = weapons
 			
 			let eventCameraSymbol = findSymbol("wld::btl::data::s_eventCameraData")
 			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera, -1)
-			data[dataDivisions.eventCamera] = eventCameras
+			data.eventCamera = eventCameras
 			
 			let bossAttackSymbol = findSymbol("wld::btl::data::s_godHandData")
 			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack, -1)
-			data[dataDivisions.bossAttack] = bossAttacks
+			data.bossAttack = bossAttacks
 			
 			let puzzleLevelSymbol = findSymbol("wld::btl::data::s_puzzleLevelData")
 			let puzzleLevels = parseSymbol(dataSection, stringSection, puzzleLevelSymbol, DataType.BtlPuzzleLevel, -1)
-			data[dataDivisions.puzzleLevel] = puzzleLevels
+			data.puzzleLevel = puzzleLevels
 			
 			let cheerTermsSymbol = findSymbol("wld::btl::data::s_cheerTermsData")
 			let cheerTerms = parseSymbol(dataSection, stringSection, cheerTermsSymbol, DataType.BtlCheerTerms, -1)
-			data[dataDivisions.cheerTerm] = cheerTerms
+			data.cheerTerm = cheerTerms
 			
 			let cheerSymbol = findSymbol("wld::btl::data::s_cheerData")
 			let cheers = parseSymbol(dataSection, stringSection, cheerSymbol, DataType.BtlCheer, -1)
-			data[dataDivisions.cheer] = cheers
+			data.cheer = cheers
 			
 			// resources
 			let resourceFieldSymbol = findSymbol("wld::btl::data::s_resourceData")
 			let resourceFields = parseSymbol(dataSection, stringSection, resourceFieldSymbol, DataType.BtlResourceField, -1)
-			data[dataDivisions.resourceField] = resourceFields
+			data.resourceField = resourceFields
 			
 			let allResources = []
 			
@@ -724,11 +724,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				resourceField.resources = resourcesObj
 			}
 			
-			data[dataDivisions.resource] = allResources
+			data.resource = allResources
 			
 			let configSymbol = findSymbol("wld::btl::data::s_configData")
 			let configs = parseSymbol(dataSection, stringSection, configSymbol, DataType.BtlConfig, -1)
-			data[dataDivisions.config] = configs
+			data.config = configs
 			
 			break
 		}
@@ -744,7 +744,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let count = rodataView.getInt32(0, true)
 			
 			data = {}
-			data[dataDivisions.main] = applyStrings(
+			data.main = applyStrings(
 				Pointer.ZERO, dataType,  dataStringSection, 
 				allRelocations.get('.data'), 
 				
