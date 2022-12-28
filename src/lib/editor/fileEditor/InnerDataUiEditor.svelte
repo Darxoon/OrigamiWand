@@ -35,7 +35,7 @@
 </script>
 
 <div class="editor">
-	{#each items as [name, {dataType, dataDivision}]}
+	{#each items as [name, {dataType, dataDivision, label}]}
 		<div class="card link" on:click={e => {
 			dispatch("open", {
 				type: "window",
@@ -53,7 +53,7 @@
 		}}>
 			<i data-feather="external-link" class="icon-link"></i>
 			<div style="user-select: none">
-				{name}
+				{label ?? name}
 			</div>
 		</div>
 	{/each}

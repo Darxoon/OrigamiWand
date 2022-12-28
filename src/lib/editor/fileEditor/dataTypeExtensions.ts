@@ -43,6 +43,11 @@ const complexEditorCategories = {
 	},
 	
 	[DataType.DataBtl]: {
+		"Actors": {
+			label: "Actors (all characters in battle)",
+			dataType: DataType.BtlUnit,
+			dataDivision: dataDivisions.unit,
+		},
 		"Models": {
 			dataType: DataType.BtlModel,
 			dataDivision: dataDivisions.model,
@@ -51,17 +56,13 @@ const complexEditorCategories = {
 			dataType: DataType.BtlPart,
 			dataDivision: dataDivisions.part,
 		},
-		"Units": {
-			dataType: DataType.BtlUnit,
-			dataDivision: dataDivisions.unit,
+		"Attacks": {
+			dataType: DataType.BtlAttack,
+			dataDivision: dataDivisions.attack,
 		},
 		"Attack Ranges": {
 			dataType: DataType.BtlAttackRangeHeader,
 			dataDivision: dataDivisions.attackRangeHeader,
-		},
-		"Attacks": {
-			dataType: DataType.BtlAttack,
-			dataDivision: dataDivisions.attack,
 		},
 		"Boss Attacks": {
 			dataType: DataType.BtlBossAttack,

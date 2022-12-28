@@ -117,9 +117,9 @@ export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isC
                 objectTitle: FILE_TYPES[dataType].displayName,
                 binary,
                 objects: dataType === DataType.Maplink
-                    ? binary.data[dataDivisions.maplinkNodes]
-                    : binary.data[dataDivisions.main],
-                headerObject: dataType === DataType.Maplink ? binary.data[dataDivisions.main][0] : undefined,
+                    ? binary.data.maplinkNodes
+                    : binary.data.main,
+                headerObject: dataType === DataType.Maplink ? binary.data.main[0] : undefined,
                 importantFieldName: FILE_TYPES[dataType].identifyingField,
                 dataType,
             },
@@ -152,18 +152,29 @@ export function toReadableString(camelCaseStr: string) {
 	let output = ""
 	
 	for (let i = 0; i < camelCaseStr.length; i++) {
-		const newWordBeginning: boolean = camelCaseStr[i].toUpperCase() === camelCaseStr[i] || output === ''
+		const previousChar = camelCaseStr[i - 1]
+		const currentChar = camelCaseStr[i]
+		const lookAhead = camelCaseStr[i + 1]
+		
+		const isNumber = /^\d$/.test(currentChar)
+		const newWordBeginning: boolean = currentChar.toUpperCase() === currentChar || output === ''
+		
+		// special case for BShapes
 		if (newWordBeginning && output.endsWith(' B')) {
-			output += camelCaseStr[i].toUpperCase()
+			output += currentChar.toUpperCase()
+		}
+		// special case for word "ID"
+		else if (output.endsWith(' I') && currentChar === 'd' && !(/^[a-z]$/.test(lookAhead))) {
+			output += currentChar.toUpperCase()
+		}
+		else if (isNumber && /^\d$/.test(previousChar)) {
+			output += currentChar
 		}
 		else if (newWordBeginning) {
-			output += ' ' + camelCaseStr[i].toUpperCase()
+			output += ' ' + currentChar.toUpperCase()
 		} 
-		// special case for word "ID"
-		else if (output.endsWith(' I') && camelCaseStr[i] === 'd' && !(/^[a-z]$/.test(camelCaseStr[i + 1]))) {
-			output += camelCaseStr[i].toUpperCase()
-		} else {
-			output += camelCaseStr[i]
+		else {
+			output += currentChar
 		}
 	}
 	

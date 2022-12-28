@@ -5,13 +5,13 @@ import type { Section, Symbol } from "./types"
  */
 export class ElfBinary {
 	private sections: Section[]
-	data: {[division in keyof typeof dataDivisions]?: any[]}
+	data: {[division in DataDivision]?: any[]}
 	symbolTable: Symbol[]
 	modelSymbolReference: WeakMap<object[]|object, string>
 	
 	constructor(
 		sections: Section[], 
-		data: {[division in keyof typeof dataDivisions]?: any[]}, 
+		data: {[division in DataDivision]?: any[]}, 
 		symbolTable: Symbol[], 
 		modelSymbolReference: WeakMap<any | any[], string>,
 	) {
@@ -64,7 +64,9 @@ export const dataDivisions = {
 	resourceField: "resourceField",
 	resource: "resource",
 	config: "config",
-}
+} as const
+
+export type DataDivision = keyof typeof dataDivisions
 
 export namespace ElfBinary {
 	export enum ObjectType {

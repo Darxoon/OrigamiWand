@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dataDivisions, DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import Expander from "$lib/editor/fileEditor/Expander.svelte";
 	import { createEventDispatcher } from "svelte";
@@ -56,13 +56,13 @@
 	{#if dataType === DataType.DataBtlSet}
 		<Expander title="Special Map Names">
 			<div class="maps">
-				{#each binary.data[dataDivisions.map] as mapName}
+				{#each binary.data.map as mapName}
 					<div><pre>{mapName}</pre></div>
 				{/each}
 			</div>
 		</Expander>
 		
-		{#each binary.data[dataDivisions.main] as obj}
+		{#each binary.data.main as obj}
 			<Expander title={obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)} showButtons={true}>
 				<div class="category">
 					<div class="card set_data" on:click={e => {
@@ -106,13 +106,13 @@
 	{/if}
 	
 	{#if dataType === DataType.DataConfettiTotalHoleInfo}
-		<ObjectEditor title="General Information" obj={binary.data[dataDivisions.version][0]}
+		<ObjectEditor title="General Information" obj={binary.data.version[0]}
 				dataType={DataType.ConfettiVersion} showButtons={false} binary={binary} />
 		
-		<ObjectEditor title="Data Header" obj={binary.data[dataDivisions.dataHeader][0]}
+		<ObjectEditor title="Data Header" obj={binary.data.dataHeader[0]}
 				dataType={DataType.ConfettiData} showButtons={false} binary={binary} />
 		
-		{#each binary.data[dataDivisions.map] as map}
+		{#each binary.data.map as map}
 			<ObjectEditor title={map.id} dataType={DataType.ConfettiMap} obj={map} on:open binary={binary} />
 		{/each}
 	{/if}
