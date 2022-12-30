@@ -85,6 +85,9 @@
 				binary.modelSymbolReference.set(clone, clone.id)
 				// duplicate all symbols related to this
 				// reverse loop to prevent duplicated symbols from being duplicated again
+				
+				// TODO: why do this? just create all nonexistant symbols during serialization
+				// also, this only works for data_*_model files
 				console.log('dasf')
 				for (let i = binary.symbolTable.length - 1; i >= 0; i--) {
 					const symbol = binary.symbolTable[i]
