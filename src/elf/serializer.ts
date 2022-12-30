@@ -7,10 +7,9 @@ import { demangle, mangleIdentifier } from "./nameMangling";
 import { enumerate } from "./util";
 
 type SectionName = string
+type Offset = number
+type SymbolName = string
 
-
-// Because I want this ELF code / library to stay platform indipendent, 
-// I sadly have no other option than to embed it like this
 const BINARY_HEADER: Uint8Array = new Uint8Array([
 	0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -43,6 +42,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const allRelocations: Map<SectionName, Relocation[]> = new Map()
 	const stringRelocations: Map<SectionName, Map<number, string>> = new Map()
 	const objectRelocations: Map<SectionName, Map<number, object>> = new Map()
+	const symbolRelocations: Map<SectionName, Map<number, SymbolName>> = new Map()
+	
 	const objectOffsets: WeakMap<object, Pointer> = new WeakMap()
 	
 	const symbolLocationReference: Map<string, Pointer> = new Map()
@@ -73,11 +74,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		let dataStringRelocations = new Map() as Map<Offset, string>
 		stringRelocations.set(".data", dataStringRelocations)
 		
-		type Offset = number
-		type SymbolName = string
-		
-		let symbolRelocations = new Map() as Map<Offset, SymbolName>
-		
 		switch (dataType) {
 			case DataType.Maplink: {
 				let data: SectionElements = {
@@ -98,10 +94,13 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			}
 			
 			case DataType.DataBtlSet: {
+				// TODO: remake this to use normal symbolRelocations instead of its own thing
+				
 				let data: SectionElements = {
 					writer: dataWriter,
 					stringRelocations: dataStringRelocations,
 					crossPointers: undefined,
+					symbolRelocations: new Map(),
 				}
 				
 				for (const category of binary.data.main) {
@@ -136,21 +135,21 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				// data table
 				for (const { symbolName } of binary.data.main) {
-					symbolRelocations.set(dataWriter.size, symbolName)
+					data.symbolRelocations.set(dataWriter.size, symbolName)
 					dataWriter.writeBigInt64(0n)
 				}
 				
 				dataWriter.writeBigInt64(0n)
 				
 				
-				// reloctions towards custom symbols
+				// relocations towards custom symbols
 				// would probably would make more sense where the other relocations are generated but who cares
 				let dataRelocations: Relocation[] = []
 				allRelocations.set('.data', dataRelocations)
 				
 				let symbolReference = Object.fromEntries(binary.symbolTable.map((symbol, index) => [demangle(symbol.name), index]))
 				
-				for (const [offset, symbolName] of symbolRelocations) {
+				for (const [offset, symbolName] of data.symbolRelocations) {
 					dataRelocations.push(new Relocation(new Pointer(offset), 0x101, symbolReference[symbolName], Pointer.ZERO))
 				}
 				
@@ -175,23 +174,25 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				}
 				
 				serializeObjects(data, dataType, binary.data.main)
-					
 				serializeObjects(data, dataType, [FILE_TYPES[dataType].instantiate()])
 				
-				
-				let rodataStringRelocations = new Map()
-				stringRelocations.set('.rodata', rodataStringRelocations)
-				
-				let rodataRelocations = new Map()
-				objectRelocations.set('.rodata', rodataRelocations)
-								
 				let rodataReferences = binary.data.main.map(npc => 
 					[npc.id, binary.modelSymbolReference.get(npc), npc.assetGroups, npc.states] as RodataReference)
 				
-				updatedSections.set('.rodata', serializeModelRodata(rodataReferences, rodataStringRelocations, rodataRelocations))
+				let rodata: SectionElements = {
+					writer: new BinaryWriter(),
+					stringRelocations: new Map(),
+					crossPointers: new Map(),
+				}
 				
-				for (const npc of binary.data.main) {
-					binary.modelSymbolReference.set(npc, npc.id)
+				stringRelocations.set('.rodata', rodata.stringRelocations)
+				objectRelocations.set('.rodata', rodata.crossPointers)
+				
+				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.main.length)
+				updatedSections.set('.rodata', serializedRodata)
+				
+				for (const model of binary.data.main) {
+					binary.modelSymbolReference.set(model, model.id)
 				}
 				
 				break
@@ -265,11 +266,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			case DataType.DataUi: {
 				const rodataWriter = new BinaryWriter()
 				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
 				
 				let data: SectionElements = {
 					writer: dataWriter,
 					stringRelocations: dataStringRelocations,
 					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
 				}
 				
 				let dataRelocations: Relocation[] = []
@@ -280,7 +285,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(dataWriter.size))
 					
 					if (model.properties)
-						serializeObjects(data, DataType.UiModelProperty, model.properties, false)
+						serializeObjects(data, DataType.UiModelProperty, model.properties, 0, false)
 				}
 				
 				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(dataWriter.size))
@@ -304,6 +309,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 							+ FILE_TYPES[DataType.UiShop].size * i
 							+ (FILE_TYPES[DataType.UiShop].fieldOffsets["soldItems"] as number)
 					let sellDataSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === `wld::fld::data::s_sellData_${shop.id}`)
+					// TODO: redo all of these with symbolRelocations
 					dataRelocations.push(new Relocation(new Pointer(locationOffset), 0x101, sellDataSymbolIndex, Pointer.ZERO))
 				}
 				
@@ -342,12 +348,129 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				
 				updatedSections.set('.rodata', rodataWriter.toArrayBuffer())
-				objectRelocations.set('.data', dataPointers)
 
 				break
 			}
 			
-			default:
+			case DataType.DataBtl: {
+				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+				
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
+				
+				// ----------------  data  ----------------
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
+				}
+				
+				// model
+				symbolLocationReference.set("wld::btl::data::s_modelBattle", new Pointer(dataWriter.size))
+				// TODO: use padding amount in all data types
+				serializeObjects(data, DataType.BtlModel, binary.data.model, 1)
+				
+				// parts
+				symbolLocationReference.set("wld::btl::data::s_partsData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlPart, binary.data.part, 1)
+				
+				// unit (actor)
+				symbolLocationReference.set("wld::btl::data::s_unitData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlUnit, binary.data.unit, 1)
+				
+				// weapon range
+				for (const rangeHeader of binary.data.attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
+					const { item: attackRange, symbolName } = rangeHeader.attackRange as {item: Struct<DataType.BtlAttackRange>, symbolName: string}
+					
+					let newSymbolName = "wld::btl::data::s_weaponRangeData_" + rangeHeader.id
+					
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolNameOverrides.set(symbolName, newSymbolName)
+					
+					rangeHeader.attackRange.symbolName = newSymbolName
+					
+					serializeObjects(data, DataType.BtlAttackRange, [ attackRange ])
+				}
+				
+				// weapon range header
+				symbolLocationReference.set("wld::btl::data::s_weaponRangeDataTable", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlAttackRangeHeader, binary.data.attackRangeHeader, 1)
+				
+				// attacks
+				symbolLocationReference.set("wld::btl::data::s_weaponData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlAttack, binary.data.attack, 1)
+				
+				// event camera
+				symbolLocationReference.set("wld::btl::data::s_eventCameraData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlEventCamera, binary.data.eventCamera, 1)
+				
+				// boss attacks (godhand)
+				symbolLocationReference.set("wld::btl::data::s_godHandData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlBossAttack, binary.data.bossAttack)
+				
+				// puzzle level
+				symbolLocationReference.set("wld::btl::data::s_puzzleLevelData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlPuzzleLevel, binary.data.puzzleLevel, 1)
+				
+				// cheer terms
+				symbolLocationReference.set("wld::btl::data::s_cheerTermsData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlCheerTerms, binary.data.cheerTerm, 1)
+				
+				// cheer
+				symbolLocationReference.set("wld::btl::data::s_cheerData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlCheer, binary.data.cheer, 1)
+				
+				// resources
+				for (const resourceHeader of binary.data.resourceField as Struct<DataType.BtlResourceField>[]) {
+					const resources = resourceHeader.resources as {children: Struct<DataType.BtlResource>[], symbolName: string}
+					const { children, symbolName } = resources
+					
+					let newSymbolName = "wld::btl::data::s_resourceElementData_" + resourceHeader.id
+					
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolNameOverrides.set(symbolName, newSymbolName)
+					
+					resources.symbolName = newSymbolName
+					
+					serializeObjects(data, DataType.BtlResource, children)
+				}
+				
+				// resource fields/headers
+				symbolLocationReference.set("wld::btl::data::s_resourceData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlResourceField, binary.data.resourceField, 1)
+				
+				// settings
+				symbolLocationReference.set("wld::btl::data::s_configData", new Pointer(dataWriter.size))
+				serializeObjects(data, DataType.BtlConfig, binary.data.config, 1)
+				
+				
+				// ----------------  rodata  ----------------
+				// rodata model stuff
+				let rodataReferences: RodataReference[] = binary.data.model.map(model => 
+					[model.id, binary.modelSymbolReference.get(model), model.assetGroups, model.states])
+					
+				let rodata: SectionElements = {
+					writer: new BinaryWriter(),
+					stringRelocations: new Map(),
+					crossPointers: new Map(),
+				}
+				
+				stringRelocations.set('.rodata', rodata.stringRelocations)
+				objectRelocations.set('.rodata', rodata.crossPointers)
+				
+				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.model.length)
+				updatedSections.set('.rodata', serializedRodata)
+				
+				for (const npc of binary.data.model) {
+					binary.modelSymbolReference.set(npc, npc.id)
+				}
+				
+				break
+			}
+			
+			default: {
 				let data: SectionElements = {
 					writer: dataWriter,
 					stringRelocations: dataStringRelocations,
@@ -357,26 +480,25 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				serializeObjects(data, dataType, binary.data.main)
 				
 				let isStandardDataFile = dataType >= DataType.DataNpc && dataType < DataType.DataNpcModel
+				let isOtherSpecificDataFile = dataType == DataType.DataItemSet
+						|| dataType == DataType.DataMaplinkZoom
+						|| dataType == DataType.DataParty
 				
-				if (isStandardDataFile || dataType == DataType.DataItemSet || dataType == DataType.DataMaplinkZoom || dataType == DataType.DataParty) {
+				if (isStandardDataFile || isOtherSpecificDataFile) {
 					serializeObjects(data, dataType, [FILE_TYPES[dataType].instantiate()])
 				}
+				
 				break
+			}
 		}
 		
 		updatedSections.set('.data', dataWriter.toArrayBuffer())
 		
 		type RodataReference = [id: string, originalId: string, assetGroups: Struct<DataType.NpcFiles>[], states: Struct<DataType.NpcState>[]]
 		
-		function serializeModelRodata(rodataReferences: RodataReference[], rodataStringRelocations: Map<number, string>, rodataRelocations: Map<number, object>) {
-			const rodataWriter = new BinaryWriter()
+		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number) {
+			const rodataWriter = rodata.writer
 			
-			let rodata: SectionElements = {
-				writer: rodataWriter,
-				stringRelocations: rodataStringRelocations,
-				crossPointers: rodataRelocations,
-			}
-				
 			// .rodata section is structured like this:
 			
 			// AssetGroup[]
@@ -431,7 +553,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			
 			// step 2: serialize modelNpc_num
 			symbolLocationReference?.set(FILE_TYPES[dataType].countSymbol, new Pointer(rodataWriter.size))
-			rodataWriter.writeBigInt64(BigInt(binary.data.main.length))
+			rodataWriter.writeBigInt64(BigInt(modelNumber))
 			
 			// step 3: serialize substates, faces and animes
 			for (const [id, originalId, assetGroups, states] of rodataReferences) {
@@ -484,11 +606,29 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			writer: BinaryWriter
 			stringRelocations: Map<number, string>
 			crossPointers: Map<number, object>
+			symbolRelocations?: Map<number, SymbolName>
 		}
 		
-		function serializeObjects({writer, stringRelocations, crossPointers}: SectionElements, dataType: DataType, objects: object[], addStrings: boolean = true) {
+		/**
+		 * Serializes an array of objects of a certain data type.
+		 * @param param0 The section to be serialized into (e.g. data, rodata). Contains the BinaryWriter, string relocations and object relocations
+		 * @param dataType 
+		 * @param objects The objects to be serialized.
+		 * @param paddingAmount If positive, it will append as many zero value instances as specified. If negative, it will remove objects at the end.
+		 * @param addStrings If set to false, then the strings in the objects won't be added to the allStrings set.
+		 */
+		function serializeObjects({writer, stringRelocations, crossPointers, symbolRelocations}: SectionElements, dataType: DataType, objects: object[], paddingAmount = 0, addStrings: boolean = true) {
 			if (objects.length == 0) {
 				objectOffsets.set(objects, new Pointer(writer.size))
+			}
+			
+			if (paddingAmount > 0) {
+				let padding = Array.from({ length: paddingAmount }, FILE_TYPES[dataType].instantiate)
+				objects = [...objects, ...padding]
+			}
+			
+			if (paddingAmount < 0) {
+				objects = objects.slice(0, objects.length + paddingAmount)
 			}
 			
 			for (const instance of objects) {
@@ -509,7 +649,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 							break
 						case "symbol": 
 							if (fieldValue != null)
-								symbolRelocations.set(writer.size, fieldValue)
+								symbolRelocations.set(writer.size, fieldValue.symbolName)
 							
 							writer.writeBigInt64(0n)
 							break
@@ -572,7 +712,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// The .rodata section always contains the amount of items in .data as a 32-bit integer.
 	// In most of the file formats, this is it, the section is just 4 bytes in size.
 	// However, there are a few file formats that contain secondary data. This means that
-	// .rodata additionally contains a lot of indipendent structs or struct arrays similar to
+	// .rodata additionally contains a lot of independent structs or struct arrays similar to
 	// a heap.
 	// One example are the data_model files, which function this way, and where most of the
 	// information is actually stored in this section.
@@ -603,7 +743,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// The .rodata.str1.1 section maybe sounds like it's similar to .rodata, 
 	// but in terms of content, it's not. It contains all of the strings in the content sections
 	// (as opposed to .strtab, which contains ELF format related strings).
-	// Because we collected the strings earlier into the allStrings variable, we can now serialize
+	// Because we collected the strings earlier into the allStrings set, we can now serialize
 	// all of them.
 	// However, we need to store where the strings are located, so they can be linked to
 	// in the .rela* sections.
@@ -625,6 +765,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	
 	// In Maplink files, symbol 9 always points to the beginning of the Maplink Header
+	// TODO: use symbolLocationReference in the main data serializer above instead
 	if (dataType == DataType.Maplink) {
 		const dataSection = updatedSections.get('.data')
 		
@@ -693,6 +834,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const DEFAULT_RELOCATION_TYPE = 0x101
 	
 	{
+		// string relocations
 		const stringSectionIndex = sections.findIndex(section => section.name === ".rodata.str1.1")
 		const stringSectionSymbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3
 			&& symbol.sectionHeaderIndex == stringSectionIndex)
@@ -713,9 +855,10 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	}
 	
 	{
+		// pointer relocations
 		let destinationSection = dataType === DataType.DataUi ? ".data" : ".rodata"
-		let rodataSectionIndex = sections.findIndex(section => section.name === destinationSection)
-		let symbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3 && symbol.sectionHeaderIndex == rodataSectionIndex)
+		let destinationSectionIndex = sections.findIndex(section => section.name === destinationSection)
+		let sectionSymbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3 && symbol.sectionHeaderIndex == destinationSectionIndex)
 		
 		for (const [sectionName, sectionObjectRelocations] of objectRelocations) {
 			if (!allRelocations.has(sectionName))
@@ -730,7 +873,25 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					console.warn("No offset entry for object", target)
 				
 				if (targetLocation != Pointer.NULL && targetLocation != undefined)
-					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, symbolIndex, targetLocation))
+					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, sectionSymbolIndex, targetLocation))
+			}
+		}
+	}
+	
+	{
+		// symbol relocations
+		if (dataType != DataType.DataBtlSet && dataType != DataType.DataUi) {
+			for (const [sectionName, sectionSymbolRelocations] of symbolRelocations) {
+				if (!allRelocations.has(sectionName))
+					allRelocations.set(sectionName, [])
+				
+				let rawRelocations: Relocation[] = allRelocations.get(sectionName)
+				
+				for (const [location, targetSymbol] of sectionSymbolRelocations) {
+					debugger
+					let targetSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === targetSymbol)
+					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, targetSymbolIndex, Pointer.ZERO))
+				}
 			}
 		}
 	}

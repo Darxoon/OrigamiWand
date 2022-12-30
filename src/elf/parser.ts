@@ -638,6 +638,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let modelFilesIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
 			let stateIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.states, obj.stateCount])
 			
+			modelSymbolReference = new WeakMap(data.model.map(obj => [obj, obj.id as string]))
+			
 			parseModelRodata(data, 'model', modelFilesIndices, stateIndices)
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
@@ -685,8 +687,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let eventCameras = parseSymbol(dataSection, stringSection, eventCameraSymbol, DataType.BtlEventCamera, -1)
 			data.eventCamera = eventCameras
 			
+			// in boss attacks (godhands), what would normally be the padding zero value, actually has some numbers inside it
 			let bossAttackSymbol = findSymbol("wld::btl::data::s_godHandData")
-			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack, -1)
+			let bossAttacks = parseSymbol(dataSection, stringSection, bossAttackSymbol, DataType.BtlBossAttack)
 			data.bossAttack = bossAttacks
 			
 			let puzzleLevelSymbol = findSymbol("wld::btl::data::s_puzzleLevelData")

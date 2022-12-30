@@ -1831,7 +1831,7 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		__objectType: dataDivisions.unit,
 		
 		id: "string",
-		modelId: new Property("string", "The model found in the 'Models' tab."),
+		field_0x8: new Property("string", "Originally thought to be referencing models, but that's not true."),
 		field_0x10: new Property("string", "A sort of variant of the model? But I'm not sure what it influences exactly"),
 		description: "string",
 		textId: new Property("string", "The name of the item. Before it is displayed, it is looked up in `glossary.msbt`."),
@@ -1943,7 +1943,6 @@ Example:
 		},
 		
 		id: "string",
-		// TODO: maybe add a "reference" type that determines on context whether it's a pointer or a symbol?
 		attackRange: new Property("symbol", undefined, {tabName: "Attack Range of {id}", hidden: true}),
 	},
 	
@@ -1994,7 +1993,7 @@ Example:
 		attackRangeId: "string",
 		bossBattleVariant: "string",
 		// TODO: give field name "textId" a global description, similar to field names like id, position, etc.
-		textId: new Property("string", "The name of the attack. Before it is displayed, it is looked up in `glossary.msbt`."),
+		textId: new Property("string", "The name of the attack. Before it is displayed, it is looked up in `battle_Attack.msbt`."),
 		field_0x28: "int",
 		field_0x2c: "int",
 		field_0x30: "int",
