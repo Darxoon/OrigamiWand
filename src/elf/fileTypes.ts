@@ -872,7 +872,7 @@ The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 		onUseFunction: "string",
 		field_0xc0: "int",
 		field_0xc4: "int",
-		scriptFilename: "string",
+		battleAttackID: "string",
 	},
 	
 	[DataType.DataMap]: {
@@ -1997,17 +1997,17 @@ Example:
 		field_0x28: "int",
 		field_0x2c: "int",
 		field_0x30: "int",
-		baseAttackDamage: "int",
-		niceDamageIncrease: "int",
-		greatDamageIncrease: "int",
-		excellentDamageIncrease: "int",
+		baseValue: "int",
+		niceValueIncrease: "int",
+		greatValueIncrease: "int",
+		excellentValueIncrease: "int",
 		field_0x44: "int",
 		field_0x48: "int",
 		field_0x4c: "int",
 		field_0x50: "int",
 		field_0x54: "int",
 		field_0x58: "int",
-		damageIncreaseRange: "int",
+		valueIncreaseRange: "int",
 		field_0x60: "int",
 		field_0x64: "int",
 		field_0x68: "int",
@@ -2028,9 +2028,9 @@ Example:
 		field_0xa4: "int",
 		field_0xa8: "int",
 		field_0xac: "int",
-		field_0xb0: "int",
+		targetAttackability: new Property("int", "Ability to attack grounded or airborne enemies. 1814 for Airborne, 790 for Grounded."),
 		field_0xb4: "int",
-		field_0xb8: "int",
+		attackEffect: "int",
 		field_0xbc: "int",
 		field_0xc0: "int",
 		field_0xc4: "int",
@@ -2051,10 +2051,12 @@ The tier of the attack. Possible values:
 For some reason, the naming scheme of the attacks themselves does not say much about the tier.
 Many with the tier 'kirakira' only have 'kira' in their name while many 'kira' attacks do not have
 any indicator in ther name.`),
-		elementType: new Property("int", `
-Bit field for the element type. Possible values:
+		gFXType: new Property("int", `
+Bit field for the attack GFX type. Known values:
 
 * 2 - normal
+* 128 - earth
+* 256 - water
 * 512 - fire
 * 1024 - ice
 * ...`),
