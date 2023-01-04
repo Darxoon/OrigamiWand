@@ -853,9 +853,9 @@ The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 * 'C' for accessories and 'K' for key items
 `),
 		field_0x68: "bool8",
-		field_0x69: "bool8",
-		field_0x6a: "bool8",
-		field_0x6b: "bool8",
+		useInBattle: "bool8",
+		useInField: "bool8",
+		useInMenu: "bool8",
 		field_0x6c: "int",
 		field_0x70: "int",
 		field_0x74: "int",
@@ -1802,17 +1802,35 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		attackPosition10: new Property("string", "Position where this actor can be attacked from in boss battles."),
 		attackPosition11: new Property("string", "Position where this actor can be attacked from in boss battles."),
 		attackPosition12: new Property("string", "Position where this actor can be attacked from in boss battles."),
-		field_0xf8: "int",
+		defenseType: new Property("int", `
+Determines if an enemy is Grounded, Floating, Flying etc.
+To give mutiple attributes, pick them and add them together. Known Values:
+
+* 1 = Grounded
+* 2 = Floating
+* 4 = Flying
+* 16 = On Fire
+* 32 = Is Cold?
+* 256 = Spiked
+* 2048 = Transforms
+* 4096 = Flippable`),
 		field_0xfc: "int",
 		field_0x100: "int",
-		field_0x104: "int",
-		field_0x108: "int",
-		field_0x10c: "int",
-		field_0x110: "int",
-		field_0x114: "int",
-		field_0x118: "int",
-		field_0x11c: "int",
-		field_0x120: "int",
+		jumpResistance: new Property("int", `
+Resistance to this type of attack.
+Known Values:
+
+* -998621184 = 1.5 Damage
+* -998440960 = 0.5 Damage
+* -998653952 = No Damage
+* -990240768 = Does 2 Damage`),
+		hammerResistance: "int",
+		throwHammerResistance: "int",
+		powResistance: "int",
+		earthResistance: "int",
+		waterResistance: "int",
+		fireResistance: "int",
+		iceResistance: "int",
 		field_0x124: "int",
 		field_0x128: "int",
 		field_0x12c: "int",
@@ -2030,7 +2048,22 @@ Example:
 		field_0xac: "int",
 		targetAttackability: new Property("int", "Ability to attack grounded or airborne enemies. 1814 for Airborne, 790 for Grounded."),
 		field_0xb4: "int",
-		attackEffect: "int",
+		attackType: new Property("int", `
+Determines if an attack is Jump, Hammer, Pow etc.
+To give mutiple attributes, pick them and add them together. Known Values:
+
+* 1 = Jump
+* 2 = Hammer
+* 4 = Normal
+* 8 = Shell
+* 16 = Item
+* 32 = Magic
+* 64 = Pow
+* 128 = Tail
+* 256 = Fire
+* 512 = Ice
+* 1024 = Earth
+* 2048 = Water`),
 		field_0xbc: "int",
 		field_0xc0: "int",
 		field_0xc4: "int",
