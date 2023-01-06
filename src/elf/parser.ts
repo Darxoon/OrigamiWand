@@ -4,6 +4,7 @@ import type { Struct } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
 import { demangle } from "./nameMangling";
 import { Relocation, Section, Symbol } from "./types";
+import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
 
 type Typedef<T> = {[fieldName: string]: T}
 
@@ -859,6 +860,8 @@ function parseRawDataSection(section: Section, count: number, initialPosition: n
 	
 	function objFromReader(reader: BinaryReader, typedef: {[fieldName: string]: string}): object {
 		let result = {}
+		
+		result[VALUE_UUID] = ValueUuid()
 		
 		for (const [fieldName, fieldType] of Object.entries(typedef)) {
 			
