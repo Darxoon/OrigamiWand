@@ -1,5 +1,7 @@
+import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
+
 export interface IndexValue {
-    obj: object,
+    obj: UuidTagged,
     field: string,
     value: string,
 }

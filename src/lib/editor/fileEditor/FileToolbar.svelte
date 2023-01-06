@@ -4,6 +4,7 @@
     import type { SearchIndex } from "../search/searchIndex";
 	
 	export let searchIndex: SearchIndex
+	export let searchTerm: string = ""
 	export let searchResults: SearchIndex = undefined
 	
 	const dispatch = createEventDispatcher()
@@ -18,7 +19,7 @@
 		<div class="icon"><i data-feather="x"></i></div>
 		Delete all Objects
 	</div>
-	<SearchBar index={searchIndex} bind:results={searchResults} />
+	<SearchBar index={searchIndex} bind:searchTerm={searchTerm} bind:results={searchResults} />
 </div>
 
 <style>

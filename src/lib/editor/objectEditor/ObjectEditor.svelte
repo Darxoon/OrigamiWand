@@ -27,7 +27,7 @@
 	
 	export let open = false
 	
-	export let highlightedFields: Set<string> = new Set()
+	export let highlightedFields: string[] = []
 	
 	$: entries = Object.entries(obj)
 	
@@ -51,6 +51,9 @@
 	}
 	
 	onMount(() => {
+		// @ts-ignore
+		feather.replace()
+		
 		function viewportCheck() {
 			if (!hasEnteredViewport && editor?.getBoundingClientRect().y < window.innerHeight) {
 				hasEnteredViewport = true
@@ -120,7 +123,7 @@
 			{#if !(FILE_TYPES[dataType].metadata[field]?.hidden ?? false)}
 				
 				<!-- Field Label -->
-				<div class="key" class:highlighted={highlightedFields?.has(field)} 
+				<div class="key" class:highlighted={highlightedFields?.includes(field)} 
 				class:bold={!field.startsWith('field_')} bind:this={entryLabelElements[i]} 
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 					{toReadableString(field)}

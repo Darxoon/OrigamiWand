@@ -1,61 +1,46 @@
 <script lang="ts">
 	import { afterUpdate, createEventDispatcher } from "svelte";
-	
 	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-	import { demangle, incrementName, mangleIdentifier } from "paper-mario-elfs/nameMangling";
-	
 	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
-	import SearchBar from '../search/SearchBar.svelte';
 	import type { SearchIndex } from "../search/searchIndex";
-	import { duplicateElfObject } from "paper-mario-elfs/util";
     import FileToolbar from "./FileToolbar.svelte";
+    import BasicObjectArray from "./objectList/BasicObjectArray.svelte";
+    import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
 
 	const dispatch = createEventDispatcher()
 	
-	export let objectTitle: string
-	export let objects: object[] = []
-	export let headerObject: object = undefined
-	export let dataType: DataType | undefined = undefined
-	export let importantFieldName: string | undefined = undefined
-	export let metadataObject: any = undefined
-	export let parent: any = undefined
 	export let binary: ElfBinary = undefined
+	export let dataType: DataType | undefined = undefined
 	
-	let editorElements: ObjectEditor[] = []
-	// let afterUpdateObjects = undefined
+	export let headerObject: object = undefined
 	
-	let loadedObjectCount = 120
+	let arrayComponent: BasicObjectArray
+	
+	let addingNewObject = false
+	let searchTerm = ""
+	let searchResults: SearchIndex
+	
+	$: objects = binary.data[FILE_TYPES[dataType].objectType]
+	$: index = createIndex(objects)
+	
+	
+	$: searchResultObjects = searchResults && [...new Set(searchResults.map(result => result.obj))]
+	$: highlightedFields = searchResults && new WeakMap(
+		searchResultObjects.map(obj => [
+			obj, 
+			searchResults.filter(result => result.obj == obj).map(result => result.field),
+		]))
 	
 	export function collapseAll() {
-		editorElements.forEach(editor => editor.open = false)
+		arrayComponent.collapseAll()
 	}
 	
 	export function expandAll() {
-		editorElements.forEach(editor => editor.open = true)
+		arrayComponent.expandAll()
 	}
 	
-	function deleteObject(obj: object) {
-		let index = objects.indexOf(obj)
-		objects = []
-		dispatch('delete', { index })
-	}
-	
-	
-	function duplicateObject(obj: object) {
-		objectToClone = obj
-		backupObjects = objects
-		objects = []
-	}
-	
-	let backupObjects: any[] = undefined
-	let objectToClone = undefined
-	
-	let addingNewObject = false
-	
-	$: index = createIndex(objects)
-	
-	function createIndex(objects: object[]) {
+	function createIndex(objects: UuidTagged[]) {
 		let index: SearchIndex = []
 		
 		for (const obj of objects) {
@@ -77,48 +62,11 @@
 		// @ts-ignore
 		feather.replace()
 		
-		if (objectToClone) {
-			console.warn('cloning', DataType[dataType], objectToClone.id)
-			let clone = duplicateElfObject(binary, dataType, backupObjects, objectToClone)
-			objects = backupObjects
-			
-			if (dataType >= DataType.DataNpcModel && dataType < DataType.DataModelEnd) {
-				binary.modelSymbolReference.set(clone, clone.id)
-				// duplicate all symbols related to this
-				// reverse loop to prevent duplicated symbols from being duplicated again
-				
-				// TODO: why do this? just create all nonexistant symbols during serialization
-				// also, this only works for data_*_model files
-				console.log('dasf')
-				for (let i = binary.symbolTable.length - 1; i >= 0; i--) {
-					const symbol = binary.symbolTable[i]
-					let match = demangle(symbol.name).match(/^wld::fld::data:::(\w+)(_(?:model_files|state|anime)\w*)$/)
-					if (match && match[1] == binary.modelSymbolReference.get(objectToClone)) {
-						console.log(demangle(symbol.name))
-						let clonedSymbol = symbol.clone()
-						clonedSymbol.name = mangleIdentifier(`wld::fld::data:::${clone.id}${match[2]}`)
-						binary.symbolTable.splice(i + 1, 0, clonedSymbol)
-					}
-				}
-			}
-			
-			objectToClone = undefined
-		}
-		
 		if (addingNewObject) {
 			addingNewObject = false
-			
-			editorElements[objects.length - 1]?.scrollIntoView()
+			arrayComponent.scrollIntoView(objects[objects.length - 1])
 		}
 	})
-	
-	let searchResults: SearchIndex
-	$: searchResultObjects = searchResults && [...new Set(searchResults.map(result => result.obj))]
-	$: searchResultFields = searchResults && new WeakMap(
-		searchResultObjects.map(obj => [
-			obj, 
-			searchResults.filter(result => result.obj == obj).map(result => result.field),
-		]))
 	
 	function addObject() {
 		dispatch('addObject', {
@@ -134,45 +82,22 @@
 </script>
 
 <div class="editor">
-	<FileToolbar on:add={addObject} on:clear={deleteAll} searchIndex={index} bind:searchResults={searchResults} />
-	
-	<!-- TODO: this is a data_btlSet thing, this should be removed -->
-	{#if metadataObject}
-		<ObjectEditor title="General Information" bind:obj={metadataObject} dataType={DataType.Metadata} 
-			on:valueChanged={e => {if (parent && parent.applyChangedValue) parent.applyChangedValue()}} showButtons={false} />
-	{/if}
+	<FileToolbar on:add={addObject} on:clear={deleteAll} searchIndex={index} bind:searchTerm={searchTerm} bind:searchResults={searchResults} />
 	
 	<div class="listing" style="--content-height: {objects?.length * 61}px;">
-		{#if searchResultObjects}
+		{#if searchResults}
 			<div class="resultlabel">Showing {searchResultObjects.length} results
 				(out of {objects.length} objects):</div>
-		{/if}
-		
-		{#if searchResults}
-			{#each searchResultObjects as obj, i}
-				{#if i < loadedObjectCount}
-					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} bind:obj={obj} dataType={dataType}
-						title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}"
-						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
-						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
-						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
-				{/if}
-			{/each}
+			
+			<BasicObjectArray binary={binary} dataType={dataType} objects={searchResultObjects} highlightedFields={highlightedFields} />
 		{:else}
-			{#each objects as obj, i}
-				{#if i < loadedObjectCount}
-					<ObjectEditor bind:this={editorElements[objects.indexOf(obj)]} title="{objectTitle} {objects.indexOf(obj)}: {obj[importantFieldName]}" bind:obj={obj} dataType={dataType}
-						highlightedFields={searchResultFields && new Set(searchResultFields.get(obj))}
-						on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(obj)} on:open binary={binary}
-						on:appear={e => {if (loadedObjectCount < i + 40) loadedObjectCount = i + 200}} />
-				{/if}
-			{/each}
+			<BasicObjectArray bind:this={arrayComponent} binary={binary} dataType={dataType} objects={objects} />
 		{/if}
 	</div>
 	
 	<!-- TODO: use a dedicated special elf editor instead -->
 	{#if dataType === DataType.Maplink}
-		<ObjectEditor bind:this={editorElements[objects.length]} title={`Maplink Header (Advanced)`} bind:obj={headerObject} 
+		<ObjectEditor title={`Maplink Header (Advanced)`} bind:obj={headerObject} 
 			dataType={DataType.MaplinkHeader} showButtons={false} />
 	{/if}
 </div>

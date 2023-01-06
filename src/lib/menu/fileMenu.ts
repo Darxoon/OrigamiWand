@@ -4,7 +4,7 @@ import TextAlert from "$lib/modal/TextAlert.svelte"
 import DataTypePrompt from "$lib/modals/DataTypePrompt.svelte"
 import { globalEditorStrip, loadedAutosave } from "$lib/stores"
 import { compress, decompress, downloadBlob, loadFile, Tab } from "$lib/util"
-import type { ElfBinary } from "paper-mario-elfs/elfBinary"
+import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary"
 import parseElfBinary, { EmptyFileError } from "paper-mario-elfs/parser"
 import serializeElfBinary from "paper-mario-elfs/serializer"
 
@@ -56,6 +56,15 @@ function openFileSelector() {
 
 		if (!dataType) {
 			return
+		}
+		
+		console.log(DataType[dataType])
+		
+		if (dataType === DataType.DataBtlSet) {
+			// TODO: remove once data_btlSet has been revamped
+			alert("\
+Warning: The file type data_btlSet is currently not supported fully. \
+When proceeding, you are likely going to encounter bugs.")
 		}
 		
 		const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
