@@ -1,5 +1,6 @@
 import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { Vector3 } from "./misc";
+import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
 
 export type Typedef<T> = {[fieldName: string]: T}
 
@@ -872,7 +873,7 @@ The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 		onUseFunction: "string",
 		field_0xc0: "int",
 		field_0xc4: "int",
-		battleAttackID: "string",
+		battleAttackId: "string",
 	},
 	
 	[DataType.DataMap]: {
@@ -2558,6 +2559,7 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 		
 		instantiate(): object {
 			let result = {}
+			result[VALUE_UUID] = ValueUuid()
 			for (const [fieldName, type] of Object.entries(filteredTypedef)) {
 				let typeString = type instanceof Property ? type.type : type as string
 				result[fieldName] = typeString === "string" || typeString === "symbol"
