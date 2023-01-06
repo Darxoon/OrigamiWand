@@ -1816,32 +1816,32 @@ To give mutiple attributes, pick them and add them together. Known Values:
 * 4096 = Flippable`),
 		field_0xfc: "int",
 		field_0x100: "int",
-		jumpResistance: new Property("int", `
+		jumpResistance: new Property("float", `
 Resistance to this type of attack.
 Known Values:
 
-* -998621184 = 1.5 Damage
-* -998440960 = 0.5 Damage
-* -998653952 = No Damage
-* -990240768 = Does 2 Damage`),
-		hammerResistance: "int",
-		throwHammerResistance: "int",
-		powResistance: "int",
-		earthResistance: "int",
-		waterResistance: "int",
-		fireResistance: "int",
-		iceResistance: "int",
-		field_0x124: "int",
-		field_0x128: "int",
-		field_0x12c: "int",
-		field_0x130: "int",
-		field_0x134: "int",
-		field_0x138: "int",
-		field_0x13c: "int",
-		field_0x140: "int",
-		field_0x144: "int",
-		field_0x148: "int",
-		field_0x14c: "int",
+* -1012.0 = -998440960 = 0.5 Damage
+* -999.0 = -998653952 = No Damage
+* -2001.0 = -990240768 = Does 2 Damage
+* ? = Does 1.5 damage`),
+		hammerResistance: "float",
+		throwHammerResistance: "float",
+		powResistance: "float",
+		earthResistance: "float",
+		waterResistance: "float",
+		fireResistance: "float",
+		iceResistance: "float",
+		field_0x124: "float",
+		field_0x128: "float",
+		field_0x12c: "float",
+		field_0x130: "float",
+		field_0x134: "float",
+		field_0x138: "float",
+		field_0x13c: "float",
+		field_0x140: "float",
+		field_0x144: "float",
+		field_0x148: "float",
+		field_0x14c: "float",
 	},
 	
 	[DataType.BtlUnit]: {
