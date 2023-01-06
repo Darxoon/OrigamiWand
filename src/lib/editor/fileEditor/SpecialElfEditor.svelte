@@ -23,6 +23,6 @@
 	<InnerDataUiEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
 			bind:this={inner} self={inner} on:addObject on:delete on:open />
 {:else}
-	<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
+	<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary}
 			bind:this={inner} self={inner} on:addObject on:delete on:open />
 {/if}

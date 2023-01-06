@@ -13,8 +13,6 @@
 	export let binary: ElfBinary = undefined
 	export let dataType: DataType | undefined = undefined
 	
-	export let headerObject: object = undefined
-	
 	let arrayComponent: BasicObjectArray
 	
 	let addingNewObject = false
@@ -97,8 +95,8 @@
 	
 	<!-- TODO: use a dedicated special elf editor instead -->
 	{#if dataType === DataType.Maplink}
-		<ObjectEditor title={`Maplink Header (Advanced)`} bind:obj={headerObject} 
-			dataType={DataType.MaplinkHeader} showButtons={false} />
+		<ObjectEditor title={`Maplink Header (Advanced)`} bind:obj={binary.data.main[0]} 
+			dataType={DataType.MaplinkHeader} showButtons={false} binary={binary} />
 	{/if}
 </div>
 

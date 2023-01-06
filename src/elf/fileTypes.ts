@@ -2011,7 +2011,6 @@ Example:
 		field_0x8: "string",
 		attackRangeId: "string",
 		bossBattleVariant: "string",
-		// TODO: give field name "textId" a global description, similar to field names like id, position, etc.
 		textId: new Property("string", "The name of the attack. Before it is displayed, it is looked up in `battle_Attack.msbt`."),
 		field_0x28: "int",
 		field_0x2c: "int",
