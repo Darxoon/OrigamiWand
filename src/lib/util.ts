@@ -91,40 +91,32 @@ export function compress(buffer: ArrayBuffer) {
 	})
 }
 
+const nonStandardDataTypes = new Set([
+	DataType.DataBtlSet,
+	DataType.DataConfettiTotalHoleInfo,
+	DataType.DataUi,
+	DataType.DataBtl,
+])
+
 export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-	// TODO: this is awful
-    if (dataType === DataType.DataBtlSet || dataType === DataType.DataConfettiTotalHoleInfo || dataType === DataType.DataUi || dataType === DataType.DataBtl) {
-        return {
-            id: Symbol(),
-            name: fileName,
-            component: SpecialElfEditor,
-            children: [],
-            isCompressed,
-            properties: {
-                dataType,
-                binary,
-                fileName,
-            },
-        }
-    } else {
-        return {
-            id: Symbol(),
-            name: fileName,
-            component: ElfEditor,
-            children: [],
-            isCompressed,
-            properties: {
-                objectTitle: FILE_TYPES[dataType].displayName,
-                binary,
-                objects: dataType === DataType.Maplink
-                    ? binary.data.maplinkNodes
-                    : binary.data.main,
-                headerObject: dataType === DataType.Maplink ? binary.data.main[0] : undefined,
-                importantFieldName: FILE_TYPES[dataType].identifyingField,
-                dataType,
-            },
-        }
-    }
+	let isNonStandard = nonStandardDataTypes.has(dataType)
+	
+	let properties: any = {
+		binary,
+		dataType,
+	}
+	
+	if (isNonStandard)
+		properties.fileName = fileName
+	
+	return {
+		id: Symbol(),
+		name: fileName,
+		component: isNonStandard ? SpecialElfEditor : ElfEditor,
+		children: [],
+		isCompressed,
+		properties,
+	}
 }
 
 export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {
