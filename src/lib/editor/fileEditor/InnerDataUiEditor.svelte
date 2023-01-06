@@ -44,9 +44,9 @@
 				properties: {
 					objectTitle: FILE_TYPES[dataType].displayName,
 					objects: binary.data[dataDivision],
-					dataType: dataType,
 					importantFieldName: FILE_TYPES[dataType].identifyingField,
 					parent: self,
+					dataType,
 					binary,
 				}
 			})

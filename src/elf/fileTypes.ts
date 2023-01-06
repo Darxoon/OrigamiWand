@@ -1163,7 +1163,7 @@ Seems to indicate whether the Puzzle Solver from the battle lab should show a ci
 	
 	/**
 	 * This is a metadata object in data_btlSet fight/element objects.
-	 * The fact that this data type exists is so stupid.
+	 * TODO: The fact that this data type exists is so stupid.
 	 */
 	[DataType.Metadata]: {
 		symbolName: new Property("string", "The identifier of this fight.", {noSpaces: true}),

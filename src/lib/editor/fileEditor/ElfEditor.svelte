@@ -9,6 +9,7 @@
 	import SearchBar from '../search/SearchBar.svelte';
 	import type { SearchIndex } from "../search/searchIndex";
 	import { duplicateElfObject } from "paper-mario-elfs/util";
+    import FileToolbar from "./FileToolbar.svelte";
 
 	const dispatch = createEventDispatcher()
 	
@@ -133,20 +134,9 @@
 </script>
 
 <div class="editor">
-	<div class="toolbar">
-		<div class="card btn" on:click={addObject}>
-			<div class="icon"><i data-feather="plus"></i></div>
-			<span>Add new Object</span>
-		</div>
-		<div class="card btn" on:click={deleteAll}>
-			<div class="icon"><i data-feather="x"></i></div>
-			Delete all Objects
-		</div>
-		<SearchBar index={index} bind:results={searchResults} />
-	</div>
-		
-	<!-- <div class="toolbar">Yes</div> -->
+	<FileToolbar on:add={addObject} on:clear={deleteAll} searchIndex={index} bind:searchResults={searchResults} />
 	
+	<!-- TODO: this is a data_btlSet thing, this should be removed -->
 	{#if metadataObject}
 		<ObjectEditor title="General Information" bind:obj={metadataObject} dataType={DataType.Metadata} 
 			on:valueChanged={e => {if (parent && parent.applyChangedValue) parent.applyChangedValue()}} showButtons={false} />
@@ -180,6 +170,7 @@
 		{/if}
 	</div>
 	
+	<!-- TODO: use a dedicated special elf editor instead -->
 	{#if dataType === DataType.Maplink}
 		<ObjectEditor bind:this={editorElements[objects.length]} title={`Maplink Header (Advanced)`} bind:obj={headerObject} 
 			dataType={DataType.MaplinkHeader} showButtons={false} />

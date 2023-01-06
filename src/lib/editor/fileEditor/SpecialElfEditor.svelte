@@ -8,7 +8,7 @@
 	export let binary: ElfBinary
 	export let fileName: string
 	
-	let inner: InnerSpecialSvelteEditor
+	let inner
 	
 	export function collapseAll() {
 		inner.collapseAll()
