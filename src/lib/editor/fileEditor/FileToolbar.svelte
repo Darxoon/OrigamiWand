@@ -20,3 +20,44 @@
 	</div>
 	<SearchBar index={searchIndex} bind:results={searchResults} />
 </div>
+
+<style>
+	.toolbar {
+		margin: 1rem auto 2rem auto;
+		max-width: 54rem;
+		
+		display: flex;
+		user-select: none;
+	}		
+		
+	.toolbar div {
+		margin-right: 0.5rem;
+	}
+	
+	.toolbar div:last-child {
+		margin-right: 0;
+	}
+	
+	.btn {
+		height: 20px;
+	}
+	
+	.btn:hover {
+		background: #d2d2d2;
+	}
+	
+	.btn:active, .btn:focus {
+		background: #808080;
+	}
+	
+	.btn .icon {
+		float: left;
+		height: 24px;
+		width: 24px;
+		margin: -1px 0 0 -5px;
+	}
+	
+	.btn span {
+		margin-top: -1px;
+	}
+</style>
