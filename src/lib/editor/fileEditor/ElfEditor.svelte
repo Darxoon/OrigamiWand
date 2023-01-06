@@ -178,49 +178,6 @@
 </div>
 
 <style lang="scss">
-	.toolbar {
-		/* display: flex; */
-		margin: 1rem auto 2rem auto;
-		max-width: 54rem;
-		
-		display: flex;
-		// transform: translateX(-12px);
-		
-		user-select: none;
-				
-		div {
-			margin-right: 0.5rem;
-		}
-		
-		div:last-child {
-			margin-right: 0;
-		}
-		
-		.btn {
-			height: 20px;
-			
-			.icon {
-				float: left;
-				height: 24px;
-				width: 24px;
-				// margin: -2px 0 0 0;
-				margin: -1px 0 0 -5px;
-			}
-			
-			span {
-				margin-top: -1px;
-			}
-		}
-		
-		.btn:hover {
-			background: #d2d2d2;
-		}
-		
-		.btn:active, .btn:focus {
-			background: #808080;
-		}
-	}
-	
 	.resultlabel {
 		font-size: 17pt;
 		color: white;
