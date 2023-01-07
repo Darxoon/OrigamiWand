@@ -21,8 +21,8 @@
 
 {#if dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)}
 	<InnerDataUiEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
-			bind:this={inner} self={inner} on:delete on:open />
+			bind:this={inner} self={inner} on:open />
 {:else}
 	<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary}
-			bind:this={inner} self={inner} on:delete on:open />
+			bind:this={inner} self={inner} on:open />
 {/if}

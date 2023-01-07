@@ -101,16 +101,6 @@
 						editorWindows[0]?.setActive()
 					}
 				}}
-				on:delete={e => {
-					let index = e.detail.index
-					if (typeof index === 'undefined') {
-						tabList[selectedTabs[i]].properties.objects.length = 0
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					} else {
-						tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 1)
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					}
-				}}
 				on:dockTab={e => {
 					let { tab, isRight } = e.detail
 					tabs.splice(isRight ? i + 1 : i, 0, [tab])

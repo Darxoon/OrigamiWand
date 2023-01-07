@@ -32,7 +32,8 @@
 	}
 	
 	function deleteAll() {
-		dispatch('delete', {})
+		// TODO: implement for SpecialElfEditor
+		alert("Currently not available, duplicate an existing object instead")
 	}
 </script>
 

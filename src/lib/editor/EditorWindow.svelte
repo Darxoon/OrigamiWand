@@ -287,7 +287,7 @@ Do you want to close those too?`,
 		
 		{#each tabs as tab, i}
 			<div class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:delete on:open on:valueChanged />
+				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
 			</div>
 		{/each}
 		
