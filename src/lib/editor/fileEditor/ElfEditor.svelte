@@ -74,7 +74,8 @@
 	}
 	
 	function deleteAll() {
-		dispatch('delete', {})
+		objects.length = 0
+		objects = objects
 	}
 </script>
 
