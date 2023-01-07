@@ -27,9 +27,8 @@
 	}
 	
 	function addObject() {
-		dispatch('addObject', {
-			obj: FILE_TYPES[dataType].instantiate(),
-		})
+		// TODO: implement for SpecialElfEditor
+		alert("Currently not available, duplicate an existing object instead")
 	}
 	
 	function deleteAll() {
