@@ -67,9 +67,8 @@
 	})
 	
 	function addObject() {
-		dispatch('addObject', {
-			obj: FILE_TYPES[dataType].instantiate(),
-		})
+		objects.push(FILE_TYPES[dataType].instantiate())
+		objects = objects
 		
 		addingNewObject = true
 	}
