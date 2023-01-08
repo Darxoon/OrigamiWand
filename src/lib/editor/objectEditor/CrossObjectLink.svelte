@@ -41,6 +41,7 @@
 			properties: {
 				binary,
 				dataType: targetDataType,
+				overrideObjects: targetObjects,
 			}
 		})
 	}

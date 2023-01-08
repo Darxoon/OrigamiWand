@@ -72,11 +72,12 @@
 							properties: {
 								binary,
 								dataType: DataType.BtlSetCategory,
+								overrideObjects: obj.objects,
 							}
 						})
 					}}>View Set Data (probably scripted fights)</div>
 					
-					{#each obj.childObjects as child, j}
+					{#each obj.childObjects as child}
 						<div class="card fight" on:click={e => {
 							dispatch("open", {
 								type: "window",
@@ -85,6 +86,7 @@
 								properties: {
 									binary,
 									dataType: DataType.BtlSetElement,
+									overrideObjects: child.objects,
 									parent: self,
 								}
 							})

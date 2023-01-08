@@ -8,10 +8,10 @@
     import BasicObjectArray from "./objectList/BasicObjectArray.svelte";
     import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
 
-	const dispatch = createEventDispatcher()
-	
-	export let binary: ElfBinary = undefined
-	export let dataType: DataType | undefined = undefined
+	export let binary: ElfBinary
+	export let dataType: DataType
+	// TODO: will be replaced by separate tab object types for implicit objects or explicitly added objects
+	export let overrideObjects: UuidTagged[] | undefined = undefined
 	
 	let arrayComponent: BasicObjectArray
 	
@@ -19,7 +19,7 @@
 	let searchTerm = ""
 	let searchResults: SearchIndex
 	
-	$: objects = binary.data[FILE_TYPES[dataType].objectType]
+	$: objects = overrideObjects ?? binary.data[FILE_TYPES[dataType].objectType]
 	$: index = createIndex(objects)
 	
 	
@@ -87,9 +87,9 @@
 			<div class="resultlabel">Showing {searchResultObjects.length} results
 				(out of {objects.length} objects):</div>
 			
-			<BasicObjectArray binary={binary} dataType={dataType} objects={searchResultObjects} highlightedFields={highlightedFields} />
+			<BasicObjectArray on:open binary={binary} dataType={dataType} objects={searchResultObjects} highlightedFields={highlightedFields} />
 		{:else}
-			<BasicObjectArray bind:this={arrayComponent} binary={binary} dataType={dataType} objects={objects} />
+			<BasicObjectArray on:open bind:this={arrayComponent} binary={binary} dataType={dataType} objects={objects} />
 		{/if}
 	</div>
 	

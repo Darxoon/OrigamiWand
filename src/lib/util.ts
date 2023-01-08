@@ -98,7 +98,7 @@ const nonStandardDataTypes = new Set([
 	DataType.DataBtl,
 ])
 
-export function Tab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
+export function createFileTab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
 	let isNonStandard = nonStandardDataTypes.has(dataType)
 	
 	let properties: any = {
