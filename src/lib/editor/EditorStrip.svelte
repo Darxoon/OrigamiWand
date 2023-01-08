@@ -108,7 +108,7 @@
 				}}
 				on:open={e => {
 					if (e.detail.type === "window") {
-						const { title, shortTitle, component, properties, isCompressed } = e.detail
+						const { title, component, properties, isCompressed } = e.detail
 						
 						const childID = Symbol(`Tab ID ${title}`)
 						

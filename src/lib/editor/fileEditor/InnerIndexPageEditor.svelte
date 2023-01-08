@@ -42,12 +42,9 @@
 				title: `${name} (${fileName})`,
 				component: ElfEditor,
 				properties: {
-					objectTitle: FILE_TYPES[dataType].displayName,
-					objects: binary.data[dataDivision],
-					importantFieldName: FILE_TYPES[dataType].identifyingField,
-					parent: self,
-					dataType,
 					binary,
+					dataType,
+					parent: self,
 				}
 			})
 		}}>

@@ -888,7 +888,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				let rawRelocations: Relocation[] = allRelocations.get(sectionName)
 				
 				for (const [location, targetSymbol] of sectionSymbolRelocations) {
-					debugger
 					let targetSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === targetSymbol)
 					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, targetSymbolIndex, Pointer.ZERO))
 				}
