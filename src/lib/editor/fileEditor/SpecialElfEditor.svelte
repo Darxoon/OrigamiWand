@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
     import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";
-    import InnerDataUiEditor from "./InnerDataUiEditor.svelte";
+    import InnerIndexPageEditor from "./InnerIndexPageEditor.svelte";
 	import InnerSpecialSvelteEditor from "./InnerSpecialSvelteEditor.svelte";
 	
 	export let dataType: DataType
@@ -20,7 +20,7 @@
 </script>
 
 {#if dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)}
-	<InnerDataUiEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
+	<InnerIndexPageEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
 			bind:this={inner} self={inner} on:open />
 {:else}
 	<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary}

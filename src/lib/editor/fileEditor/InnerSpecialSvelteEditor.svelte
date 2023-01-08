@@ -68,14 +68,10 @@
 						dispatch("open", {
 							type: "window",
 							title: `Set Data of ${obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)}`,
-							shortTitle: obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length),
 							component: ElfEditor,
 							properties: {
-								objectTitle: FILE_TYPES[DataType.BtlSetCategory].displayName,
-								objects: obj.objects,
-								importantFieldName: FILE_TYPES[DataType.BtlSetCategory].identifyingField,
-								dataType: DataType.BtlSetCategory,
 								binary,
+								dataType: DataType.BtlSetCategory,
 							}
 						})
 					}}>View Set Data (probably scripted fights)</div>
@@ -85,16 +81,11 @@
 							dispatch("open", {
 								type: "window",
 								title: `Fight ${child.symbolName.slice('wld::btl::data::s_setElementData_'.length)}`,
-								shortTitle: child.symbolName.slice('wld::btl::data::s_setElementData_'.length),
 								component: ElfEditor,
 								properties: {
-									objectTitle: FILE_TYPES[DataType.BtlSetElement].displayName,
-									objects: obj.childObjects[j].objects,
-									importantFieldName: FILE_TYPES[DataType.BtlSetElement].identifyingField,
-									dataType: DataType.BtlSetElement,
-									metadataObject: obj.childObjects[j],
-									parent: self,
 									binary,
+									dataType: DataType.BtlSetElement,
+									parent: self,
 								}
 							})
 						}}>Open Fight "{child.symbolName.startsWith('wld::btl::data::s_setElementData_') ? child.symbolName.slice('wld::btl::data::s_setElementData_'.length) : child.symbolName}"</div>
