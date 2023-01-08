@@ -70,6 +70,8 @@
 				select.value = DataType[type]
 				selectedIndex = select.selectedIndex
 				okButton.disabled = false
+				
+				break
 			}
 		}
 		
