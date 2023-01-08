@@ -13,6 +13,11 @@
 	let objectEditors: ObjectEditor[] = []
 	let areEditorsOpen: boolean[] = []
 	
+	$: if (objects.find(x => x[VALUE_UUID] == undefined) != undefined) {
+		console.error("Not all objects have a UUID")
+		debugger
+	}
+	
 	export function scrollIntoView(object?: UuidTagged) {
 		let index = object ? objects.indexOf(object) : objects.length - 1
 		objectEditors[index].scrollIntoView()

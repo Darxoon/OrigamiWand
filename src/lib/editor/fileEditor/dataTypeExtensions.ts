@@ -14,31 +14,24 @@ const complexEditorCategories = {
 	[DataType.DataUi]: {
 		"Models": {
 			dataType: DataType.UiModel,
-			dataDivision: dataDivisions.model,
 		},
 		"Messages": {
 			dataType: DataType.UiMsg,
-			dataDivision: dataDivisions.msg,
 		},
 		"Shops": {
 			dataType: DataType.UiShop,
-			dataDivision: dataDivisions.shop,
 		},
 		"Sea Map": {
 			dataType: DataType.UiSeaMap,
-			dataDivision: dataDivisions.seaEntry,
 		},
 		"Menus": {
 			dataType: DataType.UiMenu,
-			dataDivision: dataDivisions.menu,
 		},
 		"Announcements": {
 			dataType: DataType.UiAnnouncement,
-			dataDivision: dataDivisions.announcement,
 		},
 		"Announcement Excludes": {
 			dataType: DataType.UiAnnouncementExclude,
-			dataDivision: dataDivisions.announcementExclude,
 		},
 	},
 	
@@ -46,51 +39,39 @@ const complexEditorCategories = {
 		"Actors": {
 			label: "Actors (all characters in battle)",
 			dataType: DataType.BtlUnit,
-			dataDivision: dataDivisions.unit,
 		},
 		"Models": {
 			dataType: DataType.BtlModel,
-			dataDivision: dataDivisions.model,
 		},
 		"Parts": {
 			dataType: DataType.BtlPart,
-			dataDivision: dataDivisions.part,
 		},
 		"Attacks": {
 			dataType: DataType.BtlAttack,
-			dataDivision: dataDivisions.attack,
 		},
 		"Attack Ranges": {
 			dataType: DataType.BtlAttackRangeHeader,
-			dataDivision: dataDivisions.attackRangeHeader,
 		},
 		"Boss Attacks": {
 			dataType: DataType.BtlBossAttack,
-			dataDivision: dataDivisions.bossAttack,
 		},
 		"Event Cameras": {
 			dataType: DataType.BtlEventCamera,
-			dataDivision: dataDivisions.eventCamera,
 		},
 		"Puzzle Levels": {
 			dataType: DataType.BtlPuzzleLevel,
-			dataDivision: dataDivisions.puzzleLevel,
 		},
 		"Cheer Terms": {
 			dataType: DataType.BtlCheerTerms,
-			dataDivision: dataDivisions.cheerTerm,
 		},
 		"Cheers": {
 			dataType: DataType.BtlCheer,
-			dataDivision: dataDivisions.cheer,
 		},
 		"Resources": {
 			dataType: DataType.BtlResourceField,
-			dataDivision: dataDivisions.resourceField,
 		},
 		"Settings": {
 			dataType: DataType.BtlConfig,
-			dataDivision: dataDivisions.config,
 		},
 	},
 }

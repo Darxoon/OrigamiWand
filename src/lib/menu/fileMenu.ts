@@ -3,7 +3,7 @@ import { showModal } from "$lib/modal/modal"
 import TextAlert from "$lib/modal/TextAlert.svelte"
 import DataTypePrompt from "$lib/modals/DataTypePrompt.svelte"
 import { globalEditorStrip, loadedAutosave } from "$lib/stores"
-import { compress, decompress, downloadBlob, loadFile, Tab } from "$lib/util"
+import { compress, decompress, downloadBlob, loadFile, createFileTab } from "$lib/util"
 import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary"
 import parseElfBinary, { EmptyFileError } from "paper-mario-elfs/parser"
 import serializeElfBinary from "paper-mario-elfs/serializer"
@@ -90,7 +90,7 @@ When proceeding, you are likely going to encounter bugs.")
 			throw e
 		}
 
-		editorStrip.appendTab(Tab(file.name, binary, dataType, isCompressed))
+		editorStrip.appendTab(createFileTab(file.name, binary, dataType, isCompressed))
 	})
 }
 

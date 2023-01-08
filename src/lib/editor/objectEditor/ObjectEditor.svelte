@@ -89,6 +89,11 @@
 	}
 	
 	function length(arrayOrObj) {
+		if (typeof arrayOrObj == "string") {
+			// this shouldn't happen
+			// TODO: this is a btlSet thing again
+			debugger
+		}
 		if (arrayOrObj instanceof Array)
 			return arrayOrObj.length
 		else if ("children" in arrayOrObj)
@@ -137,7 +142,7 @@
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
 						<CrossObjectLink label={`Click to open (${length(value)} item${length(value) < 2 ? '' : 's'})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
-								sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
+							sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
 					{:else}
 						<InputField on:valueChanged={updateEntries} noSpaces={FILE_TYPES[dataType].metadata[field]?.noSpaces ?? false}
 							fieldType={FILE_TYPES[dataType].typedef[field]} key={field} value={value}
