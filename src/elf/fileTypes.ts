@@ -1824,7 +1824,7 @@ Known Values:
 * -1012.0 = -998440960 = 0.5 Damage
 * -999.0 = -998653952 = No Damage
 * -2001.0 = -990240768 = Does 2 Damage
-* ? = Does 1.5 damage`),
+* -1001.0 = -998621184 =  Does 1.5 damage`),
 		hammerResistance: "float",
 		throwHammerResistance: "float",
 		powResistance: "float",
