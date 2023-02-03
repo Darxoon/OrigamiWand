@@ -68,39 +68,6 @@ export const dataDivisions = {
 
 export type DataDivision = keyof typeof dataDivisions
 
-export namespace ElfBinary {
-	export enum ObjectType {
-		Main,
-		MaplinkNodes,
-		
-		AssetGroup,
-		State,
-		SubState,
-		Face,
-		Anime,
-		
-		Element,
-		Map,
-		
-		DataHeader,
-		Hole,
-		Version,
-		
-		Category,
-		
-		Model,
-		ModelProperty,
-		Msg,
-		Shop,
-		SellItem,
-		SeaEntry,
-		Menu,
-		Announcement,
-		AnnouncementExclude,
-	}
-}
-
-
 export enum DataType {
 	None,
 	
