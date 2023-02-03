@@ -13,20 +13,49 @@ export interface PropertyOptions {
 	noSpaces?: boolean
 }
 
-export class Property {
-	type: string
+export type PropertyType = "string" | "symbol" | "pointer" | "Vector3" | "float"
+	| "double" | "byte" | "bool8" | "bool32" | "short" | "int" | "long"
+
+export class Property<T extends PropertyType> {
+	type: T
 	description?: string
 	hidden: boolean
 	tabName?: string
 	noSpaces: boolean
 	
-	constructor(type: string, description?: string, options?: PropertyOptions) {
+	constructor(type: T, description?: string, options?: PropertyOptions) {
 		this.type = type
 		this.description = description
 		this.hidden = options?.hidden ?? false
 		this.tabName = options?.tabName
 		this.noSpaces = options?.noSpaces ?? false
 	}
+}
+
+
+// TODO: factor out into unique file
+type RawTypedef<T extends number> = (typeof typedefs)[T]
+
+type StrToType<T> = 
+	T extends "string" ? string
+	: T extends "symbol" ? any
+	: T extends "pointer" ? any
+	: T extends "Vector3" ? Vector3
+	
+	: T extends "float" ? number
+	: T extends "double" ? number
+	: T extends "long" ? number
+	: T extends "int" ? number
+	: T extends "short" ? number
+	: T extends "byte" ? number
+	
+	: T extends "bool8" ? boolean
+	: T extends "bool32" ? boolean
+	
+	: never
+
+export type Instance<T extends number> = {
+	-readonly [p in keyof RawTypedef<T>]: StrToType<RawTypedef<T>[p] extends Property<infer U> ? U : RawTypedef<T>[p]>
 }
 
 const defaultDescriptions: Typedef<string> = {
@@ -2458,9 +2487,8 @@ Bit field for the attack GFX type. Known values:
 		field_0xa0: "int",
 		field_0xa4: "int",
 	},
-}
+} as const
 
-export type Struct<T extends number> = {[p in keyof (typeof typedefs)[T]]: any}
 
 function mapObject<A, B>(obj: {[key: string]: A}, fn: (value: [string, A], index: number) => [string, B]): {[key: string]: B} {
 	return Object.fromEntries(Object.entries(obj).map(fn))
@@ -2470,8 +2498,8 @@ function filterObject<A>(obj: {[key: string]: A}, fn: (value: [string, A], index
 }
 
 interface FileTypeRegistry {
-	typedef: Typedef<string>
-	metadata: Typedef<Property>
+	typedef: Typedef<PropertyType>
+	metadata: Typedef<Property<PropertyType>>
 	fieldOffsets: Typedef<string | number>
 	size: number
 	displayName: string
@@ -2491,9 +2519,11 @@ interface FileTypeRegistry {
 export const FILE_TYPES = mapObject(typedefs, ([dataTypeString, typedef]) => [dataTypeString, generateTypedefFor(parseInt(dataTypeString), typedef, typedef)])
 
 
-function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property>, extendedTypedef: Typedef<any>): FileTypeRegistry {
+function generateTypedefFor<T extends PropertyType>(dataType: DataType, typedef: Typedef<T | Property<T>>, 
+	extendedTypedef: Typedef<any>): FileTypeRegistry {
+	
 	if (typedef.__parent) {
-		return generateTypedefFor(dataType, extendedTypedef.__parent as Typedef<string|Property>, extendedTypedef)
+		return generateTypedefFor(dataType, extendedTypedef.__parent as Typedef<T|Property<T>>, extendedTypedef)
 	}
 	
 	
@@ -2503,8 +2533,8 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 	
 	let typedefWithoutMetadata = mapObject(filteredTypedef, ([fieldName, definition]) => [
 		fieldName,
-		definition instanceof Property ? definition.type : definition as string,
-	]) as Typedef<string>	
+		definition instanceof Property ? definition.type : definition,
+	])
 	
 	let unfilteredMetadata = mapObject(filteredTypedef, ([fieldName, definition]) => {
 		let description: string | undefined = defaultDescriptions[fieldName]
@@ -2533,7 +2563,7 @@ function generateTypedefFor(dataType: DataType, typedef: Typedef<string|Property
 	return {
 		typedef: typedefWithoutMetadata,
 				
-		metadata: filterObject(unfilteredMetadata, ([, definition]) => definition instanceof Property) as Typedef<Property>,
+		metadata: filterObject(unfilteredMetadata, ([, definition]) => definition instanceof Property) as Typedef<Property<T>>,
 				
 		fieldOffsets,
 		size,

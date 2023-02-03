@@ -1,6 +1,6 @@
 import { DataType, ElfBinary, Pointer } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
-import type { Struct } from "./fileTypes";
+import type { Instance } from "./fileTypes";
 import { BinaryWriter } from "./misc";
 import { Relocation, Section, Symbol } from "./types";
 import { demangle, mangleIdentifier } from "./nameMangling";
@@ -248,7 +248,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				serializeObjects(rodata, DataType.ConfettiData, binary.data.dataHeader)
 				
-				for (const map of binary.data.map as Struct<DataType.ConfettiMap>[]) {
+				for (const map of binary.data.map as Instance<DataType.ConfettiMap>[]) {
 					symbolLocationReference.set(`confetti::data::hole::${map.id}_Hole_List`, new Pointer(rodataWriter.size))
 
 					serializeObjects(rodata, DataType.ConfettiHole, map.holes)
@@ -281,7 +281,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				allRelocations.set('.data', dataRelocations)
 				
 				// models
-				for (const model of binary.data.model as Struct<DataType.UiModel>[]) {
+				for (const model of binary.data.model as Instance<DataType.UiModel>[]) {
 					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(dataWriter.size))
 					
 					if (model.properties)
@@ -297,14 +297,14 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				serializeObjects(data, DataType.UiMsg, binary.data.msg)
 				
 				// sell data
-				for (const shop of binary.data.shop as Struct<DataType.UiShop>[]) {
+				for (const shop of binary.data.shop as Instance<DataType.UiShop>[]) {
 					symbolLocationReference.set(`wld::fld::data::s_sellData_${shop.id}`, new Pointer(dataWriter.size))
 					
 					serializeObjects(data, DataType.UiSellItem, shop.soldItems)
 				}
 				
 				// shops
-				for (const [shop, i] of enumerate(binary.data.shop as Struct<DataType.UiShop>[])) {
+				for (const [shop, i] of enumerate(binary.data.shop as Instance<DataType.UiShop>[])) {
 					let locationOffset: number = dataWriter.size 
 							+ FILE_TYPES[DataType.UiShop].size * i
 							+ (FILE_TYPES[DataType.UiShop].fieldOffsets["soldItems"] as number)
@@ -341,7 +341,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				rodataWriter.writeInt32(binary.data.announcementExclude.length)
 
 				// remaining strings
-				for (const model of binary.data.model as Struct<DataType.UiModel>[]) {
+				for (const model of binary.data.model as Instance<DataType.UiModel>[]) {
 					if (model.properties)
 						serializeStringsOnly(DataType.UiModelProperty, model.properties)
 				}
@@ -381,8 +381,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				serializeObjects(data, DataType.BtlUnit, binary.data.unit, 1)
 				
 				// weapon range
-				for (const rangeHeader of binary.data.attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
-					const { item: attackRange, symbolName } = rangeHeader.attackRange as {item: Struct<DataType.BtlAttackRange>, symbolName: string}
+				for (const rangeHeader of binary.data.attackRangeHeader as Instance<DataType.BtlAttackRangeHeader>[]) {
+					const { item: attackRange, symbolName } = rangeHeader.attackRange as {item: Instance<DataType.BtlAttackRange>, symbolName: string}
 					
 					let newSymbolName = "wld::btl::data::s_weaponRangeData_" + rangeHeader.id
 					
@@ -423,8 +423,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				serializeObjects(data, DataType.BtlCheer, binary.data.cheer, 1)
 				
 				// resources
-				for (const resourceHeader of binary.data.resourceField as Struct<DataType.BtlResourceField>[]) {
-					const resources = resourceHeader.resources as {children: Struct<DataType.BtlResource>[], symbolName: string}
+				for (const resourceHeader of binary.data.resourceField as Instance<DataType.BtlResourceField>[]) {
+					const resources = resourceHeader.resources as {children: Instance<DataType.BtlResource>[], symbolName: string}
 					const { children, symbolName } = resources
 					
 					let newSymbolName = "wld::btl::data::s_resourceElementData_" + resourceHeader.id
@@ -494,7 +494,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		
 		updatedSections.set('.data', dataWriter.toArrayBuffer())
 		
-		type RodataReference = [id: string, originalId: string, assetGroups: Struct<DataType.NpcFiles>[], states: Struct<DataType.NpcState>[]]
+		type RodataReference = [id: string, originalId: string, assetGroups: Instance<DataType.NpcFiles>[], states: Instance<DataType.NpcState>[]]
 		
 		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number) {
 			const rodataWriter = rodata.writer
@@ -572,7 +572,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					let { substates } = state
 					
 					for (const [substate, j] of enumerate(substates)) {
-						let { faces } = substate as Struct<DataType.NpcSubState>
+						let { faces } = substate as Instance<DataType.NpcSubState>
 						
 						symbolLocationReference?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
 						symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, `wld::fld::data:::${id}_state${i}_face${j}`)
