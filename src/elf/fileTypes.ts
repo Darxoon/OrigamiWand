@@ -54,9 +54,14 @@ type StrToType<T> =
 	
 	: never
 
-export type Instance<T extends number> = {
+type UnfilteredInstance<T extends number> = {
 	-readonly [p in keyof RawTypedef<T>]: StrToType<RawTypedef<T>[p] extends Property<infer U> ? U : RawTypedef<T>[p]>
 }
+
+export type Instance<T extends number> = Pick<
+	UnfilteredInstance<T>, 
+	{[p in keyof UnfilteredInstance<T>]: UnfilteredInstance<T>[p] extends never ? never : p}[keyof UnfilteredInstance<T>]
+>
 
 const defaultDescriptions: Typedef<string> = {
 	stage: "The stage that the {type} is on. It's the same for every {type} in the same file.",
