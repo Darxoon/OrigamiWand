@@ -1868,7 +1868,7 @@ Known Values:
 		iceResistance: "float",
 		field_0x124: "float",
 		field_0x128: "float",
-		field_0x12c: "float",
+		flipResistance: "float",
 		field_0x130: "float",
 		field_0x134: "float",
 		field_0x138: "float",
@@ -2084,20 +2084,27 @@ Example:
 		field_0xb4: "int",
 		attackType: new Property("int", `
 Determines if an attack is Jump, Hammer, Pow etc.
-To give mutiple attributes, pick them and add them together. Known Values:
+The values are all a power of 2. Known entries are listed as an exponent.
+To give mutiple attributes, pick them and add them together.
 
-* 1 = Jump
-* 2 = Hammer
-* 4 = Normal
-* 8 = Shell
-* 16 = Item
-* 32 = Magic
-* 64 = Pow
-* 128 = Tail
-* 256 = Fire
-* 512 = Ice
-* 1024 = Earth
-* 2048 = Water`),
+* 2^0 = Jump
+* 2^1 = Hammer
+* 2^2 = Normal
+* 2^3 = Shell
+* 2^4 = Item
+* 2^5 = Magic
+* 2^6 = Pow
+* 2^7 = Tail
+* 2^8 = Fire
+* 2^9 = Ice
+* 2^10 = Earth
+* 2^11 = Water
+* 2^17 = Player Specific Value
+* 2^18 = Heal
+* 2^19 = UNKNOWN but enemies dont flinch
+* 2^20 = UNKNOWN but you only target the first enemy in that encounter's list
+* 2^28 = Partner Specific Attack Type
+* 2^29 = Ignore Spike Defence`),
 		field_0xbc: "int",
 		field_0xc0: "int",
 		field_0xc4: "int",
