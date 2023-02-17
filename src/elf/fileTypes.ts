@@ -2070,10 +2070,10 @@ Example:
 		nineActorRange: new Property("int", "The range the damage will increase when 9 actors are attacking at once."),
 		tenActorRange: new Property("int", "The range the damage will increase when 10 actors are attacking at once."),
 		field_0x84: "int",
-		field_0x88: "int",
-		field_0x8c: "int",
-		field_0x90: "int",
-		field_0x94: "int",
+		niceACEndFrame: new Property("int", "The frame which timing for pressing A for a Nice action command ends."),
+		greatACEndFrame: new Property("int", "The frame which timing for pressing A for a Great action command ends."),
+		excellentACEndFrame: new Property("int", "The frame which timing for pressing A for a Excellent action command ends."),
+		failACEndFrame: new Property("int", "The time, in frames, for low long it takes for the failed command action to play."),
 		field_0x98: "int",
 		field_0x9c: "int",
 		field_0xa0: "int",
@@ -2101,7 +2101,7 @@ To give mutiple attributes, pick them and add them together.
 * 2^11 = Water
 * 2^17 = Player Specific Value
 * 2^18 = Heal
-* 2^19 = UNKNOWN but enemies dont flinch
+* 2^19 = Counter
 * 2^20 = UNKNOWN but you only target the first enemy in that encounter's list
 * 2^28 = Partner Specific Attack Type
 * 2^29 = Ignore Spike Defence`),
