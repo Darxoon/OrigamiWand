@@ -31,17 +31,17 @@
 			objects = targetObjects
 		}
 		
+		console.log('opening', objects)
+		
 		dispatch("open", {
 			type: "window",
 			title,
 			shortTitle: title.replaceAll(/\[.+?\]/g, ""),
 			component: ElfEditor,
 			properties: {
-				objectTitle: FILE_TYPES[targetDataType].displayName,
-				objects: objects,
-				importantFieldName: FILE_TYPES[targetDataType].identifyingField,
-				dataType: targetDataType,
 				binary,
+				dataType: targetDataType,
+				overrideObjects: objects,
 			}
 		})
 	}

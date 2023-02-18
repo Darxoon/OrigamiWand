@@ -101,27 +101,6 @@
 						editorWindows[0]?.setActive()
 					}
 				}}
-				on:delete={e => {
-					let index = e.detail.index
-					if (typeof index === 'undefined') {
-						tabList[selectedTabs[i]].properties.objects.length = 0
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					} else {
-						tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 1)
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					}
-				}}
-				on:addObject={e => {
-					let obj = e.detail.obj
-					if (typeof e.detail.index !== "undefined") {
-						// we have to mutate the original array here, because that is directly linked with the ElfBinary
-						tabList[selectedTabs[i]].properties.objects.splice(e.detail.index, 0, obj)
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					} else {
-						tabList[selectedTabs[i]].properties.objects.push(obj)
-						tabList[selectedTabs[i]].properties.objects = tabList[selectedTabs[i]].properties.objects
-					}
-				}}
 				on:dockTab={e => {
 					let { tab, isRight } = e.detail
 					tabs.splice(isRight ? i + 1 : i, 0, [tab])
@@ -129,7 +108,7 @@
 				}}
 				on:open={e => {
 					if (e.detail.type === "window") {
-						const { title, shortTitle, component, properties, isCompressed } = e.detail
+						const { title, component, properties, isCompressed } = e.detail
 						
 						const childID = Symbol(`Tab ID ${title}`)
 						

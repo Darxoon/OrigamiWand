@@ -16,8 +16,9 @@ const config = {
 			assets: 'build',
 			fallback: null,
 		}),
-		prerender: {
-			default: true,
+		alias: {
+			'paper-mario-elfs': 'src/elf',
+			'paper-mario-elfs/*': 'src/elf/*',
 		},
 	}
 };

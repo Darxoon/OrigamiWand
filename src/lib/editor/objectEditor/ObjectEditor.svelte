@@ -27,7 +27,7 @@
 	
 	export let open = false
 	
-	export let highlightedFields: Set<string> = new Set()
+	export let highlightedFields: string[] = []
 	
 	$: entries = Object.entries(obj)
 	
@@ -51,6 +51,9 @@
 	}
 	
 	onMount(() => {
+		// @ts-ignore
+		feather.replace()
+		
 		function viewportCheck() {
 			if (!hasEnteredViewport && editor?.getBoundingClientRect().y < window.innerHeight) {
 				hasEnteredViewport = true
@@ -86,6 +89,11 @@
 	}
 	
 	function length(arrayOrObj) {
+		if (typeof arrayOrObj == "string") {
+			// this shouldn't happen
+			// TODO: this is a btlSet thing again
+			debugger
+		}
 		if (arrayOrObj instanceof Array)
 			return arrayOrObj.length
 		else if ("children" in arrayOrObj)
@@ -120,7 +128,7 @@
 			{#if !(FILE_TYPES[dataType].metadata[field]?.hidden ?? false)}
 				
 				<!-- Field Label -->
-				<div class="key" class:highlighted={highlightedFields?.has(field)} 
+				<div class="key" class:highlighted={highlightedFields?.includes(field)} 
 				class:bold={!field.startsWith('field_')} bind:this={entryLabelElements[i]} 
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
 					{toReadableString(field)}
@@ -134,7 +142,7 @@
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
 						<CrossObjectLink label={`Click to open (${length(value)} item${length(value) < 2 ? '' : 's'})`} binary={binary}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
-								sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
+							sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
 					{:else}
 						<InputField on:valueChanged={updateEntries} noSpaces={FILE_TYPES[dataType].metadata[field]?.noSpaces ?? false}
 							fieldType={FILE_TYPES[dataType].typedef[field]} key={field} value={value}

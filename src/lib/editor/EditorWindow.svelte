@@ -5,7 +5,7 @@
 	
 	import { insertIntoArrayPure, resizeArray } from "$lib/util";
 	
-	import { createEventDispatcher, onMount } from "svelte";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import { globalDragEndEvent, globalDraggedTab, wasDraggingGlobally, type Tab } from "./globalDragging";
 	
 	export let tabs: Tab[] = []
@@ -145,15 +145,22 @@
 			}
 		})
 		
-		globalDragEndEvent.on('end', () => {
-			if (startedDragging && $wasDraggingGlobally) {
-				console.log('removing element')
-				closeTab(selectedIndex)
-				
-				$wasDraggingGlobally = false
-			}
-		})
+		globalDragEndEvent.on('end', onGlobalDragEnd)
+		
 	})
+	
+	onDestroy(() => {
+		globalDragEndEvent.removeListener('end', onGlobalDragEnd)
+	})
+	
+	function onGlobalDragEnd() {
+		if (startedDragging && $wasDraggingGlobally) {
+			console.log('removing element')
+			closeTab(selectedIndex)
+			
+			$wasDraggingGlobally = false
+		}
+	}
 	
 	function onMouseLeave(e: MouseEvent) {
 		mouseOutside = true
@@ -287,7 +294,7 @@ Do you want to close those too?`,
 		
 		{#each tabs as tab, i}
 			<div class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:addObject on:delete on:open on:valueChanged />
+				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
 			</div>
 		{/each}
 		

@@ -1,6 +1,7 @@
 import { DataType, ElfBinary } from "./elfBinary"
 import { FILE_TYPES } from "./fileTypes"
 import { incrementName } from "./nameMangling"
+import { ValueUuid, VALUE_UUID } from "./valueIdentifier"
 
 export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
 	for (let i = 0; i < arr.length; i++) {
@@ -8,13 +9,15 @@ export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
 	}
 }
 
-export function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, isRootObject: boolean = true): T {
+export function duplicateObjectInBinary<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, incrementId: boolean = true): T {
 	function cloneObject<T>(dataType: DataType, obj: T): T {
 		// deep clone self
 		let clone = {...obj}
 		Object.setPrototypeOf(clone, Object.getPrototypeOf(obj))
 		
-		if (isRootObject && FILE_TYPES[dataType].identifyingField == "id") {
+		clone[VALUE_UUID] = ValueUuid()
+		
+		if (incrementId && FILE_TYPES[dataType].identifyingField == "id") {
 			// @ts-ignore
 			clone.id = incrementName(obj.id)
 		}
@@ -27,7 +30,7 @@ export function duplicateElfObject<T>(binary: ElfBinary, dataType: DataType, con
 				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
 				let childObjectType = FILE_TYPES[childDataType].objectType
 				
-				let clonedChild = duplicateElfObject(binary, childDataType, binary.data[childObjectType], fieldValue, false)
+				let clonedChild = duplicateObjectInBinary(binary, childDataType, binary.data[childObjectType], fieldValue, false)
 				clone[fieldName] = clonedChild
 			}
 		}

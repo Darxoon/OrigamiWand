@@ -35,19 +35,16 @@
 </script>
 
 <div class="editor">
-	{#each items as [name, {dataType, dataDivision, label}]}
+	{#each items as [name, {dataType, label}]}
 		<div class="card link" on:click={e => {
 			dispatch("open", {
 				type: "window",
 				title: `${name} (${fileName})`,
 				component: ElfEditor,
 				properties: {
-					objectTitle: FILE_TYPES[dataType].displayName,
-					objects: binary.data[dataDivision],
-					dataType: dataType,
-					importantFieldName: FILE_TYPES[dataType].identifyingField,
-					parent: self,
 					binary,
+					dataType,
+					parent: self,
 				}
 			})
 		}}>

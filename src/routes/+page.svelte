@@ -18,9 +18,10 @@
 	import { getFileMenu } from '$lib/menu/fileMenu';
 	import { getViewMenu } from '$lib/menu/viewMenu';
 	import { globalEditorStrip, loadedAutosave } from '$lib/stores';
-	import { loadFile, map2d, Tab } from '$lib/util';
+	import { loadFile, map2d, createFileTab } from '$lib/util';
 	
 	import TitleCard from '$lib/TitleCard.svelte';
+    import VersionIdentifier from '$lib/VersionIdentifier.svelte';
 	
 	let editorStrip: EditorStrip
 	
@@ -59,7 +60,7 @@
 			}
 			
 			let tabs = map2d(save, ({name, dataType, content, isCompressed}) => 
-				Tab(name, parseElfBinary(dataType, content), dataType, isCompressed)
+				createFileTab(name, parseElfBinary(dataType, content), dataType, isCompressed)
 			).filter(arr => arr.length > 0)
 			
 			if (tabs.length != 0) {
@@ -154,6 +155,8 @@ to me, the developer (Darxoon). Thanks.`
 	
 	<EditorStrip bind:this={editorStrip}></EditorStrip>
 </section>
+
+<VersionIdentifier />
 
 {#if $modalVisible}
 	<Modal>

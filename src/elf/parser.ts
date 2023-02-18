@@ -1,9 +1,10 @@
 import { DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
-import type { Struct } from "./fileTypes";
+import type { Instance } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
 import { demangle } from "./nameMangling";
 import { Relocation, Section, Symbol } from "./types";
+import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
 
 type Typedef<T> = {[fieldName: string]: T}
 
@@ -117,7 +118,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		// wouldn't that be way too much nesting? no thanks
 		
-		function parseObjectsByIndices(dataType: DataType, indices: [Pointer, number][], offsetReference?: Map<number, any>) {
+		function parseObjectsByIndices<T extends DataType>(dataType: T, indices: [Pointer, number][], offsetReference?: Map<number, any>) {
 			return indices.map(([ offset, count ]) => {
 				let result = applyStrings(
 					offset,
@@ -407,6 +408,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			data = {}
 			
+			// TODO: use parseSymbol everywhere
 			// version is simply a 64-bit integer with the value 11
 			const versionSymbol = findSymbol("confetti::data::hole::s_version")
 			const version = Number(rodataView.getBigInt64(versionSymbol.location.value, true))
@@ -415,7 +417,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// data is the main entry point for this file type
 			const dataSymbol = findSymbol("confetti::data::hole::data")
-			const dataArray: Struct<DataType.ConfettiData>[] = applyStrings(
+			const dataArray = applyStrings(
 				dataSymbol.location, DataType.ConfettiData, dataStringSection,
 				allRelocations.get('.rodata'), 
 				
@@ -427,7 +429,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			// map list
 			const { maps: mapListOffset, mapCount } = dataArray[0]
 			console.log('maps', mapListOffset, mapCount)
-			const maps: Struct<DataType.ConfettiMap>[] = applyStrings(
+			const maps = applyStrings(
 				mapListOffset, DataType.ConfettiMap, dataStringSection,
 				allRelocations.get('.rodata'), 
 				
@@ -579,7 +581,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let menuDataSymbol = findSymbol("wld::fld::data::s_menuData")
 			
-			let menus: Struct<DataType.UiMenu>[] = applyStrings(
+			let menus = applyStrings(
 				menuDataSymbol.location, DataType.UiMenu,  dataStringSection, 
 				allRelocations.get('.data'), 
 				
@@ -594,7 +596,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let announcementSymbol = findSymbol("wld::fld::data::s_announceData")
 			
-			let announcements: Struct<DataType.UiAnnouncement>[] = applyStrings(
+			let announcements = applyStrings(
 				announcementSymbol.location, DataType.UiAnnouncement,  dataStringSection, 
 				allRelocations.get('.data'), 
 				
@@ -609,7 +611,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let announcementExcludeSymbol = findSymbol("wld::fld::data::s_announceExcludeData")
 			
-			let announcementExcludes: Struct<DataType.UiAnnouncementExclude>[] = applyStrings(
+			let announcementExcludes = applyStrings(
 				announcementExcludeSymbol.location, DataType.UiAnnouncementExclude,  dataStringSection, 
 				allRelocations.get('.data'), 
 				
@@ -657,7 +659,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let attackRanges = []
 			
-			for (const headerNode of attackRangeHeader as Struct<DataType.BtlAttackRangeHeader>[]) {
+			for (const headerNode of attackRangeHeader) {
 				let attackRangeSymbol = findSymbol(headerNode.attackRange)
 				let offset = attackRangeSymbol.location
 				
@@ -711,7 +713,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let allResources = []
 			
-			for (const resourceField of resourceFields as Struct<DataType.BtlResourceField>[]) {
+			for (const resourceField of resourceFields) {
 				if (resourceField.resources == undefined)
 					continue
 				
@@ -719,7 +721,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceField.resourceCount)
 				
 				let resourcesObj = {
-					symbolName: `wld::btl::data::s_weaponRangeData_${resourceField.id}`,
+					symbolName: "wld::btl::data::s_resourceElementData_" + resourceField.id,
 					children: resources,
 				}
 				
@@ -763,7 +765,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	return new ElfBinary(sections, data, symbolTable, modelSymbolReference)
 	
 	
-	function parseSymbol(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: DataType, count?: number) {
+	function parseSymbol<T extends DataType>(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: T, count?: number) {
 		// if count is smaller than zero, calculate size like normal and subtract negative value from it
 		let subtract = 0
 		
@@ -782,7 +784,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	}
 	
 	
-	function applyStrings(baseOffsetPointer: Pointer, dataType: DataType, stringSection: Section, relocationTable: Map<number, Relocation>, objects: object[]) {
+	function applyStrings<T extends DataType>(baseOffsetPointer: Pointer, dataType: T, stringSection: Section, 
+		relocationTable: Map<number, Relocation>, objects: object[]): Instance<T>[] {
+		
 		let result = []
 		
 		const baseOffset = baseOffsetPointer.value
@@ -859,6 +863,8 @@ function parseRawDataSection(section: Section, count: number, initialPosition: n
 	
 	function objFromReader(reader: BinaryReader, typedef: {[fieldName: string]: string}): object {
 		let result = {}
+		
+		result[VALUE_UUID] = ValueUuid()
 		
 		for (const [fieldName, fieldType] of Object.entries(typedef)) {
 			

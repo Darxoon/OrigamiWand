@@ -10,7 +10,6 @@
 	
 	export let dataType: DataType
 	export let binary: ElfBinary
-	export let fileName: string
 	export let self
 	
 	let editorElements = []
@@ -28,13 +27,13 @@
 	}
 	
 	function addObject() {
-		dispatch('addObject', {
-			obj: FILE_TYPES[dataType].instantiate(),
-		})
+		// TODO: implement for SpecialElfEditor
+		alert("Currently not available, duplicate an existing object instead")
 	}
 	
 	function deleteAll() {
-		dispatch('delete', {})
+		// TODO: implement for SpecialElfEditor
+		alert("Currently not available, duplicate an existing object instead")
 	}
 </script>
 
@@ -69,33 +68,26 @@
 						dispatch("open", {
 							type: "window",
 							title: `Set Data of ${obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)}`,
-							shortTitle: obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length),
 							component: ElfEditor,
 							properties: {
-								objectTitle: FILE_TYPES[DataType.BtlSetCategory].displayName,
-								objects: obj.objects,
-								importantFieldName: FILE_TYPES[DataType.BtlSetCategory].identifyingField,
-								dataType: DataType.BtlSetCategory,
 								binary,
+								dataType: DataType.BtlSetCategory,
+								overrideObjects: obj.objects,
 							}
 						})
 					}}>View Set Data (probably scripted fights)</div>
 					
-					{#each obj.childObjects as child, j}
+					{#each obj.childObjects as child}
 						<div class="card fight" on:click={e => {
 							dispatch("open", {
 								type: "window",
 								title: `Fight ${child.symbolName.slice('wld::btl::data::s_setElementData_'.length)}`,
-								shortTitle: child.symbolName.slice('wld::btl::data::s_setElementData_'.length),
 								component: ElfEditor,
 								properties: {
-									objectTitle: FILE_TYPES[DataType.BtlSetElement].displayName,
-									objects: obj.childObjects[j].objects,
-									importantFieldName: FILE_TYPES[DataType.BtlSetElement].identifyingField,
-									dataType: DataType.BtlSetElement,
-									metadataObject: obj.childObjects[j],
-									parent: self,
 									binary,
+									dataType: DataType.BtlSetElement,
+									overrideObjects: child.objects,
+									parent: self,
 								}
 							})
 						}}>Open Fight "{child.symbolName.startsWith('wld::btl::data::s_setElementData_') ? child.symbolName.slice('wld::btl::data::s_setElementData_'.length) : child.symbolName}"</div>
