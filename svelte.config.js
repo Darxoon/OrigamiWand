@@ -13,6 +13,10 @@ const config = {
 			assets: 'build',
 			fallback: null,
 		}),
+		alias: {
+			'paper-mario-elfs': 'src/elf',
+			'paper-mario-elfs/*': 'src/elf/*',
+		},
 	}
 };
 
