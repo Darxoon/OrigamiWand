@@ -2430,7 +2430,7 @@ Bit field for the attack GFX type. Known values:
 	},
 	
 	[DataType.BtlResourceField]: {
-		__displayName: "Resource Field",
+		__displayName: "Resource Category",
 		__objectType: dataDivisions.resourceField,
 		__childTypes: {
 			"resources": DataType.BtlResource,

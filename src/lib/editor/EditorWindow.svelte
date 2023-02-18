@@ -5,7 +5,7 @@
 	
 	import { insertIntoArrayPure, resizeArray } from "$lib/util";
 	
-	import { createEventDispatcher, onMount } from "svelte";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import { globalDragEndEvent, globalDraggedTab, wasDraggingGlobally, type Tab } from "./globalDragging";
 	
 	export let tabs: Tab[] = []
@@ -145,15 +145,22 @@
 			}
 		})
 		
-		globalDragEndEvent.on('end', () => {
-			if (startedDragging && $wasDraggingGlobally) {
-				console.log('removing element')
-				closeTab(selectedIndex)
-				
-				$wasDraggingGlobally = false
-			}
-		})
+		globalDragEndEvent.on('end', onGlobalDragEnd)
+		
 	})
+	
+	onDestroy(() => {
+		globalDragEndEvent.removeListener('end', onGlobalDragEnd)
+	})
+	
+	function onGlobalDragEnd() {
+		if (startedDragging && $wasDraggingGlobally) {
+			console.log('removing element')
+			closeTab(selectedIndex)
+			
+			$wasDraggingGlobally = false
+		}
+	}
 	
 	function onMouseLeave(e: MouseEvent) {
 		mouseOutside = true
