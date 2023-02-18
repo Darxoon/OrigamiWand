@@ -408,6 +408,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			data = {}
 			
+			// TODO: use parseSymbol everywhere
 			// version is simply a 64-bit integer with the value 11
 			const versionSymbol = findSymbol("confetti::data::hole::s_version")
 			const version = Number(rodataView.getBigInt64(versionSymbol.location.value, true))
@@ -720,7 +721,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceField.resourceCount)
 				
 				let resourcesObj = {
-					symbolName: `wld::btl::data::s_weaponRangeData_${resourceField.id}`,
+					symbolName: "wld::btl::data::s_resourceElementData_" + resourceField.id,
 					children: resources,
 				}
 				

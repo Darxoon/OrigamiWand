@@ -793,7 +793,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		for (const symbol of binary.symbolTable) {
 			let symbolId = demangle(symbol.name)
 			
-			if (symbolLocationReference?.has(symbolId)) {
+			if (symbolLocationReference.has(symbolId)) {
 				symbol.location = symbolLocationReference.get(symbolId)
 			} else {
 				// console.warn(`Symbol ${JSON.stringify(symbolId)} offset is not being updated`)
@@ -926,7 +926,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	// Now that all of the sections have been updated, the file needs to be reassembled.
 	// For more precise information on the structure of an ELF file, see `parseElfFile`.
-	// Basically, an ELF file is made up of these things: Header, Sections, Section Header Table.
 	
 	const writer = new BinaryWriter()
 	

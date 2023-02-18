@@ -63,10 +63,6 @@
 	</div>
 
 <style lang="scss">
-	:root {
-		--bg-label-highlight: #eaeaea;
-	}
-	
 	.child_container {
 		margin-top: 0.3em;
 		
