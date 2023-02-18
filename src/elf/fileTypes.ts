@@ -1789,7 +1789,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		__objectType: dataDivisions.part,
 		
 		id: "string",
-		field_0x8: new Property("string", `
+		bossParts: new Property("string", `
 I am sure that I marked too many fields as strings.
 
 TODO: verify that every field that is marked as a string is actually a string`),
@@ -1797,8 +1797,8 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0x18: "int",
 		field_0x1c: "float",
 		field_0x20: "string",
-		field_0x28: "float",
-		field_0x2c: "float",
+		jumpWalkDistance: "float",
+		jumpHeightDistance: "float",
 		field_0x30: "float",
 		field_0x34: "float",
 		field_0x38: "float",
@@ -1868,7 +1868,7 @@ Known Values:
 		iceResistance: "float",
 		field_0x124: "float",
 		field_0x128: "float",
-		field_0x12c: "float",
+		flipResistance: "float",
 		field_0x130: "float",
 		field_0x134: "float",
 		field_0x138: "float",
@@ -1884,7 +1884,7 @@ Known Values:
 		__objectType: dataDivisions.unit,
 		
 		id: "string",
-		field_0x8: new Property("string", "Originally thought to be referencing models, but that's not true."),
+		baseModel: new Property("string", "Originally thought to be referencing models, but that's not true."),
 		field_0x10: new Property("string", "A sort of variant of the model? But I'm not sure what it influences exactly"),
 		description: "string",
 		textId: new Property("string", "The name of the item. Before it is displayed, it is looked up in `glossary.msbt`."),
@@ -2004,10 +2004,10 @@ Example:
 		__objectType: dataDivisions.attackRange,
 		
 		field_0x0: "int",
-		ringSection: "int",
-		field_0x8: "int",
-		rangeWidth: "int",
-		rangeLength: "int",
+		ringSection: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
+		rotation: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
+		rangeWidth: new Property("int", "The width that the attack range has"),
+		rangeLength: new Property("int", "The length that the arrack range has"),
 		field_0x14: "int",
 		field_0x18: "int",
 		field_0x1c: "int",
@@ -2053,27 +2053,27 @@ Example:
 		niceValueIncrease: "int",
 		greatValueIncrease: "int",
 		excellentValueIncrease: "int",
-		field_0x44: "int",
-		field_0x48: "int",
-		field_0x4c: "int",
-		field_0x50: "int",
-		field_0x54: "int",
-		field_0x58: "int",
+		fiveActorDamage: new Property("int", "Group attacks will use this if there are five enemies attacking."),
+		sixActorDamage: new Property("int", "Group attacks will use this if there are six enemies attacking."),
+		sevenActorDamage: new Property("int", "Group attacks will use this if there are seven enemies attacking."),
+		eightActorDamage: new Property("int", "Group attacks will use this if there are eight enemies attacking."),
+		nineActorDamage: new Property("int", "Group attacks will use this if there are nine enemies attacking."),
+		tenActorDamage: new Property("int", "Group attacks will use this if there are ten enemies attacking."),
 		valueIncreaseRange: "int",
-		field_0x60: "int",
-		field_0x64: "int",
-		field_0x68: "int",
-		field_0x6c: "int",
-		field_0x70: "int",
-		field_0x74: "int",
-		field_0x78: "int",
-		field_0x7c: "int",
-		field_0x80: "int",
+		twoActorRange: new Property("int", "The range the damage will increase when 2 actors are attacking at once."),
+		threeActorRange: new Property("int", "The range the damage will increase when 3 actors are attacking at once."),
+		fourActorRange: new Property("int", "The range the damage will increase when 4 actors are attacking at once."),
+		fiveActorRange: new Property("int", "The range the damage will increase when 5 actors are attacking at once."),
+		sixActorRange: new Property("int", "The range the damage will increase when 6 actors are attacking at once."),
+		sevenActorRange: new Property("int", "The range the damage will increase when 7 actors are attacking at once."),
+		eightActorRange: new Property("int", "The range the damage will increase when 8 actors are attacking at once."),
+		nineActorRange: new Property("int", "The range the damage will increase when 9 actors are attacking at once."),
+		tenActorRange: new Property("int", "The range the damage will increase when 10 actors are attacking at once."),
 		field_0x84: "int",
-		field_0x88: "int",
-		field_0x8c: "int",
-		field_0x90: "int",
-		field_0x94: "int",
+		niceACEndFrame: new Property("int", "The frame which timing for pressing A for a Nice action command ends."),
+		greatACEndFrame: new Property("int", "The frame which timing for pressing A for a Great action command ends."),
+		excellentACEndFrame: new Property("int", "The frame which timing for pressing A for a Excellent action command ends."),
+		failACEndFrame: new Property("int", "The time, in frames, for low long it takes for the failed command action to play."),
 		field_0x98: "int",
 		field_0x9c: "int",
 		field_0xa0: "int",
@@ -2084,20 +2084,27 @@ Example:
 		field_0xb4: "int",
 		attackType: new Property("int", `
 Determines if an attack is Jump, Hammer, Pow etc.
-To give mutiple attributes, pick them and add them together. Known Values:
+The values are all a power of 2. Known entries are listed as an exponent.
+To give mutiple attributes, pick them and add them together.
 
-* 1 = Jump
-* 2 = Hammer
-* 4 = Normal
-* 8 = Shell
-* 16 = Item
-* 32 = Magic
-* 64 = Pow
-* 128 = Tail
-* 256 = Fire
-* 512 = Ice
-* 1024 = Earth
-* 2048 = Water`),
+* 2^0 = Jump
+* 2^1 = Hammer
+* 2^2 = Normal
+* 2^3 = Shell
+* 2^4 = Item
+* 2^5 = Magic
+* 2^6 = Pow
+* 2^7 = Tail
+* 2^8 = Fire
+* 2^9 = Ice
+* 2^10 = Earth
+* 2^11 = Water
+* 2^17 = Player Specific Value
+* 2^18 = Heal
+* 2^19 = Counter
+* 2^20 = UNKNOWN but you only target the first enemy in that encounter's list
+* 2^28 = Partner Specific Attack Type
+* 2^29 = Ignore Spike Defence`),
 		field_0xbc: "int",
 		field_0xc0: "int",
 		field_0xc4: "int",
@@ -2174,8 +2181,8 @@ Bit field for the attack GFX type. Known values:
 		id: "string",
 		field_0x8: "int",
 		field_0xc: "int",
-		field_0x10: "string",
-		field_0x18: "string",
+		leftGrab: new Property("string", "Bone ID for left hand of 1000-fold arms to grab. Located on enemy model's skeleton"),
+		rightGrab: new Property("string", "Bone ID for right hand of 1000-fold arms to grab. Located on enemy model's skeleton"),
 		field_0x20: "float",
 		field_0x24: "float",
 		field_0x28: "float",
