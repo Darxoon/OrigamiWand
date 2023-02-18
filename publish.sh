@@ -25,3 +25,7 @@ git merge master
 
 echo
 git switch master > /dev/null
+
+echo
+echo Build instruction (ran in build branch):
+echo PUBLIC_OW_VERSION='"'"$tag"'"' PUBLIC_VERSION_TIMESTAMP=$(date +%s)000 PUBLIC_IS_DEV_VERSION=0 npm run build
