@@ -21,6 +21,7 @@
 	import { loadFile, map2d, createFileTab } from '$lib/util';
 	
 	import TitleCard from '$lib/TitleCard.svelte';
+    import VersionIdentifier from '$lib/VersionIdentifier.svelte';
 	
 	let editorStrip: EditorStrip
 	
@@ -154,6 +155,8 @@ to me, the developer (Darxoon). Thanks.`
 	
 	<EditorStrip bind:this={editorStrip}></EditorStrip>
 </section>
+
+<VersionIdentifier />
 
 {#if $modalVisible}
 	<Modal>
