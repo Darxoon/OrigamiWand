@@ -4,9 +4,4 @@ node_modules
 /.svelte-kit
 /package
 
-.vs/ProjectSettings.json
-.vs/slnx.sqlite
-.vs/OrigamiWand/v16/Browse.VC.opendb
-.vs/OrigamiWand/v16/Browse.VC.db-wal
-.vs/OrigamiWand/v16/Browse.VC.db-shm
-.vs/OrigamiWand/v16/Browse.VC.db
+.vs
