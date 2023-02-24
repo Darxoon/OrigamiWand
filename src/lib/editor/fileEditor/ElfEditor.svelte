@@ -18,17 +18,25 @@
 	let addingNewObject = false
 	let searchTerm = ""
 	let searchResults: SearchIndex
+	let searchResultObjects: UuidTagged[]
+	
+	let searchResultObjectBuffer: UuidTagged[]
 	
 	$: objects = overrideObjects ?? binary.data[FILE_TYPES[dataType].objectType]
 	$: index = createIndex(objects)
 	
-	
-	$: searchResultObjects = searchResults && [...new Set(searchResults.map(result => result.obj))]
 	$: highlightedFields = searchResults && new WeakMap(
 		searchResultObjects.map(obj => [
 			obj, 
 			searchResults.filter(result => result.obj == obj).map(result => result.field),
 		]))
+	
+	$: if (searchResults) {
+		searchResultObjects = []
+		searchResultObjectBuffer = [...new Set(searchResults.map(result => result.obj))]
+	} else {
+		searchResultObjects = null
+	}
 	
 	export function collapseAll() {
 		arrayComponent.collapseAll()
@@ -63,6 +71,11 @@
 		if (addingNewObject) {
 			addingNewObject = false
 			arrayComponent.scrollIntoView(objects[objects.length - 1])
+		}
+		
+		if (searchResultObjectBuffer) {
+			searchResultObjects = searchResultObjectBuffer
+			searchResultObjectBuffer = null
 		}
 	})
 	
