@@ -104,6 +104,20 @@
 		}
 	}
 	
+	function onTitleClick() {
+		open = !open;
+		initialized = true;
+	}
+	
+	function keyPress(e: KeyboardEvent) {
+		if (e.key == "Enter" || e.key == " ") {
+			e.preventDefault()
+			e.stopPropagation()
+			
+			onTitleClick()
+		}
+	}
+	
 	let editor: HTMLDivElement
 	
 	let hasEnteredViewport = false
@@ -114,7 +128,9 @@
 <div class="card editor" style="--bg-card: {backgroundColor}; --bg-label-highlight: {labelHighlightColor}" bind:this={editor} 
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
-	<div class="title" class:rotated={open} on:click={() => {open = !open; initialized = true}}>
+	<div class="title" class:rotated={open}
+		on:click={onTitleClick} on:keypress={keyPress} tabindex="0" role="button">
+		
 		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{title}</span>
 		
 		{#if showButtons}
