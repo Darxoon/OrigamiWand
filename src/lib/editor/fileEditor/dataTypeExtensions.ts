@@ -64,7 +64,7 @@ const complexEditorCategories = {
 		"Cheer Terms": {
 			dataType: DataType.BtlCheerTerms,
 		},
-		"Cheers": {
+		"Cheer Events": {
 			dataType: DataType.BtlCheer,
 		},
 		"Resources": {
