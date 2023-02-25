@@ -28,7 +28,16 @@
 	
 	export function scrollIntoView(object?: UuidTagged) {
 		let index = object ? objects.indexOf(object) : objects.length - 1
-		objectEditors[index].scrollIntoView()
+		
+		if (index <= countShown) {
+			objectEditors[index].scrollIntoView()
+		} else {
+			window.scrollTo({
+				behavior: "smooth",
+				left: 0,
+				top: document.body.scrollHeight,
+			})
+		}
 	}
 	
 	export function collapseAll() {
