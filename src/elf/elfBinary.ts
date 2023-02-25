@@ -1,3 +1,4 @@
+import { demangle } from "./nameMangling"
 import type { Section, Symbol } from "./types"
 
 /**
@@ -19,6 +20,10 @@ export class ElfBinary {
 		this.data = data
 		this.symbolTable = symbolTable
 		this.modelSymbolReference = modelSymbolReference
+	}
+	
+	public findSymbol(name: string): Symbol {
+		return this.symbolTable.find(symbol => demangle(symbol.name) === name)
 	}
 }
 

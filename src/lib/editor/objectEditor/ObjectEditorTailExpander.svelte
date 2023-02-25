@@ -10,9 +10,6 @@
 	export let child: any
 	export let binary: ElfBinary = undefined
 	
-	$: console.log('child', child)
-	$: console.log('childContent', childContent)
-	
 	let isOpen: boolean = false
 	let replace = false
 		

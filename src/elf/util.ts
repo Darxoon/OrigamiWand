@@ -1,6 +1,6 @@
 import { DataType, ElfBinary } from "./elfBinary"
 import { FILE_TYPES } from "./fileTypes"
-import { incrementName } from "./nameMangling"
+import { demangle, incrementName, mangleIdentifier } from "./nameMangling"
 import { ValueUuid, VALUE_UUID } from "./valueIdentifier"
 
 export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
@@ -9,7 +9,7 @@ export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
 	}
 }
 
-export function duplicateObjectInBinary<T>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, incrementId: boolean = true): T {
+export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, incrementId: boolean = true): T {
 	function cloneObject<T>(dataType: DataType, obj: T): T {
 		// deep clone self
 		let clone = {...obj}
@@ -23,15 +23,45 @@ export function duplicateObjectInBinary<T>(binary: ElfBinary, dataType: DataType
 		}
 		
 		// deep clone children
-		for (const [fieldName, fieldValue] of Object.entries(obj)) {
+		for (const [fieldName, fieldValue] of Object.entries(obj) as [string, unknown][]) {
 			const fieldType = FILE_TYPES[dataType].typedef[fieldName]
 			
 			if (fieldType === "pointer" && fieldValue != null) {
 				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
-				let childObjectType = FILE_TYPES[childDataType].objectType
+				const childObjectType = FILE_TYPES[childDataType].objectType
 				
-				let clonedChild = duplicateObjectInBinary(binary, childDataType, binary.data[childObjectType], fieldValue, false)
+				let clonedChild = duplicateObjectInBinary(binary, childDataType, binary.data[childObjectType], fieldValue as object, false)
 				clone[fieldName] = clonedChild
+			}
+			
+			if (fieldType === "symbol" && fieldValue != null) {
+				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
+				const childObjectType = FILE_TYPES[childDataType].objectType
+				
+				if (!binary.data[childObjectType].includes(fieldValue)) {
+					throw new Error("Cannot clone object " + fieldValue + " because it doesn't exist in the binary")
+				}
+				
+				if (typeof fieldValue != "object" || !("symbolName" in fieldValue) || typeof fieldValue.symbolName != "string") {
+					throw new Error("Cannot clone object " + fieldValue + " because it's of an invalid type")
+				}
+				
+				let clonedChild = duplicateObjectInBinary<object & Record<"symbolName", unknown>>(binary, 
+					childDataType, binary.data[childObjectType], fieldValue, false)
+				
+				// also duplicate symbol
+				let originalSymbol = binary.findSymbol(fieldValue.symbolName)
+				let clonedSymbol = originalSymbol.clone()
+				
+				let clonedSymbolName = incrementName(demangle(originalSymbol.name))
+				clonedSymbol.name = mangleIdentifier(clonedSymbolName)
+				
+				// insert new symbol into symboltable
+				let originalSymbolIndex = binary.symbolTable.indexOf(originalSymbol)
+				binary.symbolTable.splice(originalSymbolIndex + 1, 0, clonedSymbol)
+				
+				clone[fieldName] = clonedChild
+				clonedChild.symbolName = clonedSymbolName
 			}
 		}
 		
@@ -45,12 +75,18 @@ export function duplicateObjectInBinary<T>(binary: ElfBinary, dataType: DataType
 	}
 	
 	console.log('cloning', DataType[dataType], obj)
-	let clone = obj instanceof Array ? cloneArray(dataType, obj) as unknown as T : cloneObject(dataType, obj)
+	let clone = obj instanceof Array
+		? cloneArray(dataType, obj) as unknown as T
+		: 'item' in obj
+		? {...obj, item: cloneObject(dataType, obj.item)}
+		: 'children' in obj
+		? {...obj, children: cloneArray(dataType, obj.children as any[])}
+		: cloneObject(dataType, obj)
+			
 	
 	// insert clone into array
 	let objectIndex = containingArray.indexOf(obj)
 	containingArray.splice(objectIndex + 1, 0, clone)
-	containingArray = containingArray
 	
 	return clone
 }
