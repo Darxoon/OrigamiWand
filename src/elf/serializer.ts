@@ -49,6 +49,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	const symbolLocationReference: Map<string, Pointer> = new Map()
 	// TODO: use this everywhere
 	const symbolNameOverrides: Map<string, string> = new Map()
+	// TODO: use this everywhere
+	const symbolSizeOverrides: Map<string, number> = new Map()
 	
 	function findSection(sectionName: string): Section {
 		return sections.find(section => section.name == sectionName)
@@ -369,15 +371,18 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				// model
 				symbolLocationReference.set("wld::btl::data::s_modelBattle", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_modelBattle", (binary.data.model.length + 1) * FILE_TYPES[DataType.BtlModel].size)
 				// TODO: use padding amount in all data types
 				serializeObjects(data, DataType.BtlModel, binary.data.model, 1)
 				
 				// parts
 				symbolLocationReference.set("wld::btl::data::s_partsData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_partsData", (binary.data.part.length + 1) * FILE_TYPES[DataType.BtlPart].size)
 				serializeObjects(data, DataType.BtlPart, binary.data.part, 1)
 				
 				// unit (actor)
 				symbolLocationReference.set("wld::btl::data::s_unitData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_unitData", (binary.data.unit.length + 1) * FILE_TYPES[DataType.BtlUnit].size)
 				serializeObjects(data, DataType.BtlUnit, binary.data.unit, 1)
 				
 				// weapon range
@@ -387,6 +392,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					let newSymbolName = "wld::btl::data::s_weaponRangeData_" + rangeHeader.id
 					
 					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolSizeOverrides.set(symbolName, FILE_TYPES[DataType.BtlAttackRange].size)
 					symbolNameOverrides.set(symbolName, newSymbolName)
 					
 					rangeHeader.attackRange.symbolName = newSymbolName
@@ -396,53 +402,65 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				// weapon range header
 				symbolLocationReference.set("wld::btl::data::s_weaponRangeDataTable", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_weaponRangeDataTable", (binary.data.attackRangeHeader.length + 1) * FILE_TYPES[DataType.BtlAttackRangeHeader].size)
 				serializeObjects(data, DataType.BtlAttackRangeHeader, binary.data.attackRangeHeader, 1)
 				
 				// attacks
 				symbolLocationReference.set("wld::btl::data::s_weaponData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_weaponData", (binary.data.attack.length + 1) * FILE_TYPES[DataType.BtlAttack].size)
 				serializeObjects(data, DataType.BtlAttack, binary.data.attack, 1)
 				
 				// event camera
 				symbolLocationReference.set("wld::btl::data::s_eventCameraData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_eventCameraData", (binary.data.eventCamera.length + 1) * FILE_TYPES[DataType.BtlEventCamera].size)
 				serializeObjects(data, DataType.BtlEventCamera, binary.data.eventCamera, 1)
 				
 				// boss attacks (godhand)
+				// no padding value
 				symbolLocationReference.set("wld::btl::data::s_godHandData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_godHandData", binary.data.bossAttack.length * FILE_TYPES[DataType.BtlBossAttack].size)
 				serializeObjects(data, DataType.BtlBossAttack, binary.data.bossAttack)
 				
 				// puzzle level
 				symbolLocationReference.set("wld::btl::data::s_puzzleLevelData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_puzzleLevelData", (binary.data.puzzleLevel.length + 1) * FILE_TYPES[DataType.BtlPuzzleLevel].size)
 				serializeObjects(data, DataType.BtlPuzzleLevel, binary.data.puzzleLevel, 1)
 				
 				// cheer terms
 				symbolLocationReference.set("wld::btl::data::s_cheerTermsData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_cheerTermsData", (binary.data.cheerTerm.length + 1) * FILE_TYPES[DataType.BtlCheerTerms].size)
 				serializeObjects(data, DataType.BtlCheerTerms, binary.data.cheerTerm, 1)
 				
 				// cheer
 				symbolLocationReference.set("wld::btl::data::s_cheerData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_cheerData", (binary.data.cheer.length + 1) * FILE_TYPES[DataType.BtlCheer].size)
 				serializeObjects(data, DataType.BtlCheer, binary.data.cheer, 1)
 				
 				// resources
-				for (const resourceHeader of binary.data.resourceField as Instance<DataType.BtlResourceField>[]) {
-					const resources = resourceHeader.resources as {children: Instance<DataType.BtlResource>[], symbolName: string}
+				for (const resourceField of binary.data.resourceField as Instance<DataType.BtlResourceField>[]) {
+					const resources = resourceField.resources as {children: Instance<DataType.BtlResource>[], symbolName: string}
 					const { children, symbolName } = resources
 					
-					let newSymbolName = "wld::btl::data::s_resourceElementData_" + resourceHeader.id
+					let newSymbolName = "wld::btl::data::s_resourceElementData_" + resourceField.id
 					
 					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.BtlResource].size)
 					symbolNameOverrides.set(symbolName, newSymbolName)
 					
 					resources.symbolName = newSymbolName
+					resourceField.resourceCount = children.length
 					
 					serializeObjects(data, DataType.BtlResource, children)
 				}
 				
 				// resource fields/headers
 				symbolLocationReference.set("wld::btl::data::s_resourceData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_resourceData", (binary.data.resourceField.length + 1) * FILE_TYPES[DataType.BtlResourceField].size)
 				serializeObjects(data, DataType.BtlResourceField, binary.data.resourceField, 1)
 				
 				// settings
 				symbolLocationReference.set("wld::btl::data::s_configData", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::btl::data::s_configData", (binary.data.config.length + 1) * FILE_TYPES[DataType.BtlConfig].size)
 				serializeObjects(data, DataType.BtlConfig, binary.data.config, 1)
 				
 				
@@ -812,6 +830,10 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				symbol.name = mangleIdentifier(newId)
 			}
 			
+			if (symbolSizeOverrides.has(symbolId)) {
+				symbol.size = symbolSizeOverrides.get(symbolId)
+			}
+			
 			
 			symbol.toBinaryWriter(writer, stringTable)
 		}
@@ -896,6 +918,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	}
 	
 	// Maplink files always have a relocation for field_0x20 in the header to symbol 8
+	// TODO: move this to the maplink serializer
 	if (dataType == DataType.Maplink) {
 		let headerSize = FILE_TYPES[DataType.MaplinkHeader].size
 		
