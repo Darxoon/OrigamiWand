@@ -5,12 +5,12 @@
 </script>
 
 <div class="buttons">
-    <div class="icon duplicate" on:click|stopPropagation={() => {
+    <button class="icon duplicate" on:click|stopPropagation={() => {
         dispatch('duplicate')
-    }}><i data-feather="copy"></i></div>
-    <div class="icon delete" on:click|stopPropagation={() => {
+    }}><i data-feather="copy"></i></button>
+    <button class="icon delete" on:click|stopPropagation={() => {
         dispatch('delete')
-    }}><i data-feather="x"></i></div>
+    }}><i data-feather="x"></i></button>
 </div>
 
 <style>
@@ -27,9 +27,13 @@
         
         height: var(--size);
         width: var(--size);
-        margin-left: 2px;
         
+        margin-left: 2px;
         margin-top: -2px;
+        
+        border: 0;
+        padding: 0;
+        background: none;
     }
 </style>
 

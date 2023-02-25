@@ -4,6 +4,7 @@
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
     import { duplicateObjectInBinary } from "paper-mario-elfs/util";
     import { VALUE_UUID, type UuidTagged } from "paper-mario-elfs/valueIdentifier";
+    import Debouncer from "./Debouncer.svelte";
 
 	export let binary: ElfBinary
 	export let objects: UuidTagged[]
@@ -12,6 +13,13 @@
 	
 	let objectEditors: ObjectEditor[] = []
 	let areEditorsOpen: boolean[] = []
+	let countShown = 60
+	
+	let debouncer: Debouncer
+	
+	$: objectSlice = objects.slice(0, countShown)
+	
+	$: if (objects && debouncer) debouncer.reset()
 	
 	$: if (objects.find(x => x[VALUE_UUID] == undefined) != undefined) {
 		console.error("Not all objects have a UUID")
@@ -47,10 +55,18 @@
 		let { displayName, identifyingField } = FILE_TYPES[dataType]
 		return `${displayName} ${i}: ${obj[identifyingField]}`
 	}
+	
+	function appear(index: number) {
+		if (index >= countShown - 20) {
+			countShown += 40
+		}
+	}
 </script>
 
-{#each objects as obj, i (obj[VALUE_UUID])}
+<Debouncer bind:this={debouncer} autoStart={true} on:finished={() => countShown += 80} />
+
+{#each objectSlice as obj, i (obj[VALUE_UUID])}
 	<ObjectEditor bind:this={objectEditors[i]} bind:obj={obj} bind:open={areEditorsOpen[i]}
-		on:open on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(i)}
+		on:open on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(i)} on:appear={() => appear(i)}
 		binary={binary} dataType={dataType} title={titleOf(obj, i)} highlightedFields={highlightedFields?.get(obj)} />
 {/each}
