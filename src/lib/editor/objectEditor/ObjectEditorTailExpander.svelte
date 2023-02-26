@@ -2,12 +2,13 @@
     import { toReadableString } from "$lib/util";
     import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
+    import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
     import { afterUpdate } from "svelte";
     import ObjectEditor from "./ObjectEditor.svelte";
 
 	export let dataType: DataType
 	export let visible: boolean
-	export let child: any
+	export let child: UuidTagged
 	export let binary: ElfBinary = undefined
 	
 	let isOpen: boolean = false
@@ -16,7 +17,7 @@
 	$: childField = FILE_TYPES[dataType].childField ?? undefined
 	$: childFieldLabel = FILE_TYPES[dataType].childFieldLabel ?? undefined
 	
-	$: childContent = "children" in child ? child.children : "item" in child ? child.item : child
+	$: childContent = "children" in child ? child.children as unknown[] : "item" in child ? child.item as object : child
 	
 	
 	$: childDataType = dataType ? FILE_TYPES[dataType].childTypes[childField] : undefined
@@ -53,7 +54,7 @@
 						+ (childContent[FILE_TYPES[dataType].identifyingField] 
 							? `: ${childContent[FILE_TYPES[dataType].identifyingField]}` 
 							: "")
-						} open={true} binary={binary} />
+						} open={true} binary={binary} showButtons={false} />
 				{/if}
 			</div>
 		{/if}

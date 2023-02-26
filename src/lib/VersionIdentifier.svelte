@@ -5,7 +5,7 @@
 <div class="version-identifier">
 	{PUBLIC_OW_VERSION}
 	{#if !parseInt(PUBLIC_IS_DEV_VERSION)}
-		<br>from {new Date(parseInt(PUBLIC_VERSION_TIMESTAMP)).toLocaleDateString()}
+		<br>from {new Date(parseInt(PUBLIC_VERSION_TIMESTAMP)).toLocaleDateString(undefined, { dateStyle: 'medium' })}
 	{/if}
 </div>
 

@@ -170,8 +170,10 @@
 			{/each}
 		</div>
 		
-		{#if FILE_TYPES[dataType].childField}
+		{#if FILE_TYPES[dataType].childField && typeof obj[FILE_TYPES[dataType].childField] === "object" && obj[FILE_TYPES[dataType].childField]}
 			<ObjectEditorTailExpander dataType={dataType} visible={open} child={obj[FILE_TYPES[dataType].childField]} binary={binary} />
+		{:else if FILE_TYPES[dataType].childField}
+			<p class="child-content-null">Content could not be created</p>
 		{/if}
 	{/if}	
 </div>
@@ -232,6 +234,13 @@
 			background: var(--bg-label-highlight);
 			border-radius: 3px;
 		}
+	}
+	
+	.child-content-null {
+		margin-top: 0.3em;
+		margin-bottom: 0;
+		
+		font-size: 20px;
 	}
 	
 	.invisible {
