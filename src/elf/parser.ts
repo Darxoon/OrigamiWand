@@ -527,6 +527,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			for (const model of models) {
 				const { properties: offset, propertyCount } = model
 				
+				if (offset == Pointer.NULL || offset == undefined) {
+					model.properties = null
+					continue
+				}
+				
 				let children = applyStrings(
 					offset, DataType.UiModelProperty, stringSection, 
 					allRelocations.get('.data'), 
@@ -552,21 +557,20 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// shop
 			let shopSymbol = findSymbol("wld::fld::data::s_shopData")
-			let shops = parseSymbol(dataSection, stringSection, shopSymbol, DataType.UiShop)
+			let shops = parseSymbol(dataSection, stringSection, shopSymbol, DataType.UiShop, -1)
 			data.shop = shops
 			
 			// sell data
 			let soldItems = []
 			
 			for (const shop of shops) {
-				const { soldItems: offset, soldItemCount } = shop
+				const { soldItems: symbolName, soldItemCount } = shop
 				
-				let children = applyStrings(
-					offset, DataType.UiSellItem, stringSection, 
-					allRelocations.get('.data'), 
-					
-					parseRawDataSection(dataSection, soldItemCount, offset, FILE_TYPES[DataType.UiSellItem].typedef), 
-				)
+				if (symbolName == undefined)
+					continue
+				
+				let symbol = findSymbol(symbolName)
+				let children = parseSymbol(dataSection, stringSection, symbol, DataType.UiSellItem, soldItemCount)
 				
 				let soldItem = {
 					symbolName: `wld::fld::data::s_sellData_${shop.id}`,
