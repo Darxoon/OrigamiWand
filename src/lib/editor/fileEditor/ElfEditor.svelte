@@ -135,6 +135,7 @@
 <div class="editor">
 	<!-- TODO: if objects contain symbol references, it's important that there is always one object left -->
 	<!-- Ask for confirmation in this case when pressing Delete All -->
+	<!-- TODO: do the same on delete button in object editors -->
 	<FileToolbar on:add={addObject} on:clear={deleteAll} searchIndex={index} bind:searchTerm={searchTerm} bind:searchResults={searchResults} />
 	
 	<div class="listing" style="--content-height: {objects?.length * 61}px;">
