@@ -25,6 +25,10 @@ export class ElfBinary {
 	public findSymbol(name: string): Symbol {
 		return this.symbolTable.find(symbol => demangle(symbol.name) === name)
 	}
+	
+	public findSymbolIndex(name: string): number {
+		return this.symbolTable.findIndex(symbol => demangle(symbol.name) === name)
+	}
 }
 
 export const dataDivisions = {
