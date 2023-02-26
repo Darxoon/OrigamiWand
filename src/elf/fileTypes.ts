@@ -1518,53 +1518,7 @@ might be the interaction function (called when pressing A; similar to talking).`
 		field_0xb8: "string",
 	},
 	
-	[DataType.DataUi]: {
-		__entryPoints: {
-			
-			[dataDivisions.model]: {
-				symbol: "wld::fld::data::s_uiModelData",
-				dataType: DataType.UiModel,
-				section: ".data",
-				
-				children: {
-					properties: {
-						count: "propertyCount",
-						section: ".data",
-						dataType: DataType.UiModelProperty,
-						objectType: dataDivisions.modelProperty,
-					}
-				}
-			},
-			
-			[dataDivisions.msg]: {
-				symbol: "wld::fld::data::s_uiMessageData",
-				dataType: DataType.UiMsg,
-				section: ".data",
-			},
-			
-			[dataDivisions.shop]: {
-				symbol: "wld::fld::data::s_shopData",
-				dataType: DataType.UiShop,
-				section: ".data",
-				cutoff: 1,
-				
-				children: {
-					soldItems: {
-						count: "soldItemCount",
-						section: ".data",
-						dataType: DataType.UiSellItem,
-						objectType: dataDivisions.sellItem,
-					}
-				}
-			},
-			
-			[dataDivisions.seaEntry]: {
-				symbol: "wld::fld::data::s_uiSeaMapData",
-				dataType: DataType.UiSeaMap,
-				section: ".data",
-			}
-		}
-	},
+	[DataType.DataUi]: {},
 	
 	[DataType.UiModel]: {
 		__displayName: "Model",

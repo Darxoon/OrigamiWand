@@ -509,85 +509,87 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		
 		case DataType.DataUi: {
 			const dataSection = findSection('.data')
-			const dataStringSection = findSection('.rodata.str1.1')
+			const stringSection = findSection('.rodata.str1.1')
 			const rodataSection = findSection('.rodata')
 			
 			let rodataView = new DataView(rodataSection.content)
 			
 			data = {}
 			
-			// automated parsing
-			// this is awful
-			// TODO: undo this
-			for (const [dataDivision, entryPoint] of Object.entries(FILE_TYPES[dataType].entryPoints)) {
-				let symbol = findSymbol(entryPoint.symbol)
-				let count = entryPoint.count ?? symbol.size / FILE_TYPES[entryPoint.dataType].size
+			// models
+			let modelDataSymbol = findSymbol("wld::fld::data::s_uiModelData")
+			let models = parseSymbol(dataSection, stringSection, modelDataSymbol, DataType.UiModel)
+			data.model = models
+			
+			// model properties
+			let modelProperties = []
+			
+			for (const model of models) {
+				const { properties: offset, propertyCount } = model
 				
-				let section = entryPoint.section == ".rodata" ? rodataSection : dataSection
-				
-				let rawObjects = applyStrings(
-					symbol.location, entryPoint.dataType, dataStringSection, 
-					allRelocations.get(entryPoint.section), 
+				let children = applyStrings(
+					offset, DataType.UiModelProperty, stringSection, 
+					allRelocations.get('.data'), 
 					
-					parseRawDataSection(section, count, symbol.location, FILE_TYPES[entryPoint.dataType].typedef), 
+					parseRawDataSection(dataSection, propertyCount, offset, FILE_TYPES[DataType.UiModelProperty].typedef), 
 				)
 				
-				let objects = entryPoint.cutoff ? rawObjects.slice(0, -entryPoint.cutoff) : rawObjects
-				
-				data[dataDivision] = objects
-				
-				// children
-				for (const [fieldName, child] of Object.entries(entryPoint.children ?? {}) as [string, any][]) {
-					let childrenByKey: Map<number|string, any> = new Map()
-			
-					let filtered = objects.filter(obj => obj[fieldName] != Pointer.NULL && obj[fieldName] != null)
-					let children = filtered.map(obj => {
-						let childKey = obj[fieldName]
-						let count = obj[child.count]
-						
-						let offset = childKey
-						
-						if (FILE_TYPES[entryPoint.dataType].typedef[fieldName] == "symbol") {
-							// debugger
-							let symbol = findSymbol(obj[fieldName])
-							offset = symbol.location
-						}
-						
-						let section = entryPoint.section == ".rodata" ? rodataSection : dataSection
-						
-						let result = applyStrings(
-							offset, child.dataType, dataStringSection,
-							allRelocations.get(child.section), 
-							
-							parseRawDataSection(section, count, offset, FILE_TYPES[child.dataType].typedef), 
-						)
-						
-						childrenByKey.set(childKey?.value ?? childKey, result)
-						return result
-					})
-					
-					data[child.objectType] = children
-					
-					// fix references to properties
-					for (const obj of objects) {
-						obj[fieldName] = childrenByKey.get(obj[fieldName]?.value ?? obj[fieldName]) ?? null
-					}
+				let attackRange = {
+					symbolName: `wld::fld::data::s_uiModelPropertyData_${model.id}`,
+					children,
 				}
+				
+				modelProperties.push(attackRange)
+				model.properties = attackRange
 			}
+			
+			data.modelProperty = modelProperties
+			
+			// msg
+			let msgSymbol = findSymbol("wld::fld::data::s_uiMessageData")
+			let messages = parseSymbol(dataSection, stringSection, msgSymbol, DataType.UiMsg)
+			data.msg = messages
+			
+			// shop
+			let shopSymbol = findSymbol("wld::fld::data::s_shopData")
+			let shops = parseSymbol(dataSection, stringSection, shopSymbol, DataType.UiShop)
+			data.shop = shops
+			
+			// sell data
+			let soldItems = []
+			
+			for (const shop of shops) {
+				const { soldItems: offset, soldItemCount } = shop
+				
+				let children = applyStrings(
+					offset, DataType.UiSellItem, stringSection, 
+					allRelocations.get('.data'), 
+					
+					parseRawDataSection(dataSection, soldItemCount, offset, FILE_TYPES[DataType.UiSellItem].typedef), 
+				)
+				
+				let soldItem = {
+					symbolName: `wld::fld::data::s_sellData_${shop.id}`,
+					children,
+				}
+				
+				soldItems.push(soldItem)
+				shop.soldItems = soldItem
+			}
+			
+			data.sellItem = soldItems
+			
+			// seaMap
+			let seaMapSymbol = findSymbol("wld::fld::data::s_uiSeaMapData")
+			let seaEntries = parseSymbol(dataSection, stringSection, seaMapSymbol, DataType.UiSeaMap)
+			data.seaEntry = seaEntries
 			
 			// menu data
 			let menuDataCountSymbol = findSymbol("wld::fld::data::kMenuDataCount")
 			let menuCount = rodataView.getInt32(menuDataCountSymbol.location.value, true)
 			
 			let menuDataSymbol = findSymbol("wld::fld::data::s_menuData")
-			
-			let menus = applyStrings(
-				menuDataSymbol.location, DataType.UiMenu,  dataStringSection, 
-				allRelocations.get('.data'), 
-				
-				parseRawDataSection(dataSection, menuCount, menuDataSymbol.location, FILE_TYPES[DataType.UiMenu].typedef),
-			)
-			
+			let menus = parseSymbol(dataSection, stringSection, menuDataSymbol, DataType.UiMenu, menuCount)
 			data.menu = menus
 			
 			// announcement data
@@ -595,30 +597,15 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let announcementCount = rodataView.getInt32(announcementCountSymbol.location.value, true)
 			
 			let announcementSymbol = findSymbol("wld::fld::data::s_announceData")
-			
-			let announcements = applyStrings(
-				announcementSymbol.location, DataType.UiAnnouncement,  dataStringSection, 
-				allRelocations.get('.data'), 
-				
-				parseRawDataSection(dataSection, announcementCount, announcementSymbol.location, FILE_TYPES[DataType.UiAnnouncement].typedef),
-			)
-			
+			let announcements = parseSymbol(dataSection, stringSection, announcementSymbol, DataType.UiAnnouncement, announcementCount)
 			data.announcement = announcements
 			
 			// announcement excludes
-			let announcementExcludeCountSymbol = findSymbol("wld::fld::data::kAnnounceExcludeDataCount")
-			let announcementExcludeCount = rodataView.getInt32(announcementExcludeCountSymbol.location.value, true)
+			let excludeCountSymbol = findSymbol("wld::fld::data::kAnnounceExcludeDataCount")
+			let excludeCount = rodataView.getInt32(excludeCountSymbol.location.value, true)
 			
-			let announcementExcludeSymbol = findSymbol("wld::fld::data::s_announceExcludeData")
-			
-			let announcementExcludes = applyStrings(
-				announcementExcludeSymbol.location, DataType.UiAnnouncementExclude,  dataStringSection, 
-				allRelocations.get('.data'), 
-				
-				parseRawDataSection(dataSection, announcementExcludeCount, announcementExcludeSymbol.location, 
-					FILE_TYPES[DataType.UiAnnouncementExclude].typedef),
-			)
-			
+			let excludeDataSymbol = findSymbol("wld::fld::data::s_announceExcludeData")
+			let announcementExcludes = parseSymbol(dataSection, stringSection, excludeDataSymbol, DataType.UiAnnouncementExclude, excludeCount)
 			data.announcementExclude = announcementExcludes
 			
 			break
