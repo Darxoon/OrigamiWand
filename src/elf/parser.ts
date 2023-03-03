@@ -518,7 +518,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// models
 			let modelDataSymbol = findSymbol("wld::fld::data::s_uiModelData")
-			let models = parseSymbol(dataSection, stringSection, modelDataSymbol, DataType.UiModel)
+			let models = parseSymbol(dataSection, stringSection, modelDataSymbol, DataType.UiModel, -1)
 			data.model = models
 			
 			// model properties
@@ -552,7 +552,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// msg
 			let msgSymbol = findSymbol("wld::fld::data::s_uiMessageData")
-			let messages = parseSymbol(dataSection, stringSection, msgSymbol, DataType.UiMsg)
+			let messages = parseSymbol(dataSection, stringSection, msgSymbol, DataType.UiMsg, -1)
 			data.msg = messages
 			
 			// shop
@@ -585,7 +585,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// seaMap
 			let seaMapSymbol = findSymbol("wld::fld::data::s_uiSeaMapData")
-			let seaEntries = parseSymbol(dataSection, stringSection, seaMapSymbol, DataType.UiSeaMap)
+			let seaEntries = parseSymbol(dataSection, stringSection, seaMapSymbol, DataType.UiSeaMap, -1)
 			data.seaEntry = seaEntries
 			
 			// menu data
