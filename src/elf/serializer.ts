@@ -266,12 +266,13 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			}
 
 			case DataType.DataUi: {
-				const rodataWriter = new BinaryWriter()
 				const dataPointers = new Map()
 				objectRelocations.set('.data', dataPointers)
+				
 				const dataSymbols = new Map()
 				symbolRelocations.set('.data', dataSymbols)
 				
+				// ----------------  data  ----------------
 				let data: SectionElements = {
 					writer: dataWriter,
 					stringRelocations: dataStringRelocations,
@@ -279,75 +280,97 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					symbolRelocations: dataSymbols,
 				}
 				
-				let dataRelocations: Relocation[] = []
-				allRelocations.set('.data', dataRelocations)
-				
-				// models
+				// model properties
 				for (const model of binary.data.model as Instance<DataType.UiModel>[]) {
-					symbolLocationReference.set(`wld::fld::data::s_uiModelPropertyData_${model.id}`, new Pointer(dataWriter.size))
+					if (model.properties == undefined)
+						continue
 					
-					if (model.properties)
-						serializeObjects(data, DataType.UiModelProperty, model.properties, 0, false)
+					const properties = model.properties as {children: Instance<DataType.UiModelProperty>[], symbolName: string}
+					const { children, symbolName } = properties
+					
+					let newSymbolName = `wld::fld::data::s_uiModelPropertyData_${model.id}`
+					
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolNameOverrides.set(symbolName, newSymbolName)
+					symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.UiModelProperty].size)
+					
+					properties.symbolName = newSymbolName
+					model.propertyCount = children.length
+					
+					serializeObjects(data, DataType.UiModelProperty, children, { addStrings: false, symbolWrapper: properties })
 				}
 				
+				// model
 				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(dataWriter.size))
-				
-				serializeObjects(data, DataType.UiModel, binary.data.model)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiModelData`, binary.data.model.length * FILE_TYPES[DataType.UiModel].size)
+				serializeObjects(data, DataType.UiModel, binary.data.model, { padding: 1 })
 				
 				// msg
 				symbolLocationReference.set(`wld::fld::data::s_uiMessageData`, new Pointer(dataWriter.size))
-				serializeObjects(data, DataType.UiMsg, binary.data.msg)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiMessageData`, binary.data.msg.length * FILE_TYPES[DataType.UiMsg].size)
+				serializeObjects(data, DataType.UiMsg, binary.data.msg, { padding: 1 })
 				
 				// sell data
 				for (const shop of binary.data.shop as Instance<DataType.UiShop>[]) {
-					symbolLocationReference.set(`wld::fld::data::s_sellData_${shop.id}`, new Pointer(dataWriter.size))
+					const soldItems = shop.soldItems as { children: Instance<DataType.UiSellItem>[], symbolName: string }
+					const { children, symbolName } = soldItems
 					
-					serializeObjects(data, DataType.UiSellItem, shop.soldItems)
+					let newSymbolName = `wld::fld::data::s_sellData_${shop.id}`
+					
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolNameOverrides.set(symbolName, newSymbolName)
+					symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.UiSellItem].size)
+					
+					soldItems.symbolName = newSymbolName
+					shop.soldItemCount = children.length
+					
+					serializeObjects(data, DataType.UiSellItem, children, { symbolWrapper: soldItems })
 				}
 				
 				// shops
-				for (const [shop, i] of enumerate(binary.data.shop as Instance<DataType.UiShop>[])) {
-					let locationOffset: number = dataWriter.size 
-							+ FILE_TYPES[DataType.UiShop].size * i
-							+ (FILE_TYPES[DataType.UiShop].fieldOffsets["soldItems"] as number)
-					let sellDataSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === `wld::fld::data::s_sellData_${shop.id}`)
-					// TODO: redo all of these with symbolRelocations
-					dataRelocations.push(new Relocation(new Pointer(locationOffset), 0x101, sellDataSymbolIndex, Pointer.ZERO))
-				}
-				
 				symbolLocationReference.set(`wld::fld::data::s_shopData`, new Pointer(dataWriter.size))
-				serializeObjects(data, DataType.UiShop, binary.data.shop)
-				serializeObjects(data, DataType.UiShop, [
-					FILE_TYPES[DataType.UiShop].instantiate()
-				])
+				symbolSizeOverrides.set(`wld::fld::data::s_shopData`, (binary.data.shop.length + 1) * FILE_TYPES[DataType.UiShop].size)
+				serializeObjects(data, DataType.UiShop, binary.data.shop, { padding: 1 })
+				
+				// TODO: some ideas
+				// serializeSymbol(data, `wld::fld::data::s_shopData`, DataType.UiShop, { padding: 1, dataDivision: 'shop', addStrings: false })
+				// serializeSymbol(data, `wld::fld::data::s_uiSeaMapData`, DataType.UiSeaMap)
+				// serializeChildren(data, DataType.UiShop, 'wld::fld::data::s_sellData_{id}', 'soldItemCount')
 				
 				// sea map
 				symbolLocationReference.set(`wld::fld::data::s_uiSeaMapData`, new Pointer(dataWriter.size))
-				serializeObjects(data, DataType.UiSeaMap, binary.data.seaEntry)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiSeaMapData`, binary.data.seaEntry.length * FILE_TYPES[DataType.UiSeaMap].size)
+				serializeObjects(data, DataType.UiSeaMap, binary.data.seaEntry, { padding: 1 })
 				
 				// menu
 				symbolLocationReference.set(`wld::fld::data::s_menuData`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_menuData`, binary.data.menu.length * FILE_TYPES[DataType.UiMenu].size)
 				serializeObjects(data, DataType.UiMenu, binary.data.menu)
-				
-				rodataWriter.writeInt32(binary.data.menu.length)
 				
 				// announce
 				symbolLocationReference.set(`wld::fld::data::s_announceData`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_announceData`, binary.data.announcement.length * FILE_TYPES[DataType.UiAnnouncement].size)
 				serializeObjects(data, DataType.UiAnnouncement, binary.data.announcement)
 				
-				rodataWriter.writeInt32(binary.data.announcement.length)
-				
+				// announcement exclude
 				symbolLocationReference.set(`wld::fld::data::s_announceExcludeData`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_announceExcludeData`, binary.data.announcementExclude.length
+					* FILE_TYPES[DataType.UiAnnouncementExclude].size)
 				serializeObjects(data, DataType.UiAnnouncementExclude, binary.data.announcementExclude)
 				
-				rodataWriter.writeInt32(binary.data.announcementExclude.length)
-
 				// remaining strings
 				for (const model of binary.data.model as Instance<DataType.UiModel>[]) {
 					if (model.properties)
-						serializeStringsOnly(DataType.UiModelProperty, model.properties)
+						serializeStringsOnly(DataType.UiModelProperty, model.properties.children)
 				}
 				
+				// ----------------  rodata  ----------------
+				const rodataWriter = new BinaryWriter()
+				
+				// array lengths of some .data things
+				rodataWriter.writeInt32(binary.data.menu.length)
+				rodataWriter.writeInt32(binary.data.announcement.length)
+				rodataWriter.writeInt32(binary.data.announcementExclude.length)
 				
 				updatedSections.set('.rodata', rodataWriter.toArrayBuffer())
 
@@ -373,17 +396,17 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				symbolLocationReference.set("wld::btl::data::s_modelBattle", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_modelBattle", (binary.data.model.length + 1) * FILE_TYPES[DataType.BtlModel].size)
 				// TODO: use padding amount in all data types
-				serializeObjects(data, DataType.BtlModel, binary.data.model, 1)
+				serializeObjects(data, DataType.BtlModel, binary.data.model, { padding: 1 })
 				
 				// parts
 				symbolLocationReference.set("wld::btl::data::s_partsData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_partsData", (binary.data.part.length + 1) * FILE_TYPES[DataType.BtlPart].size)
-				serializeObjects(data, DataType.BtlPart, binary.data.part, 1)
+				serializeObjects(data, DataType.BtlPart, binary.data.part, { padding: 1 })
 				
 				// unit (actor)
 				symbolLocationReference.set("wld::btl::data::s_unitData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_unitData", (binary.data.unit.length + 1) * FILE_TYPES[DataType.BtlUnit].size)
-				serializeObjects(data, DataType.BtlUnit, binary.data.unit, 1)
+				serializeObjects(data, DataType.BtlUnit, binary.data.unit, { padding: 1 })
 				
 				// weapon range
 				for (const rangeHeader of binary.data.attackRangeHeader as Instance<DataType.BtlAttackRangeHeader>[]) {
@@ -397,23 +420,23 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					
 					rangeHeader.attackRange.symbolName = newSymbolName
 					
-					serializeObjects(data, DataType.BtlAttackRange, [ attackRange ])
+					serializeObjects(data, DataType.BtlAttackRange, [ attackRange ], { symbolWrapper: rangeHeader.attackRange })
 				}
 				
 				// weapon range header
 				symbolLocationReference.set("wld::btl::data::s_weaponRangeDataTable", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_weaponRangeDataTable", (binary.data.attackRangeHeader.length + 1) * FILE_TYPES[DataType.BtlAttackRangeHeader].size)
-				serializeObjects(data, DataType.BtlAttackRangeHeader, binary.data.attackRangeHeader, 1)
+				serializeObjects(data, DataType.BtlAttackRangeHeader, binary.data.attackRangeHeader, { padding: 1 })
 				
 				// attacks
 				symbolLocationReference.set("wld::btl::data::s_weaponData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_weaponData", (binary.data.attack.length + 1) * FILE_TYPES[DataType.BtlAttack].size)
-				serializeObjects(data, DataType.BtlAttack, binary.data.attack, 1)
+				serializeObjects(data, DataType.BtlAttack, binary.data.attack, { padding: 1 })
 				
 				// event camera
 				symbolLocationReference.set("wld::btl::data::s_eventCameraData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_eventCameraData", (binary.data.eventCamera.length + 1) * FILE_TYPES[DataType.BtlEventCamera].size)
-				serializeObjects(data, DataType.BtlEventCamera, binary.data.eventCamera, 1)
+				serializeObjects(data, DataType.BtlEventCamera, binary.data.eventCamera, { padding: 1 })
 				
 				// boss attacks (godhand)
 				// no padding value
@@ -424,17 +447,17 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				// puzzle level
 				symbolLocationReference.set("wld::btl::data::s_puzzleLevelData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_puzzleLevelData", (binary.data.puzzleLevel.length + 1) * FILE_TYPES[DataType.BtlPuzzleLevel].size)
-				serializeObjects(data, DataType.BtlPuzzleLevel, binary.data.puzzleLevel, 1)
+				serializeObjects(data, DataType.BtlPuzzleLevel, binary.data.puzzleLevel, { padding: 1 })
 				
 				// cheer terms
 				symbolLocationReference.set("wld::btl::data::s_cheerTermsData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_cheerTermsData", (binary.data.cheerTerm.length + 1) * FILE_TYPES[DataType.BtlCheerTerms].size)
-				serializeObjects(data, DataType.BtlCheerTerms, binary.data.cheerTerm, 1)
+				serializeObjects(data, DataType.BtlCheerTerms, binary.data.cheerTerm, { padding: 1 })
 				
 				// cheer
 				symbolLocationReference.set("wld::btl::data::s_cheerData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_cheerData", (binary.data.cheer.length + 1) * FILE_TYPES[DataType.BtlCheer].size)
-				serializeObjects(data, DataType.BtlCheer, binary.data.cheer, 1)
+				serializeObjects(data, DataType.BtlCheer, binary.data.cheer, { padding: 1 })
 				
 				// resources
 				for (const resourceField of binary.data.resourceField as Instance<DataType.BtlResourceField>[]) {
@@ -450,18 +473,18 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					resources.symbolName = newSymbolName
 					resourceField.resourceCount = children.length
 					
-					serializeObjects(data, DataType.BtlResource, children)
+					serializeObjects(data, DataType.BtlResource, children, { symbolWrapper: resources })
 				}
 				
 				// resource fields/headers
 				symbolLocationReference.set("wld::btl::data::s_resourceData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_resourceData", (binary.data.resourceField.length + 1) * FILE_TYPES[DataType.BtlResourceField].size)
-				serializeObjects(data, DataType.BtlResourceField, binary.data.resourceField, 1)
+				serializeObjects(data, DataType.BtlResourceField, binary.data.resourceField, { padding: 1 })
 				
 				// settings
 				symbolLocationReference.set("wld::btl::data::s_configData", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_configData", (binary.data.config.length + 1) * FILE_TYPES[DataType.BtlConfig].size)
-				serializeObjects(data, DataType.BtlConfig, binary.data.config, 1)
+				serializeObjects(data, DataType.BtlConfig, binary.data.config, { padding: 1 })
 				
 				
 				// ----------------  rodata  ----------------
@@ -627,6 +650,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			symbolRelocations?: Map<number, SymbolName>
 		}
 		
+		interface SerializeObjectsProperties {
+			padding?: number
+			addStrings?: boolean
+			symbolWrapper?: { symbolName: string, children?: any, item?: any }
+		}
+		
 		/**
 		 * Serializes an array of objects of a certain data type.
 		 * @param param0 The section to be serialized into (e.g. data, rodata). Contains the BinaryWriter, string relocations and object relocations
@@ -635,8 +664,14 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		 * @param paddingAmount If positive, it will append as many zero value instances as specified. If negative, it will remove objects at the end.
 		 * @param addStrings If set to false, then the strings in the objects won't be added to the allStrings set.
 		 */
-		function serializeObjects({writer, stringRelocations, crossPointers, symbolRelocations}: SectionElements, dataType: DataType, objects: object[], paddingAmount = 0, addStrings: boolean = true) {
-			if (objects.length == 0) {
+		function serializeObjects(sectionElements: SectionElements, dataType: DataType, objects: object[], properties: SerializeObjectsProperties = {}) {
+			const { writer, stringRelocations, crossPointers, symbolRelocations } = sectionElements
+			const { padding: paddingAmount = 0, addStrings = true, symbolWrapper } = properties
+			
+			if (symbolWrapper)
+				objectOffsets.set(symbolWrapper, new Pointer(writer.size))
+			
+			if (objects.length == 0 && !symbolWrapper) {
 				objectOffsets.set(objects, new Pointer(writer.size))
 			}
 			
@@ -902,7 +937,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	{
 		// symbol relocations
-		if (dataType != DataType.DataBtlSet && dataType != DataType.DataUi) {
+		if (dataType != DataType.DataBtlSet) {
 			for (const [sectionName, sectionSymbolRelocations] of symbolRelocations) {
 				if (!allRelocations.has(sectionName))
 					allRelocations.set(sectionName, [])
