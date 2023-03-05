@@ -1820,7 +1820,7 @@ Known Values:
 		iceResistance: "float",
 		field_0x124: "float",
 		field_0x128: "float",
-		flipResistance: "float",
+		field_0x12c: "float",
 		field_0x130: "float",
 		field_0x134: "float",
 		field_0x138: "float",
