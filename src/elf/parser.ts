@@ -751,9 +751,12 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		}
 	}
 	
+	let binary = new ElfBinary(sections, data, symbolTable, modelSymbolReference)
+	
+	console.log('binary', binary)
 	console.log('data', data)
 	
-	return new ElfBinary(sections, data, symbolTable, modelSymbolReference)
+	return binary
 	
 	
 	function parseSymbol<T extends DataType>(containingSection: Section, stringSection: Section, symbol: Symbol, dataType: T, count?: number) {
