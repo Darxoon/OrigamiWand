@@ -5,7 +5,7 @@ import type { Section, Symbol } from "./types"
  * An ELF file
  */
 export class ElfBinary {
-	private sections: Section[]
+	sections: Section[]
 	data: {[division in DataDivision]?: any[]}
 	symbolTable: Symbol[]
 	modelSymbolReference: WeakMap<object[]|object, string>
@@ -20,6 +20,14 @@ export class ElfBinary {
 		this.data = data
 		this.symbolTable = symbolTable
 		this.modelSymbolReference = modelSymbolReference
+	}
+	
+	public findSection(name: string): Section {
+		return this.sections.find(section => section.name == name)
+	}
+	
+	public findSectionIndex(name: string): number {
+		return this.sections.findIndex(section => section.name == name)
 	}
 	
 	public findSymbol(name: string): Symbol {

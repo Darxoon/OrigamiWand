@@ -2,11 +2,13 @@ import type EditorStrip from "$lib/editor/EditorStrip.svelte"
 import { showModal } from "$lib/modal/modal"
 import TextAlert from "$lib/modal/TextAlert.svelte"
 import DataTypePrompt from "$lib/modals/DataTypePrompt.svelte"
+import SaveAsDialog from "$lib/modals/SaveAsDialog.svelte"
 import { globalEditorStrip, loadedAutosave } from "$lib/stores"
 import { compress, decompress, downloadBlob, loadFile, createFileTab } from "$lib/util"
 import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary"
 import parseElfBinary, { EmptyFileError } from "paper-mario-elfs/parser"
 import serializeElfBinary from "paper-mario-elfs/serializer"
+import stripBinary from "paper-mario-elfs/strip"
 
 let editorStrip: EditorStrip
 globalEditorStrip.subscribe(value => editorStrip = value)
@@ -34,6 +36,10 @@ export function getFileMenu() {
 				name: "Save...",
 				onClick: saveFile
 			},
+			{
+				name: "Save As...",
+				onClick: openSaveDialog,
+			}
 		],
 	}
 }
@@ -111,4 +117,50 @@ async function saveFile() {
 	let output = isCompressed ? await compress(serialized) : serialized
 	
 	downloadBlob(output, name)
+}
+
+export interface SaveAsDialogResults {
+	fileName: string
+	compressFile: boolean
+	stripFile: boolean
+}
+
+async function openSaveDialog() {
+	let tab = editorStrip.activeTab()
+	
+	if (tab.parentId) {
+		showModal(TextAlert, {
+			title: "Cannot Save",
+			content: "Try saving the parent file instead."
+		})
+		return
+	}
+	
+	const { dataType, binary } = tab.properties
+	
+	const modalOptions = {
+		fileName: tab.name,
+		compressFile: tab.isCompressed,
+	}
+	
+	let { fileName, compressFile, stripFile } = await showModal<SaveAsDialogResults>(SaveAsDialog, modalOptions)
+	
+	fileName = fileName.trim()
+	
+	if (compressFile && !fileName.endsWith('.zst')) {
+		fileName += '.zst'
+	}
+	
+	if (!compressFile && fileName.endsWith('.zst')) {
+		fileName = fileName.slice(0, fileName.length - 4)
+	}
+	
+	if (stripFile) {
+		stripBinary(binary, { comment: "Made with Origami Wand by Darxoon" })
+	}
+	
+	let serialized = serializeElfBinary(dataType, binary)
+	let output = compressFile ? await compress(serialized) : serialized
+	
+	downloadBlob(output, fileName)
 }
