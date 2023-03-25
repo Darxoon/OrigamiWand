@@ -53,7 +53,8 @@ export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dat
 				let originalSymbol = binary.findSymbol(fieldValue.symbolName)
 				let clonedSymbol = originalSymbol.clone()
 				
-				let clonedSymbolName = incrementName(demangle(originalSymbol.name))
+				// the new symbol is given a (probably) unique name to prevent symbol name collisions, which are the root of all evil
+				let clonedSymbolName = incrementName(demangle(originalSymbol.name)) + Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
 				clonedSymbol.name = mangleIdentifier(clonedSymbolName)
 				
 				// insert new symbol into symboltable
