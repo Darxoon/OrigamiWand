@@ -11,8 +11,8 @@
 	import ButtonStrip from './ButtonStrip.svelte';
 	import FieldIcons from './FieldIcons.svelte';
 	import ObjectEditorTailExpander from './ObjectEditorTailExpander.svelte';
-    import { showModal } from "$lib/modal/modal";
-    import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
+	import { showModal } from "$lib/modal/modal";
+	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	
 	const dispatch = createEventDispatcher()
 
@@ -76,7 +76,20 @@
 	}
 	
 	function showFieldMenu(dataType, fieldName) {
-		const objects = binary.data[FILE_TYPES[dataType].objectType]
+		let objects = binary.data[FILE_TYPES[dataType].objectType]
+		
+		// find sub array if necessary
+		let containsSubArrays = objects.find(v => 'children' in v || v instanceof Array) != undefined
+		
+		if (containsSubArrays)
+			objects = objects.find(arr => (arr instanceof Array ? arr : arr.children).includes(obj))
+		
+		if ('children' in objects)
+			objects = objects.children as any[]
+		
+		
+		// TODO: In future, make this handled by BasicObjectArray by using a dispatch
+		// to prevent this ^
 		
 		showModal(FieldOptionAlert, {
 			title: `Field '${toReadableString(fieldName)}'`,
