@@ -1539,6 +1539,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	[DataType.UiModelProperty]: {
 		__displayName: "Model Property",
 		__objectType: dataDivisions.modelProperty,
+		__nestedAllValues: true,
 		
 		id: "string",
 		model: "string",
@@ -1599,6 +1600,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 	[DataType.UiSellItem]: {
 		__displayName: "Sold Item",
 		__objectType: dataDivisions.sellItem,
+		__nestedAllValues: true,
 		
 		id: "string",
 		itemGiven: "string",
@@ -1954,6 +1956,7 @@ Example:
 	[DataType.BtlAttackRange]: {
 		__displayName: "Attack Range Data",
 		__objectType: dataDivisions.attackRange,
+		__nestedAllValues: true,
 		
 		field_0x0: "int",
 		ringSection: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
@@ -2406,6 +2409,7 @@ Bit field for the attack GFX type. Known values:
 		__displayName: "Resource",
 		__importantField: "assetName",
 		__objectType: dataDivisions.resource,
+		__nestedAllValues: true,
 		
 		field_0x0: "int",
 		field_0x4: "int",

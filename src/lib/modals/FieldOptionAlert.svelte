@@ -25,8 +25,6 @@
 	
 	$: if (notes) localStorage[globalFieldId + ".description"] = notes
 	
-	$: console.log('fieldOptionAlert.binary', binary)
-	
 	onMount(() => {
 		notes = localStorage[globalFieldId + ".description"]
 	})
@@ -102,8 +100,8 @@
 				</div>
 			{/if}
 			<div class="allValues nested">
-				{#each objects as arr, i}
-					{#each arr.objects ?? arr as obj, j}
+				{#each binary.data[FILE_TYPES[dataType].objectType] as arr, i}
+					{#each arr.objects ?? arr.children ?? arr as obj, j}
 						{#if hideNulls ? obj[fieldName] !== null : true}
 							<div class="index">
 								{i}&nbsp;/&nbsp;{j}
@@ -116,9 +114,6 @@
 							</div>
 						{/if}
 					{/each}
-					<div class="filler"></div>
-					<div class="filler"></div>
-					<div class="filler"></div>
 				{/each}
 			</div>
 		</div>
@@ -143,11 +138,7 @@
 		border-radius: 3px;
 	}
 	
-	// .allValues.nested :nth-child(12n-4) {
-	// 	background: #eaeaea;
-	// 	border-radius: 3px;
-	// }
-	.allValues.nested .highlight {
+	.allValues.nested .fieldName:nth-child(6n-1) {
 		background: #eaeaea;
 		border-radius: 3px;
 	}
