@@ -302,12 +302,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				// model
 				symbolLocationReference.set(`wld::fld::data::s_uiModelData`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_uiModelData`, binary.data.model.length * FILE_TYPES[DataType.UiModel].size)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiModelData`, (binary.data.model.length + 1) * FILE_TYPES[DataType.UiModel].size)
 				serializeObjects(data, DataType.UiModel, binary.data.model, { padding: 1 })
 				
 				// msg
 				symbolLocationReference.set(`wld::fld::data::s_uiMessageData`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_uiMessageData`, binary.data.msg.length * FILE_TYPES[DataType.UiMsg].size)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiMessageData`, (binary.data.msg.length + 1) * FILE_TYPES[DataType.UiMsg].size)
 				serializeObjects(data, DataType.UiMsg, binary.data.msg, { padding: 1 })
 				
 				// sell data
@@ -339,7 +339,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				// sea map
 				symbolLocationReference.set(`wld::fld::data::s_uiSeaMapData`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_uiSeaMapData`, binary.data.seaEntry.length * FILE_TYPES[DataType.UiSeaMap].size)
+				symbolSizeOverrides.set(`wld::fld::data::s_uiSeaMapData`, (binary.data.seaEntry.length + 1) * FILE_TYPES[DataType.UiSeaMap].size)
 				serializeObjects(data, DataType.UiSeaMap, binary.data.seaEntry, { padding: 1 })
 				
 				// menu
