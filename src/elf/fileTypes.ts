@@ -227,7 +227,7 @@ Previously called 'Collision Flag', but this is not a boolean.`),
 		field_0x44: "int",
 		field_0x48: "int",
 		field_0x4C: "int",
-		field_0x50: "string",
+		itemDrop: "string",
 		field_0x58: "int",
 		field_0x5C: "int",
 		field_0x60: "int",
@@ -238,8 +238,8 @@ Previously called 'Collision Flag', but this is not a boolean.`),
 		field_0x74: "int",
 		field_0x78: "int",
 		field_0x7C: "int",
-		field_0x80: "string",
-		field_0x88: "string",
+		objectBound: "string",
+		objectBoneBound: "string",
 		field_0x90: "int",
 		field_0x94: "int",
 		field_0x98: "int",
@@ -1301,7 +1301,7 @@ Seems to indicate whether the Puzzle Solver from the battle lab should show a ci
 		modelId: "string",
 		field_0x18: "int",
 		field_0x1c: "int",
-		field_0x20: new Property("string", `
+		itemSet1: new Property("string", `
 Usage unknown, but could be related to hitting the Mobj?
 Brake could be misspelled for "break" and DRP could be short for "drop"?
 
@@ -1310,10 +1310,10 @@ Also probably related to data_mobj_model or something similar to that.
 Examples: "DRP_MOBJ_BRAKE_METAL", "DRP_MOBJ_TREE_2", "DRP_MOBJ_BRAKE_CRAFT"`),
 		field_0x28: "int",
 		field_0x2c: "int",
-		field_0x30: new Property("string", "Same as field_0x20. See that for more information."),
+		itemSet2: new Property("string", "Same as field_0x20. See that for more information."),
 		field_0x38: "int",
 		field_0x3c: "int",
-		field_0x40: new Property("string", "Same as field_0x20 and field_0x30. See that for more information."),
+		itemSet3: new Property("string", "Same as field_0x20 and field_0x30. See that for more information."),
 		field_0x48: "int",
 		field_0x4c: "int",
 		scriptPath: new Property("string", `
