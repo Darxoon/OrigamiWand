@@ -540,7 +540,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				)
 				
 				let attackRange = {
-					symbolName: `wld::fld::data::s_uiModelPropertyData_${model.id}`,
+					symbolName: `wld::fld::data::^s_uiModelPropertyData_${model.id}`,
 					children,
 				}
 				

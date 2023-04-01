@@ -1,8 +1,11 @@
 
 /**
  * Mangles a valid C++ Identifier according to Clang's name mangling rules.
- * @example "wld::fld::data::s_npcData" will be transformed into "_ZN3wld3fld4data9s_npcDataE"
+ * Internal linakge symbols (indicated by an `L` in the mangled name)
+ * are represented with a `^` symbol in the demangled name, like this:
+ * `wld::fld::data::^ModelID_Bone_state` (mangled name: _ZN3wld3fld4data**L**18ModelID_Bone_stateE, L is for internal linkage)
  * @param id The identifier to mangle. Segments are seperated by ::
+ * @example "wld::fld::data::s_npcData" will be transformed into "_ZN3wld3fld4data9s_npcDataE"
  */
 export function mangleIdentifier(id: string): string {
 	if (id.includes(' '))
@@ -12,10 +15,12 @@ export function mangleIdentifier(id: string): string {
 	let output = "_ZN"
 	
 	for (const segment of segments) {
-		if (segment.startsWith(':'))
+		let isInternallyLinked = segment.startsWith('^')
+		
+		if (isInternallyLinked)
 			output += 'L'
 		
-		let segmentId = segment.startsWith(':') ? segment.slice(1) : segment
+		let segmentId = isInternallyLinked ? segment.slice(1) : segment
 		output += segmentId.length.toString() + segmentId
 	}
 	
@@ -27,9 +32,9 @@ export function followsManglingRules(id: string): boolean {
 }
 
 /**
- * Demangles an Identifier following Clang's name mangling rules back to an almost valid C++ identifier
- * The only exception is that for example, _ZN3wld3fld4dataL18ModelID_Bone_stateE will get converted into
- * wld::fld::data:::ModelID_Bone_state (notice the L in the original and ::: in the demangled version).
+ * Demangles an Identifier following Clang's itanium name mangling rules back to a valid C++ identifier,
+ * with the exception of internal linkage symbols, which contain a `^` symbol, like this:
+ * `wld::fld::data::^ModelID_Bone_state` (mangled name: _ZN3wld3fld4data**L**18ModelID_Bone_stateE, L is for internal linkage)
  * @param mangledId The mangled identifier following Clang's name mangling rules
  * @returns The demangled identifier. Segments are seperated by ::
  * @example "_ZN3wld3fld4data9s_npcDataE" will be transformed into "wld::fld::data::s_npcData"
@@ -45,7 +50,7 @@ export function demangle(mangledId: string): string {
 	
 	
 	while (segmentIndex < id.length) {
-		let prefix = id[segmentIndex] === 'L' ? ":" : ""
+		let prefix = id[segmentIndex] === 'L' ? "^" : ""
 		
 		if (id[segmentIndex] === 'L') {
 			segmentIndex += 1
