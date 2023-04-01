@@ -14,6 +14,7 @@
 	import { showModal } from "$lib/modal/modal";
 	import FieldOptionAlert from "$lib/modals/FieldOptionAlert.svelte";
 	
+	// TODO: try using event maps
 	const dispatch = createEventDispatcher()
 
 	export let title: string
@@ -30,12 +31,15 @@
 	export let highlightedFields: string[] = []
 	
 	$: entries = Object.entries(obj)
+	$: objectId = obj[FILE_TYPES[dataType].identifyingField]
 	
 	let initialized = false
 	
 	let mouseY = 0
 	let mouseInside = false
 	let entryLabelElements: HTMLDivElement[] = []
+	
+	let fieldErrors: {[fieldName: string]: any} = {}
 	
 	export function scrollIntoView() {
 		editor.scrollIntoView({
@@ -101,19 +105,20 @@
 		})
 	}
 	
-	function length(arrayOrObj) {
-		if (typeof arrayOrObj == "string") {
-			// this shouldn't happen
-			// TODO: this is a btlSet thing again
-			debugger
-		}
-		if (arrayOrObj instanceof Array)
-			return arrayOrObj.length
-		else if ("children" in arrayOrObj)
-			return arrayOrObj.children.length
-		else {
-			console.error(new Error(`Argument is not an array, ${arrayOrObj}`))
-			return NaN
+	async function createContent(obj: any, fieldName: string) {
+		let resolve, reject
+		const promise = new Promise((innerResolve, innerReject) => {
+			resolve = innerResolve
+			reject = innerReject
+		})
+		
+		dispatch('createContent', { obj, fieldName, resolve, reject })
+		
+		try {
+			await promise
+		} catch (e) {
+			fieldErrors[fieldName] = e
+			console.error(e)
 		}
 	}
 	
@@ -168,10 +173,11 @@
 				
 				<!-- Value Input -->
 				<div class="value">
-					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol") && value != null}
-						<CrossObjectLink label={`Click to open (${length(value)} item${length(value) < 2 ? '' : 's'})`} binary={binary}
-							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} objectId={obj[FILE_TYPES[dataType].identifyingField]}
-							sourceDataType={dataType} targetDataType={FILE_TYPES[dataType].childTypes[field]} targetObjects={value} on:open />
+					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol")}
+						<CrossObjectLink binary={binary} targetObjects={value} sourceDataType={dataType} objectId={objectId}
+							targetDataType={FILE_TYPES[dataType].childTypes[field]}
+							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} error={fieldErrors[field]}
+							on:open on:create={() => createContent(obj, field)} />
 					{:else}
 						<InputField on:valueChanged={updateEntries} noSpaces={FILE_TYPES[dataType].metadata[field]?.noSpaces ?? false}
 							fieldType={FILE_TYPES[dataType].typedef[field]} key={field} value={value}

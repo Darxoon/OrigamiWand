@@ -7,13 +7,18 @@
 
 	const dispatch = createEventDispatcher()
 	
-	export let targetDataType: DataType
+	export let targetObjects: any[] | {symbolName: string, children: any[]}
+	export let binary: ElfBinary
 	export let sourceDataType: DataType
-	export let label: string
+	export let targetDataType: DataType
 	export let objectId: string
 	export let tabTitle: string
-	export let targetObjects: any[] | {symbolName: string, children: any[]}
-	export let binary: ElfBinary = undefined
+	export let error: any = undefined
+	
+	$: label = targetObjects != undefined
+		? `Click to open (${length(targetObjects)} item${length(targetObjects) < 2 ? '' : 's'})`
+		: error == undefined ? `Click to create new content` : 'Could not create content (Error)'
+		
 	
 	onMount(() => {
 		if (tabTitle == undefined) {
@@ -22,6 +27,17 @@
 	})
 	
 	function click() {
+		if (targetObjects != undefined)
+			openContent()
+		else 
+			createContent()
+	}
+	
+	function createContent() {
+		dispatch('create')
+	}
+	
+	function openContent() {
 		let title = tabTitle.replaceAll('{id}', objectId).replaceAll('{type}', FILE_TYPES[sourceDataType].displayName)
 		let objects: any[]
 		
@@ -44,6 +60,21 @@
 				overrideObjects: objects,
 			}
 		})
+	}
+	
+	function length(arrayOrObj) {
+		if (typeof arrayOrObj == "string") {
+			// this shouldn't happen
+			// TODO: this is a btlSet thing again
+			debugger
+		}
+		if (arrayOrObj instanceof Array)
+			return arrayOrObj.length
+		else if ("children" in arrayOrObj)
+			return arrayOrObj.children.length
+		else {
+			throw new Error(`Argument is not an array, ${arrayOrObj}`)
+		}
 	}
 </script>
 

@@ -1,6 +1,7 @@
 import { DataType, ElfBinary } from "./elfBinary"
 import { FILE_TYPES } from "./fileTypes"
 import { demangle, incrementName, mangleIdentifier } from "./nameMangling"
+import type { Symbol } from "./types"
 import { ValueUuid, VALUE_UUID } from "./valueIdentifier"
 
 export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
@@ -68,19 +69,10 @@ export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dat
 					childDataType, binary.data[childObjectType], fieldValue, false)
 				
 				// also duplicate symbol
-				let originalSymbol = binary.findSymbol(fieldValue.symbolName)
-				let clonedSymbol = originalSymbol.clone()
-				
-				// the new symbol is given a (probably) unique name to prevent symbol name collisions, which are the root of all evil
-				let clonedSymbolName = incrementName(demangle(originalSymbol.name)) + Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-				clonedSymbol.name = mangleIdentifier(clonedSymbolName)
-				
-				// insert new symbol into symboltable
-				let originalSymbolIndex = binary.symbolTable.indexOf(originalSymbol)
-				binary.symbolTable.splice(originalSymbolIndex + 1, 0, clonedSymbol)
+				let clonedSymbol = duplicateSymbolInBinary(binary, binary.findSymbol(fieldValue.symbolName))
 				
 				clone[fieldName] = clonedChild
-				clonedChild.symbolName = clonedSymbolName
+				clonedChild.symbolName = demangle(clonedSymbol.name)
 			}
 		}
 		
@@ -108,4 +100,18 @@ export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dat
 	containingArray.splice(objectIndex + 1, 0, clone)
 	
 	return clone
+}
+
+export function duplicateSymbolInBinary(binary: ElfBinary, originalSymbol: Symbol): Symbol {
+	let clonedSymbol = originalSymbol.clone()
+	
+	// the new symbol is given a (probably) unique name to prevent symbol name collisions, which are the root of all evil
+	let clonedSymbolName = incrementName(demangle(originalSymbol.name)) + Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+	clonedSymbol.name = mangleIdentifier(clonedSymbolName)
+	
+	// insert new symbol into symboltable
+	let originalSymbolIndex = binary.symbolTable.indexOf(originalSymbol)
+	binary.symbolTable.splice(originalSymbolIndex + 1, 0, clonedSymbol)
+	
+	return clonedSymbol
 }

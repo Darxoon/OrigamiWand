@@ -2,7 +2,8 @@
     import ObjectEditor from "$lib/editor/objectEditor/ObjectEditor.svelte";
     import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-    import { duplicateObjectInBinary } from "paper-mario-elfs/util";
+    import { demangle } from "paper-mario-elfs/nameMangling";
+    import { duplicateObjectInBinary, duplicateSymbolInBinary } from "paper-mario-elfs/util";
     import { VALUE_UUID, type UuidTagged } from "paper-mario-elfs/valueIdentifier";
     import Debouncer from "./Debouncer.svelte";
 
@@ -60,6 +61,28 @@
 		objects = objects
 	}
 	
+	// TODO: move this up to ElfEditor
+	function createContent({ obj, fieldName, resolve, reject }: { obj: UuidTagged, fieldName: string, resolve: Function, reject: Function }) {
+		// find object with symbol
+		let cloneSource = objects.find(v => v[fieldName] != undefined)
+		
+		if (cloneSource == undefined) {
+			return reject(new Error("Could not create content, there is other object with content to orientate by"))
+		}
+		
+		let sourceSymbol = binary.findSymbol(cloneSource[fieldName].symbolName)
+		let duplicateSymbol = duplicateSymbolInBinary(binary, sourceSymbol)
+		
+		obj[fieldName] = {
+			symbolName: demangle(duplicateSymbol.name),
+			children: [],
+		}
+		
+		objects = objects
+		
+		resolve()
+	}
+	
 	function titleOf(obj: any, i: number) {
 		let { displayName, identifyingField } = FILE_TYPES[dataType]
 		return `${displayName} ${i}: ${obj[identifyingField]}`
@@ -76,6 +99,7 @@
 
 {#each objectSlice as obj, i (obj[VALUE_UUID])}
 	<ObjectEditor bind:this={objectEditors[i]} bind:obj={obj} bind:open={areEditorsOpen[i]}
-		on:open on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(i)} on:appear={() => appear(i)}
+		on:open on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(i)}
+		on:appear={() => appear(i)} on:createContent={e => createContent(e.detail)}
 		binary={binary} dataType={dataType} title={titleOf(obj, i)} highlightedFields={highlightedFields?.get(obj)} />
 {/each}
