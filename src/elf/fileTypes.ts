@@ -1724,7 +1724,9 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		field_0x14: "int",
 	},
 	
-	[DataType.DataBtl]: {},
+	[DataType.DataBtl]: {
+		__countSymbol: "wld::btl::data::modelBattle_num",
+	},
 	
 	[DataType.BtlModel]: {
 		__displayName: "Battle Model",
