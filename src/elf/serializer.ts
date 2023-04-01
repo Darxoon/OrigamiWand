@@ -288,7 +288,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					const properties = model.properties as {children: Instance<DataType.UiModelProperty>[], symbolName: string}
 					const { children, symbolName } = properties
 					
-					let newSymbolName = `wld::fld::data::s_uiModelPropertyData_${model.id}`
+					let newSymbolName = `wld::fld::data::^s_uiModelPropertyData_${model.id}`
 					
 					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
 					symbolNameOverrides.set(symbolName, newSymbolName)
@@ -584,12 +584,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			// generate symbol reference for asset groups and states
 			for (const [id, originalId, assetGroups, states] of rodataReferences) {
 				let assetGroupOffset = assetGroups.length > 0 ? objectOffsets.get(assetGroups[0]) : objectOffsets.get(assetGroups)
-				symbolLocationReference?.set(`wld::fld::data:::${originalId}_model_files`, assetGroupOffset)
-				symbolNameOverrides?.set(`wld::fld::data:::${originalId}_model_files`, `wld::fld::data:::${id}_model_files`)
+				symbolLocationReference?.set(`wld::fld::data::^${originalId}_model_files`, assetGroupOffset)
+				symbolNameOverrides?.set(`wld::fld::data::^${originalId}_model_files`, `wld::fld::data::^${id}_model_files`)
 				
 				let stateOffset = states.length > 0 ? objectOffsets.get(states[0]) : objectOffsets.get(states)
-				symbolLocationReference?.set(`wld::fld::data:::${originalId}_state`, stateOffset)
-				symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state`, `wld::fld::data:::${id}_state`)
+				symbolLocationReference?.set(`wld::fld::data::^${originalId}_state`, stateOffset)
+				symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state`, `wld::fld::data::^${id}_state`)
 			}
 			
 			// step 2: serialize modelNpc_num
@@ -602,8 +602,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				let animeCount = 0
 				
 				for (const [state, i] of enumerate(states)) {
-					symbolLocationReference?.set(`wld::fld::data:::${originalId}_state${i}`, new Pointer(rodataWriter.size))
-					symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state${i}`, `wld::fld::data:::${id}_state${i}`)
+					symbolLocationReference?.set(`wld::fld::data::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
+					symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state${i}`, `wld::fld::data::^${id}_state${i}`)
 					
 					serializeObjects(rodata, DataType.NpcSubState, state.substates)
 					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
@@ -615,8 +615,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					for (const [substate, j] of enumerate(substates)) {
 						let { faces } = substate as Instance<DataType.NpcSubState>
 						
-						symbolLocationReference?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
-						symbolNameOverrides?.set(`wld::fld::data:::${originalId}_state${i}_face${j}`, `wld::fld::data:::${id}_state${i}_face${j}`)
+						symbolLocationReference?.set(`wld::fld::data::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
+						symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state${i}_face${j}`, `wld::fld::data::^${id}_state${i}_face${j}`)
 						
 						serializeObjects(rodata, DataType.NpcFace, faces)
 						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
@@ -628,8 +628,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 						for (const face of faces) {
 							let animes = face.animations
 							
-							symbolLocationReference?.set(`wld::fld::data:::${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
-							symbolNameOverrides?.set(`wld::fld::data:::${originalId}_anime${animeCount}`, `wld::fld::data:::${id}_anime${animeCount}`)
+							symbolLocationReference?.set(`wld::fld::data::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
+							symbolNameOverrides?.set(`wld::fld::data::^${originalId}_anime${animeCount}`, `wld::fld::data::^${id}_anime${animeCount}`)
 							
 							animeCount += 1
 							
@@ -839,6 +839,10 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// The symbol table is very straight forward. It's an array of `Symbol`s. However, the
 	// first element is always completely zero.
 	{
+		let unusedLocationEntries = new Set(symbolLocationReference.keys())
+		let unusedNameEntries = new Set(symbolNameOverrides.keys())
+		let unusedSizeEntries = new Set(symbolSizeOverrides.keys())
+		
 		const stringTable = findSection(".strtab")
 		
 		let writer = new BinaryWriter()
@@ -848,18 +852,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			
 			if (symbolLocationReference.has(symbolId)) {
 				symbol.location = symbolLocationReference.get(symbolId)
-			} else {
-				// console.warn(`Symbol ${JSON.stringify(symbolId)} offset is not being updated`)
+				unusedLocationEntries.delete(symbolId)
 			}
 			
 			if (symbolNameOverrides?.has(symbolId)) {
 				let newId = symbolNameOverrides.get(symbolId)
+				unusedNameEntries.delete(symbolId)
 				
-				// if the symbol *actually* changed, then warn, otherwise log
 				if (symbolId != newId) {
 					console.warn(`Updating name of Symbol ${JSON.stringify(symbolId)} to ${JSON.stringify(newId)}`)
-				} else {
-					// console.log(`Updating name of Symbol ${JSON.stringify(symbolId)} to ${JSON.stringify(newId)}`)
 				}
 				
 				symbol.name = mangleIdentifier(newId)
@@ -867,11 +868,20 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			
 			if (symbolSizeOverrides.has(symbolId)) {
 				symbol.size = symbolSizeOverrides.get(symbolId)
+				unusedSizeEntries.delete(symbolId)
 			}
-			
 			
 			symbol.toBinaryWriter(writer, stringTable)
 		}
+		
+		if (unusedLocationEntries.size > 0)
+			console.error("Unused location entries:", [...unusedLocationEntries.values()])
+		
+		if (unusedNameEntries.size > 0)
+			console.error("Unused name entries:", [...unusedNameEntries.values()])
+		
+		if (unusedSizeEntries.size > 0)
+			console.error("Unused size entries:", [...unusedSizeEntries.values()])
 		
 		updatedSections.set('.symtab', writer.toArrayBuffer())
 	}
