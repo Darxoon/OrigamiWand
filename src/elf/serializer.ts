@@ -4,7 +4,7 @@ import type { Instance } from "./fileTypes";
 import { BinaryWriter } from "./misc";
 import { Relocation, Section, Symbol } from "./types";
 import { demangle, mangleIdentifier } from "./nameMangling";
-import { enumerate } from "./util";
+import { enumerate, noUndefinedMap } from "./util";
 
 type SectionName = string
 type Offset = number
@@ -46,11 +46,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	const objectOffsets: WeakMap<object, Pointer> = new WeakMap()
 	
-	const symbolLocationReference: Map<string, Pointer> = new Map()
+	// TODO: use noUndefinedMap only in development builds
+	const symbolLocationReference: Map<string, Pointer> = noUndefinedMap(new Map())
 	// TODO: use this everywhere
-	const symbolNameOverrides: Map<string, string> = new Map()
+	const symbolNameOverrides: Map<string, string> = noUndefinedMap(new Map())
 	// TODO: use this everywhere
-	const symbolSizeOverrides: Map<string, number> = new Map()
+	const symbolSizeOverrides: Map<string, number> = noUndefinedMap(new Map())
 	
 	function findSection(sectionName: string): Section {
 		return sections.find(section => section.name == sectionName)
@@ -190,7 +191,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				stringRelocations.set('.rodata', rodata.stringRelocations)
 				objectRelocations.set('.rodata', rodata.crossPointers)
 				
-				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.main.length)
+				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.main.length, "wld::fld::data")
 				updatedSections.set('.rodata', serializedRodata)
 				
 				for (const model of binary.data.main) {
@@ -501,7 +502,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				stringRelocations.set('.rodata', rodata.stringRelocations)
 				objectRelocations.set('.rodata', rodata.crossPointers)
 				
-				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.model.length)
+				let serializedRodata = serializeModelRodata(rodataReferences, rodata, binary.data.model.length, "wld::btl::data")
 				updatedSections.set('.rodata', serializedRodata)
 				
 				for (const npc of binary.data.model) {
@@ -537,7 +538,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		
 		type RodataReference = [id: string, originalId: string, assetGroups: Instance<DataType.NpcFiles>[], states: Instance<DataType.NpcState>[]]
 		
-		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number) {
+		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number, modelNamespace: string) {
 			const rodataWriter = rodata.writer
 			
 			// .rodata section is structured like this:
@@ -584,12 +585,12 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			// generate symbol reference for asset groups and states
 			for (const [id, originalId, assetGroups, states] of rodataReferences) {
 				let assetGroupOffset = assetGroups.length > 0 ? objectOffsets.get(assetGroups[0]) : objectOffsets.get(assetGroups)
-				symbolLocationReference?.set(`wld::fld::data::^${originalId}_model_files`, assetGroupOffset)
-				symbolNameOverrides?.set(`wld::fld::data::^${originalId}_model_files`, `wld::fld::data::^${id}_model_files`)
+				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_model_files`, assetGroupOffset)
+				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_model_files`, `${modelNamespace}::^${id}_model_files`)
 				
 				let stateOffset = states.length > 0 ? objectOffsets.get(states[0]) : objectOffsets.get(states)
-				symbolLocationReference?.set(`wld::fld::data::^${originalId}_state`, stateOffset)
-				symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state`, `wld::fld::data::^${id}_state`)
+				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state`, stateOffset)
+				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state`, `${modelNamespace}::^${id}_state`)
 			}
 			
 			// step 2: serialize modelNpc_num
@@ -602,8 +603,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				let animeCount = 0
 				
 				for (const [state, i] of enumerate(states)) {
-					symbolLocationReference?.set(`wld::fld::data::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
-					symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state${i}`, `wld::fld::data::^${id}_state${i}`)
+					symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
+					symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}`, `${modelNamespace}::^${id}_state${i}`)
 					
 					serializeObjects(rodata, DataType.NpcSubState, state.substates)
 					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
@@ -615,8 +616,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					for (const [substate, j] of enumerate(substates)) {
 						let { faces } = substate as Instance<DataType.NpcSubState>
 						
-						symbolLocationReference?.set(`wld::fld::data::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
-						symbolNameOverrides?.set(`wld::fld::data::^${originalId}_state${i}_face${j}`, `wld::fld::data::^${id}_state${i}_face${j}`)
+						symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
+						symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, `${modelNamespace}::^${id}_state${i}_face${j}`)
 						
 						serializeObjects(rodata, DataType.NpcFace, faces)
 						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
@@ -628,8 +629,8 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 						for (const face of faces) {
 							let animes = face.animations
 							
-							symbolLocationReference?.set(`wld::fld::data::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
-							symbolNameOverrides?.set(`wld::fld::data::^${originalId}_anime${animeCount}`, `wld::fld::data::^${id}_anime${animeCount}`)
+							symbolLocationReference?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
+							symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, `${modelNamespace}::^${id}_anime${animeCount}`)
 							
 							animeCount += 1
 							

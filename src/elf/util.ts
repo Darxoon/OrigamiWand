@@ -9,6 +9,24 @@ export function* enumerate<T>(arr: T[]): Generator<[T, number], void, unknown> {
 	}
 }
 
+const customPrototype = Object.create(Map.prototype)
+
+customPrototype.set = function(key, value) {
+	if (key == undefined) {
+		debugger
+		throw new Error("Undefined not allowed in this map")
+	}
+	
+	Map.prototype.set.call(this, ...arguments)
+	return this
+}
+
+export function noUndefinedMap<T, U>(map: Map<T, U>): Map<T, U> {
+	Object.setPrototypeOf(map, customPrototype)
+	
+	return map
+}
+
 export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dataType: DataType, containingArray: T[], obj: T, incrementId: boolean = true): T {
 	function cloneObject<T>(dataType: DataType, obj: T): T {
 		// deep clone self
