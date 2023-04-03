@@ -65,7 +65,9 @@
 			okButton.disabled = select.selectedIndex < 1
 		}
 		
-		for (const [defaultName, type] of Object.entries(defaultFileNames)) {
+		const sortedEntries = Object.entries(defaultFileNames).sort(([a], [b]) => b.length - a.length)
+		
+		for (const [defaultName, type] of sortedEntries) {
 			if (fileName.indexOf(defaultName) > -1) {
 				select.value = DataType[type]
 				selectedIndex = select.selectedIndex
