@@ -550,7 +550,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let attackRanges = []
 			
 			for (const headerNode of attackRangeHeader) {
-				let attackRangeSymbol = findSymbol(headerNode.attackRange)
+				const { attackRange: symbolName } = headerNode
+				
+				let attackRangeSymbol = findSymbol(symbolName)
 				let offset = attackRangeSymbol.location
 				
 				let [ item ] = applyStrings(
@@ -604,11 +606,13 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let allResources = []
 			
 			for (const resourceField of resourceFields) {
+				const { resources: symbolName, resourceCount } = resourceField
+				
 				if (resourceField.resources == undefined)
 					continue
 				
-				let resourceSymbol = findSymbol(resourceField.resources)
-				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceField.resourceCount)
+				let resourceSymbol = findSymbol(symbolName)
+				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceCount)
 				
 				let resourcesObj = {
 					symbolName: "wld::btl::data::s_resourceElementData_" + resourceField.id,
@@ -629,6 +633,66 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		}
 		
 		case DataType.DataBtlSet: {
+			const dataSection = findSection('.data')
+			const stringSection = findSection('.rodata.str1.1')
+			
+			const battleSymbolPrefixLength = 33
+			
+			data = {}
+			
+			let areaSymbol = findSymbol("wld::btl::data::s_setDataTable")
+			let areaReferences = parseSymbol(dataSection, stringSection, areaSymbol, DataType.SetAreaReference, -1)
+			let areas = [] as Instance<DataType.DataBtlSet>[]
+			
+			for (const ref of areaReferences) {
+				// remove "wld::btl::data::s_setData_battle_" from symbol name to get area name
+				let id = ref.value.slice(battleSymbolPrefixLength)
+				
+				areas.push({
+					[VALUE_UUID]: ValueUuid(),
+					id,
+					battles: ref.value,
+				})
+			}
+			
+			data.main = areas
+			
+			let allBattles = []
+			let allEnemies = []
+			
+			for (const area of areas) {
+				const { battles: symbolName } = area
+				
+				let battleSymbol = findSymbol(symbolName)
+				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle, -1)
+				
+				let battleObj = {
+					symbolName: "wld::btl::data::s_setData_battle_" + area.id,
+					children: battles,
+				}
+				
+				allBattles.push(battleObj)
+				area.battles = battleObj
+				
+				// enemies
+				for (const battle of battles) {
+					const { enemies: symbolName, enemyCount } = battle
+					
+					let enemySymbol = findSymbol(symbolName)
+					let enemies = parseSymbol(dataSection, stringSection, enemySymbol, DataType.SetEnemy, enemyCount)
+					
+					let enemyObj = {
+						symbolName: "wld::btl::data::s_setElementData_" + battle.id,
+						children: enemies,
+					}
+					
+					allEnemies.push(enemyObj)
+					battle.enemies = enemyObj
+				}
+			}
+			
+			data.battle = allBattles
+			data.enemy = allEnemies
 			
 			break
 		}
