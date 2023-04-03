@@ -52,51 +52,6 @@
 		</div>
 	</div>
 	
-	{#if dataType === DataType.DataBtlSet}
-		<Expander title="Special Map Names">
-			<div class="maps">
-				{#each binary.data.map as mapName}
-					<div><pre>{mapName}</pre></div>
-				{/each}
-			</div>
-		</Expander>
-		
-		{#each binary.data.main as obj}
-			<Expander title={obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)} showButtons={true}>
-				<div class="category">
-					<div class="card set_data" on:click={e => {
-						dispatch("open", {
-							type: "window",
-							title: `Set Data of ${obj.symbolName.slice('wld::btl::data::s_setData_battle_'.length)}`,
-							component: ElfEditor,
-							properties: {
-								binary,
-								dataType: DataType.BtlSetCategory,
-								overrideObjects: obj.objects,
-							}
-						})
-					}}>View Set Data (probably scripted fights)</div>
-					
-					{#each obj.childObjects as child}
-						<div class="card fight" on:click={e => {
-							dispatch("open", {
-								type: "window",
-								title: `Fight ${child.symbolName.slice('wld::btl::data::s_setElementData_'.length)}`,
-								component: ElfEditor,
-								properties: {
-									binary,
-									dataType: DataType.BtlSetElement,
-									overrideObjects: child.objects,
-									parent: self,
-								}
-							})
-						}}>Open Fight "{child.symbolName.startsWith('wld::btl::data::s_setElementData_') ? child.symbolName.slice('wld::btl::data::s_setElementData_'.length) : child.symbolName}"</div>
-					{/each}
-				</div>
-			</Expander>
-		{/each}
-	{/if}
-	
 	{#if dataType === DataType.DataConfettiTotalHoleInfo}
 		<ObjectEditor title="General Information" obj={binary.data.version[0]}
 				dataType={DataType.ConfettiVersion} showButtons={false} binary={binary} />

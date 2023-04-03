@@ -129,13 +129,13 @@ export enum DataType {
 	
 	// misc data.elf types
 	// DataMuseum,
-	DataBtlSet,
 	DataConfettiTotalHoleInfo,
 	DataEffect,
 	DataMaplinkZoom,
 	DataParty,
 	DataUi,
 	DataBtl,
+	DataBtlSet,
 	
 	// this is the end of the actual file types
 	TypeAmount,
@@ -147,10 +147,6 @@ export enum DataType {
 	NpcSubState,
 	NpcFace,
 	NpcAnime,
-	
-	BtlSetCategory,
-	BtlSetElement,
-	Metadata,
 	
 	ConfettiVersion,
 	ConfettiData,
