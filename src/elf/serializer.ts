@@ -96,68 +96,10 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				break
 			}
 			
-			case DataType.DataBtlSet: {
-				// TODO: remake this to use normal symbolRelocations instead of its own thing
+			// case DataType.DataBtlSet: {
 				
-				let data: SectionElements = {
-					writer: dataWriter,
-					stringRelocations: dataStringRelocations,
-					crossPointers: undefined,
-					symbolRelocations: new Map(),
-				}
-				
-				for (const category of binary.data.main) {
-					const { childObjects, objects, symbolName } = category
-					
-					for (const battle of childObjects) {
-						const { objects, symbolName } = battle
-						
-						let symbol = findSymbol(symbolName)
-												
-						if (symbol) {
-							symbol.location = new Pointer(dataWriter.size)
-							symbol.size = FILE_TYPES[DataType.BtlSetElement].size * objects.length
-						} else {
-							console.warn("Could not find symbol for " + symbolName)
-						}
-						
-						serializeObjects(data, DataType.BtlSetElement, objects)
-					}
-					
-					let symbol = findSymbol(symbolName)
-												
-					if (symbol) {
-						symbol.location = new Pointer(dataWriter.size)
-						symbol.size = FILE_TYPES[DataType.BtlSetCategory].size * objects.length
-					} else {
-						console.warn("Could not find symbol for " + symbolName)
-					}
-					
-					serializeObjects(data, DataType.BtlSetCategory, objects)
-				}
-				
-				// data table
-				for (const { symbolName } of binary.data.main) {
-					data.symbolRelocations.set(dataWriter.size, symbolName)
-					dataWriter.writeBigInt64(0n)
-				}
-				
-				dataWriter.writeBigInt64(0n)
-				
-				
-				// relocations towards custom symbols
-				// would probably would make more sense where the other relocations are generated but who cares
-				let dataRelocations: Relocation[] = []
-				allRelocations.set('.data', dataRelocations)
-				
-				let symbolReference = Object.fromEntries(binary.symbolTable.map((symbol, index) => [demangle(symbol.name), index]))
-				
-				for (const [offset, symbolName] of data.symbolRelocations) {
-					dataRelocations.push(new Relocation(new Pointer(offset), 0x101, symbolReference[symbolName], Pointer.ZERO))
-				}
-				
-				break
-			}
+			// 	break
+			// }
 				
 			case DataType.DataNpcModel:
 			case DataType.DataItemModel:

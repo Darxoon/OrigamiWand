@@ -124,7 +124,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					offset,
 					dataType, 
 					dataStringSection, 
-					allRelocations.get('.rodata'), 
+					allRelocations.get('.rodata'),
+					symbolTable,
 					
 					parseRawDataSection(rodataSection, count, offset.value, FILE_TYPES[dataType].typedef), 
 				)
@@ -221,6 +222,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				DataType.MaplinkHeader,
 				dataStringSection,
 				allRelocations.get('.data'),
+				symbolTable,
 				
 				parseRawDataSection(dataSection, 1, headerOffset.value, FILE_TYPES[DataType.MaplinkHeader].typedef)
 			)
@@ -232,6 +234,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				DataType.Maplink,
 				dataStringSection,
 				allRelocations.get('.data'),
+				symbolTable,
 				
 				parseRawDataSection(dataSection, header[0].linkAmount, 0, FILE_TYPES[DataType.Maplink].typedef)
 			)
@@ -261,7 +264,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			data.main = applyStrings(
 				Pointer.ZERO, dataType, dataStringSection, 
-				allRelocations.get('.data'), 
+				allRelocations.get('.data'), symbolTable,
 				
 				parseRawDataSection(dataSection, dataCount, 0, FILE_TYPES[dataType].typedef), 
 			)
@@ -272,110 +275,6 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			let stateIndices: [Pointer, number][] = data.main.map((obj: any) => [obj.states, obj.stateCount])
 			
 			parseModelRodata(data, 'main', modelFilesIndices, stateIndices)
-			
-			break
-		}
-		
-		case DataType.DataBtlSet: {
-			// this file type doesn't have a .rodata section at all
-			const dataSection = findSection('.data')
-			const dataStringSection = findSection('.rodata.str1.1')
-			
-			// this file type doesn't contain any standalone information. everything is clearly marked
-			// by symbols. Examples include s_setElementData_W0C1_CG_KUR_01.
-			
-			// update: it does? wld::btl::data::s_setDataTable
-			// wow. I def. have to remake this parser. it is awful
-			// and the editor too
-			
-			let symbolOffsets: {[symbolName: string]: {offset: Pointer, size: number}} = {}
-			let childSymbols: string[] = []
-			let categories: {[category: string]: string[]} = {}
-			
-			const sortedSymbolTable = [...symbolTable]
-			for (const symbol of sortedSymbolTable.sort((a, b) => a.location.value - b.location.value)) {
-				if (symbol.sectionHeaderIndex != 3 || !symbol.location.equals(Pointer.ZERO)) {
-					let id = demangle(symbol.name)
-					
-					symbolOffsets[id] = {
-						offset: symbol.location,
-						size: symbol.size,
-					}
-					
-					if (id.startsWith('wld::btl::data::s_setData_battle_')) {
-						categories[id.slice('wld::btl::data::s_setData_battle_'.length)] = childSymbols
-						childSymbols = []
-					} else if (id.startsWith('wld::btl::data::s_setElementData_')) {
-						childSymbols.push(id.slice('wld::btl::data::s_setElementData_'.length))
-					} else {
-						console.error(id)
-					}
-				}
-			}
-			
-			let mapSymbols = symbolTable
-				.filter(sym => sym.sectionHeaderIndex == 3 && sym.location.equals(Pointer.ZERO))
-				.sort((a, b) => a.location.value - b.location.value)
-				.map(sym => demangle(sym.name))
-			
-			console.log('stage symbols', mapSymbols)
-			console.log('categories', categories)
-			
-			let setDataObjects = Object.entries(categories).map(([categoryId, objects]) => {
-				let symbolName = 'wld::btl::data::s_setData_battle_' + categoryId
-				let { offset, size } = symbolOffsets[symbolName]
-				let count = size / FILE_TYPES[DataType.BtlSetCategory].size
-				
-				return {
-					symbolName,
-					childObjects: [],
-					objects: applyStrings(
-						offset,
-						DataType.BtlSetCategory, 
-						dataStringSection, 
-						allRelocations.get('.data'), 
-						
-						parseRawDataSection(dataSection, count, offset.value, FILE_TYPES[DataType.BtlSetCategory].typedef), 
-					)
-				}
-			})
-			
-			let setDataReference = Object.fromEntries(setDataObjects.map(obj => [obj.symbolName, obj]))
-			
-			console.log('setDataObjects', setDataObjects)
-			
-			let elementObjects = Object.entries(categories)
-				.flatMap(([categoryId, objects]) =>
-					objects.map(id => {
-						let symbolName = 'wld::btl::data::s_setElementData_' + id
-						let { offset, size } = symbolOffsets[symbolName]
-						
-						let count = size / FILE_TYPES[DataType.BtlSetElement].size
-						
-						let result = {
-							symbolName,
-							objects: applyStrings(
-								offset,
-								DataType.BtlSetElement, 
-								dataStringSection, 
-								allRelocations.get('.data'), 
-								
-								parseRawDataSection(dataSection, count, offset.value, FILE_TYPES[DataType.BtlSetElement].typedef), 
-							),
-						}
-						
-						let category = setDataReference['wld::btl::data::s_setData_battle_' + categoryId]
-						category.childObjects.push(result)
-						
-						return result
-					}))
-			
-			console.log('elementObjects', elementObjects)
-			
-			data = {}
-			data.main = setDataObjects
-			data.element = elementObjects
-			data.map = mapSymbols
 			
 			break
 		}
@@ -391,7 +290,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			data.main = applyStrings(
 				Pointer.ZERO, dataType, dataStringSection, 
-				allRelocations.get('.data'), 
+				allRelocations.get('.data'), symbolTable,
 				
 				parseRawDataSection(dataSection, count, 0, FILE_TYPES[dataType].typedef), 
 			)
@@ -419,7 +318,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			const dataSymbol = findSymbol("confetti::data::hole::data")
 			const dataArray = applyStrings(
 				dataSymbol.location, DataType.ConfettiData, dataStringSection,
-				allRelocations.get('.rodata'), 
+				allRelocations.get('.rodata'), symbolTable,
 				
 				parseRawDataSection(rodataSection, 1, dataSymbol.location.value, FILE_TYPES[DataType.ConfettiData].typedef), 
 			)
@@ -431,7 +330,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			console.log('maps', mapListOffset, mapCount)
 			const maps = applyStrings(
 				mapListOffset, DataType.ConfettiMap, dataStringSection,
-				allRelocations.get('.rodata'), 
+				allRelocations.get('.rodata'), symbolTable,
 				
 				parseRawDataSection(rodataSection, mapCount, mapListOffset.value, FILE_TYPES[DataType.ConfettiMap].typedef), 
 			)
@@ -447,7 +346,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				const { holes: holeOffset, holeCount } = map
 				let result = applyStrings(
 					holeOffset, DataType.ConfettiHole, dataStringSection,
-					allRelocations.get('.rodata'), 
+					allRelocations.get('.rodata'), symbolTable,
 					
 					parseRawDataSection(rodataSection, holeCount, holeOffset.value, FILE_TYPES[DataType.ConfettiHole].typedef), 
 				)
@@ -497,7 +396,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			const dataSymbol = findSymbol("eft::data::s_data")
 			const dataObjects = applyStrings(
 				dataSymbol.location, dataType, dataStringSection,
-				allRelocations.get('.rodata'), 
+				allRelocations.get('.rodata'), symbolTable,
 				
 				parseRawDataSection(rodataSection, dataCount, dataSymbol.location.value, FILE_TYPES[dataType].typedef), 
 			)
@@ -534,7 +433,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				
 				let children = applyStrings(
 					offset, DataType.UiModelProperty, stringSection, 
-					allRelocations.get('.data'), 
+					allRelocations.get('.data'), symbolTable,
 					
 					parseRawDataSection(dataSection, propertyCount, offset, FILE_TYPES[DataType.UiModelProperty].typedef), 
 				)
@@ -656,7 +555,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				
 				let [ item ] = applyStrings(
 					offset, DataType.BtlAttackRange, stringSection, 
-					allRelocations.get('.data'), 
+					allRelocations.get('.data'), symbolTable,
 					
 					parseRawDataSection(dataSection, 1, offset, FILE_TYPES[DataType.BtlAttackRange].typedef), 
 				)
@@ -729,6 +628,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			break
 		}
 		
+		case DataType.DataBtlSet: {
+			
+			break
+		}
+		
 		// parse .data section by data type
 		default: {
 			const dataSection = findSection('.data')
@@ -742,7 +646,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data = {}
 			data.main = applyStrings(
 				Pointer.ZERO, dataType,  dataStringSection, 
-				allRelocations.get('.data'), 
+				allRelocations.get('.data'), symbolTable,
 				
 				parseRawDataSection(dataSection, count, 0, FILE_TYPES[dataType].typedef), 
 			)
@@ -771,71 +675,10 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		count = count ?? symbol.size / FILE_TYPES[dataType].size - subtract
 		
 		return applyStrings(
-			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), 
+			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), symbolTable,
 			
 			parseRawDataSection(containingSection, count, symbol.location, FILE_TYPES[dataType].typedef),
 		)
-	}
-	
-	
-	function applyStrings<T extends DataType>(baseOffsetPointer: Pointer, dataType: T, stringSection: Section, 
-		relocationTable: Map<number, Relocation>, objects: object[]): Instance<T>[] {
-		
-		let result = []
-		
-		const baseOffset = baseOffsetPointer.value
-		
-		for (const [offset, relocation] of relocationTable) {
-			if (offset >= baseOffset && offset < baseOffset + FILE_TYPES[dataType].size * objects.length) {
-				let size = FILE_TYPES[dataType].size
-				let fieldOffset = (offset -  baseOffset) % size
-				let fieldName = FILE_TYPES[dataType].fieldOffsets[fieldOffset]
-				
-				if (FILE_TYPES[dataType].typedef[fieldName] != "string" 
-					&& FILE_TYPES[dataType].typedef[fieldName] != "pointer"
-					&& FILE_TYPES[dataType].typedef[fieldName] != "symbol") {
-					console.error(`Field ${fieldName} should be a string instead of ${FILE_TYPES[dataType].typedef[fieldName]} \
-(found in item ${Math.floor((offset - baseOffset) / size)}) ${DataType[dataType]} (0x${offset.toString(16)} / 0x${baseOffset.toString(16)})`)
-				}
-			}
-		}
-		
-		for (let i = 0; i < objects.length; i++) {
-			const obj = objects[i]
-			
-			let copy = {...obj}
-			Object.setPrototypeOf(copy, Object.getPrototypeOf(obj))
-			
-			for (const [fieldName, fieldType] of Object.entries(FILE_TYPES[dataType].typedef)) {
-				if (fieldType == "string") {
-					let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
-					let size = FILE_TYPES[dataType].size as number
-					let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
-					
-					copy[fieldName] = stringSection.getStringAt(relocation ? relocation.targetOffset : Pointer.NULL)
-				} 
-				else if (fieldType == "symbol") {
-					let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
-					let size = FILE_TYPES[dataType].size as number
-					let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
-					let targetSymbol = symbolTable[relocation?.infoHigh]
-					
-					// console.log('symbol', relocation?.infoHigh, symbolTable)
-					
-					copy[fieldName] = demangle(targetSymbol?.name) ?? null
-				} 
-				else if (fieldType == "pointer") {
-					let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
-					let size = FILE_TYPES[dataType].size as number
-					let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
-					copy[fieldName] = relocation ? relocation.targetOffset : Pointer.NULL
-				}
-			}
-			
-			result.push(copy)
-		}
-		
-		return result
 	}
 }
 
@@ -911,4 +754,64 @@ function parseRawDataSection(section: Section, count: number, initialPosition: n
 		
 		return result
 	}
+}
+
+function applyStrings<T extends DataType>(baseOffsetPointer: Pointer, dataType: T, stringSection: Section, 
+	relocationTable: Map<number, Relocation>, symbolTable: Symbol[], objects: object[]): Instance<T>[] {
+	
+	let result = []
+	
+	const baseOffset = baseOffsetPointer.value
+	
+	for (const [offset, relocation] of relocationTable) {
+		if (offset >= baseOffset && offset < baseOffset + FILE_TYPES[dataType].size * objects.length) {
+			let size = FILE_TYPES[dataType].size
+			let fieldOffset = (offset -  baseOffset) % size
+			let fieldName = FILE_TYPES[dataType].fieldOffsets[fieldOffset]
+			
+			if (FILE_TYPES[dataType].typedef[fieldName] != "string" 
+				&& FILE_TYPES[dataType].typedef[fieldName] != "pointer"
+				&& FILE_TYPES[dataType].typedef[fieldName] != "symbol") {
+				console.error(`Field ${fieldName} should be a string instead of ${FILE_TYPES[dataType].typedef[fieldName]} \
+(found in item ${Math.floor((offset - baseOffset) / size)}) ${DataType[dataType]} (0x${offset.toString(16)} / 0x${baseOffset.toString(16)})`)
+			}
+		}
+	}
+	
+	for (let i = 0; i < objects.length; i++) {
+		const obj = objects[i]
+		
+		let copy = {...obj}
+		Object.setPrototypeOf(copy, Object.getPrototypeOf(obj))
+		
+		for (const [fieldName, fieldType] of Object.entries(FILE_TYPES[dataType].typedef)) {
+			if (fieldType == "string") {
+				let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
+				let size = FILE_TYPES[dataType].size as number
+				let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
+				
+				copy[fieldName] = stringSection.getStringAt(relocation ? relocation.targetOffset : Pointer.NULL)
+			} 
+			else if (fieldType == "symbol") {
+				let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
+				let size = FILE_TYPES[dataType].size as number
+				let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
+				let targetSymbol = symbolTable[relocation?.infoHigh]
+				
+				// console.log('symbol', relocation?.infoHigh, symbolTable)
+				
+				copy[fieldName] = demangle(targetSymbol?.name) ?? null
+			} 
+			else if (fieldType == "pointer") {
+				let fieldOffset = FILE_TYPES[dataType].fieldOffsets[fieldName] as number
+				let size = FILE_TYPES[dataType].size as number
+				let relocation: Relocation = relocationTable.get(fieldOffset + size * i + baseOffset)
+				copy[fieldName] = relocation ? relocation.targetOffset : Pointer.NULL
+			}
+		}
+		
+		result.push(copy)
+	}
+	
+	return result
 }
