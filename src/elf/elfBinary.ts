@@ -81,6 +81,9 @@ export const dataDivisions = {
 	resourceField: "resourceField",
 	resource: "resource",
 	config: "config",
+	
+	battle: "battle",
+	enemy: "enemy",
 } as const
 
 export type DataDivision = keyof typeof dataDivisions
@@ -177,6 +180,10 @@ export enum DataType {
 	BtlResourceField,
 	BtlResource,
 	BtlConfig,
+	
+	SetAreaReference,
+	SetBattle,
+	SetEnemy,
 }
 
 

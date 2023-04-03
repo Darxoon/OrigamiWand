@@ -50,7 +50,7 @@
 		"data_player_model": DataType.DataPlayerModel,
 		
 		"data_btlSet": DataType.DataBtlSet,
-		"data_confetti_hole_totalInfo": DataType.DataConfettiTotalHoleInfo,
+		// "data_confetti_hole_totalInfo": DataType.DataConfettiTotalHoleInfo,
 		"data_effect": DataType.DataEffect,
 		"data_mapLinkZoom": DataType.DataMaplinkZoom,
 		"data_party": DataType.DataParty,
@@ -129,7 +129,7 @@
 		<option value="DataPlayerModel">Player Model Registry (data_player_model)</option>
 		
 		<option value="DataBtlSet">Battle Formations (data_btlSet)</option>
-		<option value="DataConfettiTotalHoleInfo">Not-bottomless Hole Data (data_confetti_hole_totalInfo)</option>
+		<!-- <option value="DataConfettiTotalHoleInfo">Not-bottomless Hole Data (data_confetti_hole_totalInfo)</option> -->
 		<option value="DataEffect">Particle Effect Registry (data_effect)</option>
 		<option value="DataMaplinkZoom">data_mapLinkZoom</option>
 		<option value="DataParty">Party Member Registry (data_party)</option>

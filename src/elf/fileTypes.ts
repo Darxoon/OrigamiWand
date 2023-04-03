@@ -61,7 +61,7 @@ type UnfilteredInstance<T extends number> = {
 export type Instance<T extends number> = Pick<
 	UnfilteredInstance<T>, 
 	{[p in keyof UnfilteredInstance<T>]: UnfilteredInstance<T>[p] extends never ? never : p}[keyof UnfilteredInstance<T>]
->
+> & { [VALUE_UUID]?: Symbol }
 
 const defaultDescriptions: Typedef<string> = {
 	stage: "The stage that the {type} is on. It's the same for every {type} in the same file.",
@@ -2349,6 +2349,110 @@ Bit field for the attack GFX type. Known values:
 		field_0xa0: "int",
 		field_0xa4: "int",
 	},
+	
+	// this is a completely fictional struct. actually, the references to the area tables are just standalone pointers in an array
+	// however, doing this is requied to make the symbol names of these tables editable
+	[DataType.DataBtlSet]: {
+		__displayName: "Area",
+		__childTypes: {
+			battles: DataType.SetBattle,
+		},
+		
+		id: "string",
+		battles: new Property("symbol", undefined, { tabName: "Battles for {type} {id}" }),
+	},
+	
+	[DataType.SetAreaReference]: {
+		value: "symbol",
+	},
+	
+	[DataType.SetBattle]: {
+		__displayName: "{dynamic}",
+		__dynamicDisplayName: obj => obj.stageDefinition?.length > 0 ? "Stage Definition" : "Battle",
+		__objectType: dataDivisions.battle,
+		__nestedAllValues: true,
+		__childTypes: {
+			enemies: DataType.SetEnemy,
+		},
+		
+		id: "string",
+		stageDefinition: "string",
+		enemies: new Property("symbol", undefined, { tabName: "Enemies for Battle {id} "}),
+		enemyCount: new Property("int", undefined, { hidden: true }),
+		field_0x1c: "int",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "int",
+		field_0x2c: "int",
+		field_0x30: "int",
+		field_0x34: "int",
+		field_0x38: "int",
+		field_0x3c: "int",
+		field_0x40: "int",
+		field_0x44: "int",
+		field_0x48: "int",
+		field_0x4c: "int",
+		field_0x50: "int",
+		field_0x54: "int",
+		field_0x58: "int",
+		field_0x5c: "int",
+		field_0x60: "int",
+		field_0x64: "int",
+		field_0x68: "int",
+		field_0x6c: "int",
+		field_0x70: "int",
+		field_0x74: "int",
+		field_0x78: "int",
+		field_0x7c: "int",
+		field_0x80: "int",
+		field_0x84: "int",
+		field_0x88: "int",
+		field_0x8c: "int",
+		field_0x90: "string",
+		field_0x98: "string",
+		field_0xa0: "string",
+		field_0xa8: "int",
+		field_0xac: "int",
+		field_0xb0: "string",
+		field_0xb8: "string",
+		field_0xc0: "string",
+		field_0xc8: "string",
+		field_0xd0: "string",
+		field_0xd8: "string",
+		field_0xe0: "string",
+		field_0xe8: "string",
+		field_0xf0: "int",
+		field_0xf4: "int",
+		field_0xf8: "int",
+		field_0xfc: "int",
+		field_0x100: "int",
+		field_0x104: "int",
+		field_0x108: "int",
+		field_0x10c: "int",
+		field_0x110: "int",
+		field_0x114: "int",
+		field_0x118: "int",
+		field_0x11c: "int",
+	},
+	
+	[DataType.SetEnemy]: {
+		__displayName: "Enemy",
+		__objectType: dataDivisions.enemy,
+		__nestedAllValues: true,
+		__importantField: "type",
+		
+		type: "string",
+		field_0x8: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		ringSection: "int",
+		lineSection: "int",
+		field_0x20: "string",
+		field_0x28: "string",
+		circle: "string",
+		field_0x38: "int",
+		field_0x3c: "int",
+	},
 } as const
 
 
@@ -2365,6 +2469,7 @@ interface FileTypeRegistry {
 	fieldOffsets: Typedef<string | number>
 	size: number
 	displayName: string
+	getDynamicDisplayName: (obj: any) => string
 	childTypes: {[fieldName: string]: DataType}
 	childFieldLabel: string
 	childField: string
@@ -2431,6 +2536,7 @@ function generateTypedefFor<T extends PropertyType>(dataType: DataType, typedef:
 		size,
 		
 		displayName,
+		getDynamicDisplayName: extendedTypedef.__dynamicDisplayName ?? (() => displayName),
 		
 		// @ts-ignore
 		childTypes: extendedTypedef.__childTypes as {[fieldName: string]: DataType} ?? {},

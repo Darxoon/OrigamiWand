@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { toReadableString } from "$lib/util";
 	import { createEventDispatcher, onMount } from "svelte";
@@ -32,6 +32,13 @@
 	
 	$: entries = Object.entries(obj)
 	$: objectId = obj[FILE_TYPES[dataType].identifyingField]
+	$: dynTitle = title.replaceAll('{dynamic}', FILE_TYPES[dataType].getDynamicDisplayName(obj))
+	
+	// SetBattle contains both Stage Definitions and Battles
+	// to differentiate between the two, Custom Colors are only used for Stage Definitions
+	$: usesCustomColors = dataType != DataType.SetBattle || dynTitle.startsWith('Stage Definition')
+	$: actualBackgroundColor = usesCustomColors ? backgroundColor : defaultDataTypeColor
+	$: actualLabelHighlightColor = usesCustomColors ? labelHighlightColor : defaultObjectEditorHighlight
 	
 	let initialized = false
 	
@@ -143,13 +150,13 @@
 
 <svelte:options accessors={true} />
 
-<div class="card editor" style="--bg-card: {backgroundColor}; --bg-label-highlight: {labelHighlightColor}" bind:this={editor} 
+<div class="card editor" style="--bg-card: {actualBackgroundColor}; --bg-label-highlight: {actualLabelHighlightColor}" bind:this={editor}
 		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
 	<div class="title" class:rotated={open}
 		on:click={onTitleClick} on:keypress={keyPress} tabindex="0" role="button">
 		
-		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{title}</span>
+		<i data-feather="chevron-down" class="icon-arrow"></i><span class="titleLabel">{dynTitle}</span>
 		
 		{#if showButtons}
 			<ButtonStrip on:duplicate on:delete></ButtonStrip>

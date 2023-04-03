@@ -2,13 +2,12 @@
 	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
     import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";
     import InnerIndexPageEditor from "./InnerIndexPageEditor.svelte";
-	import InnerSpecialSvelteEditor from "./InnerSpecialSvelteEditor.svelte";
 	
 	export let dataType: DataType
 	export let binary: ElfBinary
 	export let fileName: string
 	
-	let inner: InnerIndexPageEditor | InnerSpecialSvelteEditor
+	let inner: InnerIndexPageEditor
 	
 	export function collapseAll() {
 		inner.collapseAll()
@@ -23,6 +22,5 @@
 	<InnerIndexPageEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
 			bind:this={inner} self={inner} on:open />
 {:else}
-	<InnerSpecialSvelteEditor bind:dataType={dataType} bind:binary={binary}
-			bind:this={inner} self={inner} on:open />
+	<div>This file does not have an editor yet.</div>
 {/if}

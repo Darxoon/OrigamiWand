@@ -92,7 +92,6 @@ export function compress(buffer: ArrayBuffer) {
 }
 
 const nonStandardDataTypes = new Set([
-	DataType.DataBtlSet,
 	DataType.DataConfettiTotalHoleInfo,
 	DataType.DataUi,
 	DataType.DataBtl,

@@ -1,6 +1,5 @@
 <script lang="ts">
-import InnerSpecialSvelteEditor from "$lib/editor/fileEditor/InnerSpecialSvelteEditor.svelte"
-import InnerParagraphDisplay from "./StringViewer/InnerParagraphDisplay.svelte"
+	import InnerParagraphDisplay from "./StringViewer/InnerParagraphDisplay.svelte"
 
 	export let text: string
 	export let inline: boolean = false

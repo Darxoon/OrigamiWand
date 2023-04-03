@@ -66,13 +66,6 @@ function openFileSelector() {
 		
 		console.log(DataType[dataType])
 		
-		if (dataType === DataType.DataBtlSet) {
-			// TODO: remove once data_btlSet has been revamped
-			alert("\
-Warning: The file type data_btlSet is currently not supported fully. \
-When proceeding, you are likely going to encounter bugs.")
-		}
-		
 		const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
 		
 		let binary: ElfBinary
