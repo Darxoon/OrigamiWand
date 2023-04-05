@@ -11,6 +11,8 @@ export function mangleIdentifier(id: string): string {
 	if (id.includes(' '))
 		throw new Error(`Input Identifier \`${id}\` is not allowed to contain any spaces.`)
 	
+	const encoder = new TextEncoder()
+	
 	let segments = id.split('::')
 	let output = "_ZN"
 	
@@ -21,7 +23,9 @@ export function mangleIdentifier(id: string): string {
 			output += 'L'
 		
 		let segmentId = isInternallyLinked ? segment.slice(1) : segment
-		output += segmentId.length.toString() + segmentId
+		let binSegmentId = encoder.encode(segmentId)
+		
+		output += binSegmentId.byteLength.toString() + segmentId
 	}
 	
 	return output + 'E'
@@ -56,6 +60,7 @@ export function demangle(mangledId: string): string {
 			segmentIndex += 1
 		}
 		
+		// TODO: make sure that this uses bytelengths and not utf-16 string lengths as well
 		// console.log(mangledId, id, segmentIndex, id[segmentIndex])
 		let [ lengthStr ] = id.slice(segmentIndex).match(/^\d+/)
 		let segmentStart = segmentIndex + lengthStr.length
