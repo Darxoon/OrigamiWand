@@ -664,7 +664,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				const { battles: symbolName } = area
 				
 				let battleSymbol = findSymbol(symbolName)
-				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle, -1)
+				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle)
 				
 				let battleObj = {
 					symbolName: "wld::btl::data::s_setData_battle_" + area.id,
@@ -677,6 +677,9 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				// enemies
 				for (const battle of battles) {
 					const { enemies: symbolName, enemyCount } = battle
+					
+					if (symbolName == undefined)
+						continue
 					
 					let enemySymbol = findSymbol(symbolName)
 					let enemies = parseSymbol(dataSection, stringSection, enemySymbol, DataType.SetEnemy, enemyCount)

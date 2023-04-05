@@ -2442,7 +2442,8 @@ Bit field for the attack GFX type. Known values:
 		__importantField: "type",
 		
 		type: "string",
-		field_0x8: "string",
+		field_0x8: "int",
+		field_0xc: "int",
 		field_0x10: "int",
 		field_0x14: "int",
 		ringSection: "int",

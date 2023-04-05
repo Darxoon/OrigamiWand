@@ -95,11 +95,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				break
 			}
-			
-			// case DataType.DataBtlSet: {
-				
-			// 	break
-			// }
 				
 			case DataType.DataNpcModel:
 			case DataType.DataItemModel:
@@ -454,6 +449,79 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				break
 			}
 			
+			case DataType.DataBtlSet: {
+				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+				
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
+				
+				// ----------------  data  ----------------
+				let data: SectionElements = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
+				}
+				
+				// battles & enemies
+				for (const area of binary.data.main as Instance<DataType.DataBtlSet>[]) {
+					if (area.battles == undefined)
+						continue
+						
+					const battles = area.battles as { children: Instance<DataType.SetBattle>[], symbolName: string }
+					const { children, symbolName } = battles
+
+					
+					// serialize enemy arrays of individual battles first, then the battles themselves
+					for (const battle of children) {
+						if (battle.enemies == undefined)
+							continue
+						
+						const enemies = battle.enemies as { children: Instance<DataType.SetEnemy>[], symbolName: string }
+						const { children, symbolName } = enemies
+						
+						let symbol = findSymbol(symbolName)
+						let newSymbolName = "wld::btl::data::s_setElementData_" + battle.id
+						
+						// section 3 is .bss, which has no content, so the offset is always 0
+						let offsetInSection = symbol.sectionHeaderIndex != 3 ? new Pointer(dataWriter.size) : Pointer.ZERO
+						
+						symbolLocationReference.set(symbolName, offsetInSection)
+						symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.SetEnemy].size)
+						symbolNameOverrides.set(symbolName, newSymbolName)
+						
+						enemies.symbolName = newSymbolName
+						battle.enemyCount = children.length
+						
+						serializeObjects(data, DataType.SetEnemy, children, { symbolWrapper: enemies })
+					}
+					
+					let newSymbolName = "wld::btl::data::s_setData_battle_" + area.id
+					
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.SetBattle].size)
+					symbolNameOverrides.set(symbolName, newSymbolName)
+					
+					battles.symbolName = newSymbolName
+					// No need to update battle count, since here, count is inferred through zero termination
+					
+					serializeObjects(data, DataType.SetBattle, children, { symbolWrapper: battles })
+				}
+				
+				// areas
+				// Since the area (DataType.DataBtlSet) struct is entirely constructed,
+				// it has to be converted into SetAreaReference first
+				let areaReferences: Instance<DataType.SetAreaReference>[]
+						= binary.data.main.map(area => ({ value: area.battles }))
+				
+				symbolLocationReference.set(`wld::btl::data::s_setDataTable`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::btl::data::s_setDataTable`, (areaReferences.length + 1) * FILE_TYPES[DataType.SetAreaReference].size)
+				serializeObjects(data, DataType.SetAreaReference, areaReferences, { padding: 1 })
+				
+				break
+			}
+			
 			default: {
 				let data: SectionElements = {
 					writer: dataWriter,
@@ -477,114 +545,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		}
 		
 		updatedSections.set('.data', dataWriter.toArrayBuffer())
-		
-		type RodataReference = [id: string, originalId: string, assetGroups: Instance<DataType.NpcFiles>[], states: Instance<DataType.NpcState>[]]
-		
-		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number, modelNamespace: string) {
-			const rodataWriter = rodata.writer
-			
-			// .rodata section is structured like this:
-			
-			// AssetGroup[]
-			// State[]
-			// ...
-			// modelNpc_num (amount of objects in .data)
-			// for each entry in .data:
-			//   substate[]
-			//   substate[]
-			//     face[]
-			//       anime[]
-			//     face[]
-			//       anime[]
-			//       anime[]
-			//       ...
-			
-			// the strings in .rodata are serialized in this order:
-			// for each entry in .data
-			//     AssetGroup, State, all animes connected to this state...
-			
-			// While it may seem unnnecessary to serialize the strings in exactly
-			// the same order they were in originally, it is important to me that
-			// the input file and unmodified output file are exactly equal, in order
-			// to prevent bugs that would go unnoticed
-			
-			// step 1: Serialize Asset Groups, States and the strings from animes
-			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				serializeObjects(rodata, DataType.NpcFiles, assetGroups)
-				serializeObjects(rodata, DataType.NpcFiles, [FILE_TYPES[DataType.NpcFiles].instantiate()])
-				
-				serializeObjects(rodata, DataType.NpcState, states)
-				serializeObjects(rodata, DataType.NpcState, [FILE_TYPES[DataType.NpcState].instantiate()])
-				
-				let animes = (states as any[])
-					.flatMap(state => state.substates)
-					.flatMap(substate => substate.faces)
-					.flatMap(face => face.animations)
-				
-				serializeStringsOnly(DataType.NpcAnime, animes)
-			}
-			
-			// generate symbol reference for asset groups and states
-			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				let assetGroupOffset = assetGroups.length > 0 ? objectOffsets.get(assetGroups[0]) : objectOffsets.get(assetGroups)
-				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_model_files`, assetGroupOffset)
-				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_model_files`, `${modelNamespace}::^${id}_model_files`)
-				
-				let stateOffset = states.length > 0 ? objectOffsets.get(states[0]) : objectOffsets.get(states)
-				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state`, stateOffset)
-				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state`, `${modelNamespace}::^${id}_state`)
-			}
-			
-			// step 2: serialize modelNpc_num
-			symbolLocationReference?.set(FILE_TYPES[dataType].countSymbol, new Pointer(rodataWriter.size))
-			rodataWriter.writeBigInt64(BigInt(modelNumber))
-			
-			// step 3: serialize substates, faces and animes
-			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				
-				let animeCount = 0
-				
-				for (const [state, i] of enumerate(states)) {
-					symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
-					symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}`, `${modelNamespace}::^${id}_state${i}`)
-					
-					serializeObjects(rodata, DataType.NpcSubState, state.substates)
-					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
-				}
-				
-				for (const [state, i] of enumerate(states)) {
-					let { substates } = state
-					
-					for (const [substate, j] of enumerate(substates)) {
-						let { faces } = substate as Instance<DataType.NpcSubState>
-						
-						symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
-						symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, `${modelNamespace}::^${id}_state${i}_face${j}`)
-						
-						serializeObjects(rodata, DataType.NpcFace, faces)
-						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
-					}
-					
-					for (const substate of substates) {
-						let faces = substate.faces
-						
-						for (const face of faces) {
-							let animes = face.animations
-							
-							symbolLocationReference?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
-							symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, `${modelNamespace}::^${id}_anime${animeCount}`)
-							
-							animeCount += 1
-							
-							serializeObjects(rodata, DataType.NpcAnime, animes)
-							serializeObjects(rodata, DataType.NpcAnime, [FILE_TYPES[DataType.NpcAnime].instantiate()])
-						}
-					}
-				}
-			}
-			
-			return rodataWriter.toArrayBuffer()
-		}
 		
 		interface SectionElements {
 			writer: BinaryWriter
@@ -702,6 +662,114 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					}
 				}
 			}
+		}
+		
+		type RodataReference = [id: string, originalId: string, assetGroups: Instance<DataType.NpcFiles>[], states: Instance<DataType.NpcState>[]]
+		
+		function serializeModelRodata(rodataReferences: RodataReference[], rodata: SectionElements, modelNumber: number, modelNamespace: string) {
+			const rodataWriter = rodata.writer
+			
+			// .rodata section is structured like this:
+			
+			// AssetGroup[]
+			// State[]
+			// ...
+			// modelNpc_num (amount of objects in .data)
+			// for each entry in .data:
+			//   substate[]
+			//   substate[]
+			//     face[]
+			//       anime[]
+			//     face[]
+			//       anime[]
+			//       anime[]
+			//       ...
+			
+			// the strings in .rodata are serialized in this order:
+			// for each entry in .data
+			//     AssetGroup, State, all animes connected to this state...
+			
+			// While it may seem unnnecessary to serialize the strings in exactly
+			// the same order they were in originally, it is important to me that
+			// the input file and unmodified output file are exactly equal, in order
+			// to prevent bugs that would go unnoticed
+			
+			// step 1: Serialize Asset Groups, States and the strings from animes
+			for (const [id, originalId, assetGroups, states] of rodataReferences) {
+				serializeObjects(rodata, DataType.NpcFiles, assetGroups)
+				serializeObjects(rodata, DataType.NpcFiles, [FILE_TYPES[DataType.NpcFiles].instantiate()])
+				
+				serializeObjects(rodata, DataType.NpcState, states)
+				serializeObjects(rodata, DataType.NpcState, [FILE_TYPES[DataType.NpcState].instantiate()])
+				
+				let animes = (states as any[])
+					.flatMap(state => state.substates)
+					.flatMap(substate => substate.faces)
+					.flatMap(face => face.animations)
+				
+				serializeStringsOnly(DataType.NpcAnime, animes)
+			}
+			
+			// generate symbol reference for asset groups and states
+			for (const [id, originalId, assetGroups, states] of rodataReferences) {
+				let assetGroupOffset = assetGroups.length > 0 ? objectOffsets.get(assetGroups[0]) : objectOffsets.get(assetGroups)
+				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_model_files`, assetGroupOffset)
+				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_model_files`, `${modelNamespace}::^${id}_model_files`)
+				
+				let stateOffset = states.length > 0 ? objectOffsets.get(states[0]) : objectOffsets.get(states)
+				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state`, stateOffset)
+				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state`, `${modelNamespace}::^${id}_state`)
+			}
+			
+			// step 2: serialize modelNpc_num
+			symbolLocationReference?.set(FILE_TYPES[dataType].countSymbol, new Pointer(rodataWriter.size))
+			rodataWriter.writeBigInt64(BigInt(modelNumber))
+			
+			// step 3: serialize substates, faces and animes
+			for (const [id, originalId, assetGroups, states] of rodataReferences) {
+				
+				let animeCount = 0
+				
+				for (const [state, i] of enumerate(states)) {
+					symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
+					symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}`, `${modelNamespace}::^${id}_state${i}`)
+					
+					serializeObjects(rodata, DataType.NpcSubState, state.substates)
+					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
+				}
+				
+				for (const [state, i] of enumerate(states)) {
+					let { substates } = state
+					
+					for (const [substate, j] of enumerate(substates)) {
+						let { faces } = substate as Instance<DataType.NpcSubState>
+						
+						symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
+						symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, `${modelNamespace}::^${id}_state${i}_face${j}`)
+						
+						serializeObjects(rodata, DataType.NpcFace, faces)
+						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
+					}
+					
+					for (const substate of substates) {
+						let faces = substate.faces
+						
+						for (const face of faces) {
+							let animes = face.animations
+							
+							symbolLocationReference?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
+							symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, `${modelNamespace}::^${id}_anime${animeCount}`)
+							
+							animeCount += 1
+							
+							serializeObjects(rodata, DataType.NpcAnime, animes)
+							serializeObjects(rodata, DataType.NpcAnime, [FILE_TYPES[DataType.NpcAnime].instantiate()])
+						}
+					}
+				}
+			}
+			
+			return rodataWriter.toArrayBuffer()
 		}
 	}
 	
