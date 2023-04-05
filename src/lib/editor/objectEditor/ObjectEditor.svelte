@@ -172,7 +172,8 @@
 				<div class="key" class:highlighted={highlightedFields?.includes(field)} 
 				class:bold={!field.startsWith('field_')} bind:this={entryLabelElements[i]} 
 				class:italic={field.startsWith('field_') && FILE_TYPES[dataType].metadata[field]?.description}>
-					{toReadableString(field)}
+					<!-- \xa0 Non breaking space -->
+					{toReadableString(field).replaceAll(' ', '\xa0')}
 					
 					<FieldIcons fieldName={field} dataType={dataType} shown={areIconsShown(i, mouseY)} 
 						on:showMenu={e => showFieldMenu(dataType, field)} />
