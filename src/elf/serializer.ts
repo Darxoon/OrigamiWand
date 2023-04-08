@@ -958,17 +958,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	{
 		// symbol relocations
-		if (dataType != DataType.DataBtlSet) {
-			for (const [sectionName, sectionSymbolRelocations] of symbolRelocations) {
-				if (!allRelocations.has(sectionName))
-					allRelocations.set(sectionName, [])
-				
-				let rawRelocations: Relocation[] = allRelocations.get(sectionName)
-				
-				for (const [location, targetSymbol] of sectionSymbolRelocations) {
-					let targetSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === targetSymbol)
-					rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, targetSymbolIndex, Pointer.ZERO))
-				}
+		for (const [sectionName, sectionSymbolRelocations] of symbolRelocations) {
+			if (!allRelocations.has(sectionName))
+				allRelocations.set(sectionName, [])
+			
+			let rawRelocations: Relocation[] = allRelocations.get(sectionName)
+			
+			for (const [location, targetSymbol] of sectionSymbolRelocations) {
+				let targetSymbolIndex = binary.symbolTable.findIndex(symbol => demangle(symbol.name) === targetSymbol)
+				rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, targetSymbolIndex, Pointer.ZERO))
 			}
 		}
 	}
