@@ -17,7 +17,7 @@
 	})
 	
 	function toPlural(name: string) {
-		if (name.endsWith('y'))
+		if (name.endsWith('y') && !'aeiou'.includes(name[name.length - 2]))
 			return name.slice(0, -1) + 'ies'
 		else
 			return name + 's'
@@ -27,8 +27,8 @@
 <Alert title="All Field Descriptions">
 	<div class="wrapper" bind:this={wrapper}>
 		{#each allMetadataEntries as [dataType, typeMetadata]}
-		{#if Object.entries(typeMetadata).length > 0}
-			<h2>{toPlural(FILE_TYPES[dataType].displayName)}:</h2>
+		{#if Object.entries(typeMetadata).filter(s => s[1].description).length > 0}
+			<h2>{toPlural(FILE_TYPES[dataType].getDynamicDisplayName(null))}:</h2>
 			
 			<div class="descriptions">
 				{#each Object.entries(typeMetadata) as [fieldName, metadata], i}

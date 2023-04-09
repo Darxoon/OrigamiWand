@@ -2368,7 +2368,7 @@ Bit field for the attack GFX type. Known values:
 	
 	[DataType.SetBattle]: {
 		__displayName: "{dynamic}",
-		__dynamicDisplayName: obj => obj.stageDefinition?.length > 0 ? "Stage Definition" : "Battle",
+		__dynamicDisplayName: obj => obj?.stageDefinition?.length > 0 ? "Stage Definition" : "Battle",
 		__objectType: dataDivisions.battle,
 		__nestedAllValues: true,
 		__childTypes: {
