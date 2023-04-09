@@ -19,8 +19,8 @@ import { DataType, Pointer } from "paper-mario-elfs/elfBinary";
 	
 	
 	$: updateStr(viewAsHex)
-	$: applyStr(str)
-	$: applyStr(vectorStrings[0] + vectorStrings[1] + vectorStrings[2])
+	$: if (!readonly) applyStr(str)
+	$: if (!readonly && fieldType == "Vector3") applyStr(vectorStrings[0] + vectorStrings[1] + vectorStrings[2])
 	
 	let vectorStrings = Array(3).fill("")
 	

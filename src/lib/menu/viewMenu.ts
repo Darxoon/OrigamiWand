@@ -6,7 +6,7 @@ import DescriptionViewer from "$lib/modals/DescriptionViewer.svelte"
 import NoteViewer from "$lib/modals/NoteViewer.svelte"
 import { globalEditorStrip } from "$lib/stores"
 import { DataType } from "paper-mario-elfs/elfBinary"
-import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
+import { FILE_TYPES, Property, type PropertyType } from "paper-mario-elfs/fileTypes"
 
 let editorStrip: EditorStrip
 globalEditorStrip.subscribe(value => editorStrip = value)
@@ -32,46 +32,60 @@ export function getViewMenu() {
 			{
 				name: "View all Descriptions...",
 				onClick: () => {
-					viewAllDescriptions()
+					let dataType = editorStrip.activeTab().properties.dataType
+					
+					viewAllDescriptions(dataType)
 				}
 			},
 		],
 	}
 }
 
-function viewAllDescriptions() {
-	let	tab = editorStrip.activeTab()
-	let dataType = tab.properties.dataType
+type Metadata = {[fieldName: string]: Property<PropertyType>}
+
+function viewAllDescriptions(dataType: DataType) {
+	let allMetadata: Map<DataType, Metadata> = new Map()
 	
-	// the map that every metadata will be stored in
-	let allMetadata = new Map()
+	// TODO: get better name for data types without entry point data type,
+	// as literally, ones with can also be complex (e.g. BtlSet)
+	let isComplex = dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)
 	
-	// add metadata of current data type
-	let mainMetadata = FILE_TYPES[dataType].metadata
-	allMetadata.set(dataType, mainMetadata)
-	
-	// add metadata of child types if it's a group type like data_ui or data_btl
-	if (dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)) {
+	if (!isComplex) {
+		addMetadataRecursive(dataType, allMetadata)
+	} else {
 		let childTypes = dataTypeExtensions(DataTypeExtension.ComplexEditorCategory, dataType)
 		
 		for (const [name, { dataType }] of Object.entries(childTypes)) {
-			allMetadata.set(dataType, FILE_TYPES[dataType].metadata)
+			addMetadataRecursive(dataType, allMetadata)
 		}
 	}
 	
-	// maplink header
 	if (dataType == DataType.Maplink) {
-		allMetadata.set(DataType.MaplinkHeader, FILE_TYPES[DataType.MaplinkHeader].metadata)
+		addMetadataRecursive(DataType.MaplinkHeader, allMetadata)
 	}
 	
-	// TODO: check if anything contains any more child types
-	
-	if (Object.entries(mainMetadata).length > 0 || allMetadata.size > 1) {
+	if (allMetadata.size >= 1) {
 		showModal(DescriptionViewer, { allMetadata })
 	} else {
 		showModal(TextAlert, {
 			title: "No Descriptions",
 			content: "This file format contains no field descriptions.",
 		})
+	}
+}
+
+function addMetadataRecursive(dataType: DataType, allMetadata: Map<DataType, Metadata>) {
+	if (allMetadata.has(dataType))
+		return
+	
+	allMetadata.set(dataType, FILE_TYPES[dataType].metadata)
+	
+	// recursively add all child types too
+	let childTypes = Object.values(FILE_TYPES[dataType].childTypes)
+	
+	if (childTypes.length > 0) {
+		for (const childType of childTypes) {
+			addMetadataRecursive(childType, allMetadata)
+		}
 	}
 }
