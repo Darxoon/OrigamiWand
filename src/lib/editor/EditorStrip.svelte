@@ -111,10 +111,17 @@
 						const { title, component, properties, isCompressed } = e.detail
 						
 						const childID = Symbol(`Tab ID ${title}`)
-						
 						tabList[selectedTabs[i]].children.push(childID)
 						
-						const parentId = tabList[selectedTabs[i]].id
+						const tab = {
+							id: childID,
+							parentId: tabList[selectedTabs[i]].id,
+							name: title,
+							component,
+							properties,
+							isCompressed: isCompressed ?? false,
+							children: [],
+						}
 						
 						if (isWide) {
 							if (tabs.length < 2) {
@@ -122,26 +129,9 @@
 							}
 							
 							tabToAddEditorIndex = 1
-							
-							tabToAdd = {
-								id: childID,
-								parentId,
-								name: title,
-								component,
-								properties,
-								isCompressed: isCompressed ?? false,
-								children: [],
-							}
+							tabToAdd = tab
 						} else {
-							editorWindows[0].addTab({
-								id: childID,
-								parentId,
-								name: title,
-								component,
-								properties,
-								isCompressed: isCompressed ?? false,
-								children: [],
-							})
+							editorWindows[0].addTab(tab)
 						}
 					} else
 						throw new Error(`Can't open ${JSON.stringify(e.detail.type)}, unknown type`)
