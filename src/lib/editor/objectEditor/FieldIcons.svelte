@@ -5,6 +5,7 @@
 	import TextAlert from "$lib/modal/TextAlert.svelte";
 	import { toReadableString } from "$lib/util";
     import { createEventDispatcher, onMount } from "svelte";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 	
     const dispatch = createEventDispatcher()
     
@@ -28,11 +29,11 @@
 </script>
 
 <div class="buttons" class:shown={shown}>
-    <div class="button description" class:hidden={fieldDescription == undefined} on:click={showDescription}>
+    <div class="button description" class:hidden={fieldDescription == undefined} use:nonnativeButton={showDescription}>
         <i data-feather="info" class="icon-field"></i>
     </div>
     
-    <div class="button options" on:click={e => dispatch('showMenu', { fieldName, dataType })}>
+    <div class="button options" use:nonnativeButton={() => dispatch('showMenu', { fieldName, dataType })}>
         <i data-feather="more-horizontal" class="icon-field"></i>
     </div>
 </div>

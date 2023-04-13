@@ -5,6 +5,7 @@
     import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
     import { afterUpdate } from "svelte";
     import ObjectEditor from "./ObjectEditor.svelte";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 
 	export let dataType: DataType
 	export let visible: boolean
@@ -35,7 +36,7 @@
 </script>
 
 	<div class="child_container" class:invisible={!visible}>
-		<div class="showChildren" on:click={e => isOpen = !isOpen}>
+		<div class="showChildren" use:nonnativeButton={() => isOpen = !isOpen}>
 			<div class:rotated={isOpen}>
 				<i data-feather="chevron-down" class="icon-children-arrow"></i>
 			</div>

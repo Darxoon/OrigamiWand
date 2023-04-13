@@ -33,6 +33,14 @@
 			createContent()
 	}
 	
+	function keyDown(e: KeyboardEvent) {
+		if (e.key == " " || e.key == "Enter") {
+			click()
+			e.stopPropagation()
+			e.preventDefault()
+		}
+	}
+	
 	function createContent() {
 		dispatch('create')
 	}
@@ -65,8 +73,7 @@
 	function length(arrayOrObj) {
 		if (typeof arrayOrObj == "string") {
 			// this shouldn't happen
-			// TODO: this is a btlSet thing again
-			debugger
+			throw new Error("Symbol value can't be a string")
 		}
 		if (arrayOrObj instanceof Array)
 			return arrayOrObj.length
@@ -78,7 +85,7 @@
 	}
 </script>
 
-<input type="text" value={label} readonly on:click={click} />
+<input type="text" role="button" value={label} readonly on:click={click} on:keydown={keyDown} />
 
 <style lang="scss">
 	input {

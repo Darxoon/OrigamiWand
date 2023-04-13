@@ -14,10 +14,10 @@
         return results.map(result => result.obj)
     }
     
-	let searchInput: HTMLInputElement
+	let searchInput: HTMLInputElement = undefined
 </script>
 
-<div class="card search" on:click={() => searchInput.click()}>
+<div class="card search" on:click={() => searchInput.click()} on:keydown={() => searchInput.click()}>
     &nbsp;
     <input type="text" class="input" placeholder="Search" size="1"
         bind:this={searchInput} bind:value={searchTerm}>

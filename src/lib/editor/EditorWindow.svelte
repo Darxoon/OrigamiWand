@@ -7,12 +7,12 @@
 	
 	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import { globalDragEndEvent, globalDraggedTab, wasDraggingGlobally, type Tab } from "./globalDragging";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 	
 	export let tabs: Tab[] = []
 	export let selectedIndex: number = 0
 	export let isActive = true
 	export let showBugReporter: boolean = false
-	export let debugIndex: number = -1
 	
 	const dispatch = createEventDispatcher()
 	
@@ -246,6 +246,7 @@ Do you want to close those too?`,
 				class:active={draggedSelectedIndex == i}
 				class:animate_dragging={draggedTab != undefined} 
 				class:colorInvisible={draggedTab && draggedTabIndex === i}
+				use:nonnativeButton={() => draggedSelectedIndex = i}
 				on:mousedown={e => {
 					if (draggedTab == undefined) {
 						selectedIndex = i
@@ -259,7 +260,6 @@ Do you want to close those too?`,
 						initiateDragging(newTabsBase, tab, tabWidth, i)
 					}
 				}} 
-				on:click={() => draggedSelectedIndex = i}
 				on:mousemove={e => {
 					if (draggedTab && draggedTab != tab) {
 						// @ts-ignore
@@ -271,7 +271,7 @@ Do you want to close those too?`,
 				>
 				
 				<span class="tabName">{tab.name}</span>
-				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation on:click={() => closeTabPrompt(tab, i)}>
+				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation use:nonnativeButton={() => closeTabPrompt(tab, i)}>
 					<i data-feather="x" class="icon-close"></i>
 				</div>
 			</li>
