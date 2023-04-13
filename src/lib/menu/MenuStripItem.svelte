@@ -28,7 +28,7 @@
 	}
 </script>
 
-<li tabindex="0" on:mouseenter={updateOpenedMenu} bind:this={li}
+<li role="button" tabindex="0" on:mouseenter={updateOpenedMenu} bind:this={li}
 	on:mousedown|stopPropagation={open} on:keypress|stopPropagation={open}>
 	
 	{name}
@@ -36,7 +36,7 @@
 	<div on:mousedown|stopPropagation={nop} class="menu" class:shown={shown}>
 		<ul>
 			{#each items as item}
-				<li class="menu_item" tabindex="0"
+				<li class="menu_item" role="button" tabindex="0"
 						on:click={e => {openedMenu.set(null); item.onClick(e);}}
 						on:keypress={e => {openedMenu.set(null); item.onClick(e);}}>{item.name}</li>
 			{/each}

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 	import { hideActiveModal } from "./modal";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 
 	export let title: string
 
@@ -15,7 +16,7 @@
 </script>
 
 <div class="alert">
-	<div class="closeButton" on:click={close}>
+	<div class="closeButton" use:nonnativeButton={close}>
 		<i data-feather="x"></i>
 	</div>
 	

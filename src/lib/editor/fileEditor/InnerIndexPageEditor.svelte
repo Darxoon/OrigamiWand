@@ -4,6 +4,7 @@
 	import { createEventDispatcher, onMount } from "svelte";
     import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";
 	import ElfEditor from "./ElfEditor.svelte";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 
 	const dispatch = createEventDispatcher()
 	
@@ -36,7 +37,7 @@
 
 <div class="editor">
 	{#each items as [name, {dataType, label}]}
-		<div class="card link" on:click={e => {
+		<div class="card link" use:nonnativeButton={() => {
 			dispatch("open", {
 				type: "window",
 				title: `${name} (${fileName})`,

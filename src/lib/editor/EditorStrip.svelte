@@ -87,7 +87,7 @@
 <div class="editors">
 	{#each tabs as tabList, i (tabList)}
 		<div on:mousedown|capture={e => activeEditor = i}>
-			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0} debugIndex={i}
+			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}
 				bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
 				on:removeEditor={e => {
 					if (tabs.length > 1) {

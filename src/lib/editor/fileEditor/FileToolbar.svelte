@@ -2,6 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import SearchBar from "../search/SearchBar.svelte";
     import type { SearchIndex } from "../search/searchIndex";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 	
 	export let searchIndex: SearchIndex
 	export let searchTerm: string = ""
@@ -11,11 +12,11 @@
 </script>
 
 <div class="toolbar">
-	<div class="card btn" on:click={() => dispatch('add')}>
+	<div class="card btn" use:nonnativeButton={() => dispatch('add')}>
 		<div class="icon"><i data-feather="plus"></i></div>
 		<span>Add new Object</span>
 	</div>
-	<div class="card btn" on:click={() => dispatch('clear')}>
+	<div class="card btn" use:nonnativeButton={() => dispatch('clear')}>
 		<div class="icon"><i data-feather="x"></i></div>
 		Delete all Objects
 	</div>
