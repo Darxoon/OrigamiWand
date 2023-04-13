@@ -142,11 +142,10 @@
 		{#if searchResults}
 			<div class="resultlabel">Showing {searchResultObjects.length} results
 				(out of {objects.length} objects):</div>
-			
-			<BasicObjectArray on:open binary={binary} dataType={dataType} objects={searchResultObjects} highlightedFields={highlightedFields} />
-		{:else}
-			<BasicObjectArray on:open bind:this={arrayComponent} binary={binary} dataType={dataType} objects={objects} />
 		{/if}
+		
+		<BasicObjectArray on:open bind:this={arrayComponent} binary={binary} dataType={dataType} referenceObjects={objects}
+			objects={searchResults ? searchResultObjects : objects} highlightedFields={highlightedFields} />
 	</div>
 	
 	<!-- TODO: use a dedicated special elf editor instead -->
