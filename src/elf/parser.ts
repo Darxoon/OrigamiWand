@@ -2,7 +2,7 @@ import { DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
 import { FILE_TYPES } from "./fileTypes";
 import type { Instance } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
-import { demangle } from "./nameMangling";
+import { demangle, mangleIdentifier } from "./nameMangling";
 import { Relocation, Section, Symbol } from "./types";
 import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
 
@@ -200,7 +200,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	}
 	
 	function findSymbol(name: string): Symbol {
-		return symbolTable.find(symbol => demangle(symbol.name) === name)
+		let mangledName = mangleIdentifier(name)
+		return symbolTable.find(symbol => symbol.name === mangledName)
 	}
 	
 	// parse data according to data type
