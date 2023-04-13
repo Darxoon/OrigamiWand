@@ -27,14 +27,14 @@ const BINARY_HEADER: Uint8Array = new Uint8Array([
 
 export default function serializeElfBinary(dataType: DataType, binary: ElfBinary): ArrayBuffer {
 	// In order to serialize an ELF binary, we don't have to regenerate the entire file.
-	// All we need to do is change the things that need to be changed and then reconstruct
-	// the foundation.
+	// All we need to do is change the sections that need to be changed and then reconstruct
+	// the rest of the structure.
 	// This means that we need to serialize the these sections:
 	//  - .data (contains main content)
-	//  - .rodata (contains count of items in .data and optional secondary content)
-	//  - .rodata.str1.1 (contains all custom strings)
-	//  - .rela* (relocation tables for all sections that need one )
-	//  - symbol table (required for maplink and data_npc_model.elf)
+	//  - .rodata (contains secondary content, usually count of items in .data but not always)
+	//  - .rodata.str1.1 (contains all user strings)
+	//  - .rela* (relocation tables for all sections that need one)
+	//  - symbol table (required for many data types, including maplink, model data, data_btlSet, data_ui and more)
 	
 	const updatedSections: Map<SectionName, ArrayBuffer> = new Map()
 	const allStrings: Set<string> = new Set()
@@ -61,15 +61,15 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		return binary.symbolTable.find(symbol => demangle(symbol.name) === name)
 	}
 	
-	// We will start with the .data section
-	// Because it is just an array of structs, serializing it is relatively straight forward
+	// We will start with the .data and .rodata section.
+	// These sections contain various stuff depending on the data type.
 	
-	// Although the .data section contains pointers, which would require the .rodata.str1.1
-	// section to exist first in order to know where exactly the pointers point to,
-	// this doesn't cause any problems, as no actual pointer information is stored here.
-	// It is stored in .rela.data, which will be generated after .rodata.str1.1.
+	// To handle pointers, all pointers are split into three categories: strings, raw pointers and symbols.
+	// For every pointer, there is the offset of the field the pointer is in stored in relation to the entire section,
+	// along with either the string, target object or symbol name it is pointing to. Depending on the type of the pointer,
+	// this is stored into either stringRelocations, objectRelocations or symbolRelocations.
 	
-	// However, we need to note which strings exist, so they can all be written into .rodata.str1.1.
+	// In addition, the program also stores all strings that are used separately in allStrings to be able to iterate over it easier.
 	
 	{
 		let dataWriter = new BinaryWriter()
@@ -79,19 +79,39 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		
 		switch (dataType) {
 			case DataType.Maplink: {
+				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+				
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
+				
 				let data: SectionElements = {
 					writer: dataWriter,
 					stringRelocations: dataStringRelocations,
-					crossPointers: undefined,
+					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
 				}
 				
-				serializeObjects(data, dataType, [
-					...binary.data.maplinkNodes,
-					FILE_TYPES[DataType.Maplink].instantiate()
-				])
+				// maplinks
+				const header = binary.data.main[0] as Instance<DataType.MaplinkHeader>
+				const maplinks = header.maplinks as {children: Instance<DataType.Maplink>[], symbolName: string}
+				const { children, symbolName } = maplinks
 				
-				serializeObjects(data, DataType.MaplinkHeader, 
-					binary.data.main)
+				let newSymbolName = `wld::fld::data::maplink::${header.stage}_nodes`
+				
+				// location reference not required since this symbol is always at offset 0
+				symbolSizeOverrides.set(symbolName, (children.length + 1) * FILE_TYPES[DataType.Maplink].size)
+				symbolNameOverrides.set(symbolName, newSymbolName)
+				
+				maplinks.symbolName = newSymbolName
+				header.linkAmount = children.length
+				
+				serializeObjects(data, DataType.Maplink, children, { symbolWrapper: maplinks, padding: 1 })
+				
+				// maplink header
+				symbolLocationReference.set("wld::fld::data::maplink::s_mapLink", new Pointer(dataWriter.size))
+				symbolSizeOverrides.set("wld::fld::data::maplink::s_mapLink", binary.data.main.length * FILE_TYPES[DataType.MaplinkHeader].size)
+				serializeObjects(data, DataType.MaplinkHeader, binary.data.main)
 				
 				break
 			}
@@ -828,18 +848,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	}
 	
 	
-	// In Maplink files, symbol 9 always points to the beginning of the Maplink Header
-	// TODO: use symbolLocationReference in the main data serializer above instead
-	if (dataType == DataType.Maplink) {
-		const dataSection = updatedSections.get('.data')
-		
-		const maplinkSymbol = binary.symbolTable[9]
-		const maplinkHeaderSize = FILE_TYPES[DataType.MaplinkHeader].size
-		
-		maplinkSymbol.location = new Pointer(dataSection.byteLength - maplinkHeaderSize)
-	}
-	
-	
 	// @ts-ignore
 	const sections = binary.sections
 	
@@ -969,16 +977,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				rawRelocations.push(new Relocation(new Pointer(location), DEFAULT_RELOCATION_TYPE, targetSymbolIndex, Pointer.ZERO))
 			}
 		}
-	}
-	
-	// Maplink files always have a relocation for field_0x20 in the header to symbol 8
-	// TODO: move this to the maplink serializer
-	if (dataType == DataType.Maplink) {
-		let headerSize = FILE_TYPES[DataType.MaplinkHeader].size
-		
-		let offset = updatedSections.get('.data').byteLength - headerSize + 0x10
-		
-		allRelocations.get('.data').push(new Relocation(new Pointer(offset), 0x101, 0x8, Pointer.ZERO))
 	}
 	
 	

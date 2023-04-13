@@ -213,31 +213,23 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			const dataSection = findSection('.data')
 			const dataStringSection = findSection('.rodata.str1.1')
 			
-			let headerOffset = new Pointer(dataSection.size - FILE_TYPES[DataType.MaplinkHeader].size)
-			
 			data = {}
 			
-			let header = applyStrings(
-				headerOffset,
-				DataType.MaplinkHeader,
-				dataStringSection,
-				allRelocations.get('.data'),
-				symbolTable,
-				
-				parseRawDataSection(dataSection, 1, headerOffset.value, FILE_TYPES[DataType.MaplinkHeader].typedef)
-			)
-			
+			let headerSymbol = findSymbol("wld::fld::data::maplink::s_mapLink")
+			let header = parseSymbol(dataSection, dataStringSection, headerSymbol, DataType.MaplinkHeader, 1)
 			data.main = header
 			
-			data.maplinkNodes = applyStrings(
-				Pointer.ZERO,
-				DataType.Maplink,
-				dataStringSection,
-				allRelocations.get('.data'),
-				symbolTable,
-				
-				parseRawDataSection(dataSection, header[0].linkAmount, 0, FILE_TYPES[DataType.Maplink].typedef)
-			)
+			// maplink nodes
+			let maplinkSymbol = findSymbol(header[0].maplinks)
+			let maplinks = parseSymbol(dataSection, dataStringSection, maplinkSymbol, DataType.Maplink, 1)
+			
+			let maplinkObj = {
+				symbolName: `wld::fld::data::maplink::${header[0].stage}_nodes`,
+				children: maplinks,
+			}
+			
+			data.maplinkNodes = maplinks
+			header[0].maplinks = maplinkObj
 			
 			break
 		}
