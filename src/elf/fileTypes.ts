@@ -400,6 +400,7 @@ Please verify."),
 	
 	[DataType.Maplink]: {
 		__objectType: dataDivisions.maplinkNodes,
+		__displayName: "Link",
 		
 		stage: "string",
 		id: "string",
@@ -456,12 +457,12 @@ Example: "Cam_Dokan"`),
 	},
 	
 	[DataType.MaplinkHeader]: {
-		__displayName: "Link",
+		__displayName: "Maplink Header",
 		
 		stage: "string",
-		linkAmount: "int",
+		linkAmount: new Property("int", undefined, { hidden: true }),
 		field_0xc: "int",
-		linkPointer: "long",
+		maplinks: new Property("symbol", undefined, { hidden: true }),
 		field_0x18: "int",
 		field_0x1c: "int",
 		field_0x20: "int",

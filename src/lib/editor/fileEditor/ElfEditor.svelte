@@ -151,7 +151,7 @@
 	
 	<!-- TODO: use a dedicated special elf editor instead -->
 	{#if dataType === DataType.Maplink}
-		<ObjectEditor title={`Maplink Header (Advanced)`} bind:obj={binary.data.main[0]} 
+		<ObjectEditor title="Maplink Header" bind:obj={binary.data.main[0]} 
 			dataType={DataType.MaplinkHeader} showButtons={false} binary={binary} />
 	{/if}
 </div>
