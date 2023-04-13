@@ -9,6 +9,7 @@
 
 	export let binary: ElfBinary
 	export let objects: UuidTagged[]
+	export let referenceObjects: UuidTagged[]
 	export let dataType: DataType
 	export let highlightedFields: WeakMap<object, string[]> = undefined
 	
@@ -83,9 +84,10 @@
 		resolve()
 	}
 	
-	function titleOf(obj: any, i: number) {
+	function titleOf(obj: any) {
 		let { displayName, identifyingField } = FILE_TYPES[dataType]
-		return `${displayName} ${i}: ${obj[identifyingField]}`
+		let index = referenceObjects.indexOf(obj)
+		return `${displayName} ${index}: ${obj[identifyingField]}`
 	}
 	
 	function appear(index: number) {
@@ -101,5 +103,5 @@
 	<ObjectEditor bind:this={objectEditors[i]} bind:obj={obj} bind:open={areEditorsOpen[i]}
 		on:open on:duplicate={() => duplicateObject(obj)} on:delete={() => deleteObject(i)}
 		on:appear={() => appear(i)} on:createContent={e => createContent(e.detail)}
-		binary={binary} dataType={dataType} title={titleOf(obj, i)} highlightedFields={highlightedFields?.get(obj)} />
+		binary={binary} dataType={dataType} title={titleOf(obj)} highlightedFields={highlightedFields?.get(obj)} />
 {/each}
