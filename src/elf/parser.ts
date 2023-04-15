@@ -222,7 +222,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			// maplink nodes
 			let maplinkSymbol = findSymbol(header[0].maplinks)
-			let maplinks = parseSymbol(dataSection, dataStringSection, maplinkSymbol, DataType.Maplink, 1)
+			let maplinks = parseSymbol(dataSection, dataStringSection, maplinkSymbol, DataType.Maplink, header[0].linkAmount)
 			
 			let maplinkObj = {
 				symbolName: `wld::fld::data::maplink::${header[0].stage}_nodes`,
