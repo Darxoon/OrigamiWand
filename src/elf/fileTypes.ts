@@ -528,10 +528,14 @@ Some examples of functions that are in this namespace:
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
-		field_0x68: "string",
+		itemDrop: "string",
 		field_0x70: "string",
 		field_0x78: "string",
-		field_0x80: "string",
+		positionType: new Property("string", `
+The position of the character in the air or the ground:
+
+* 空中 - Airborne
+* Possibly more.`),
 		landingSfx: "string",
 		jumpedOnSfx: "string",
 		hammeredOnSfx: "string",
