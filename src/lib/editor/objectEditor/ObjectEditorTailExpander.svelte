@@ -25,7 +25,7 @@
 	
 	$: if (isOpen) replace = true
 	
-	// TODO: do this in ObjectEditor instead and disable it while loading a file for loading times
+	// TODO: do this in ObjectEditor instead and disable it while loading a file for loading times using getContext
 	afterUpdate(() => {
 		if (replace) {
 			// @ts-ignore

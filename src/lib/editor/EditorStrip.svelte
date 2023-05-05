@@ -82,6 +82,29 @@
 			return serializedTabs
 		})
 	}
+	
+	export function getTab(tabId: Symbol) {
+		return tabs.flat().find(tab => tab.id == tabId)
+	}
+	
+	export function closeTab(tab: Tab, recursive: boolean) {
+		if (recursive)
+			for (const childId of tab.children) {
+				let child = getTab(childId)
+				
+				if (child)
+					closeTab(child, true)
+			}
+		
+		for (let i = 0; i < tabs.length; i++) {
+			let index = tabs[i].indexOf(tab)
+			
+			if (index != -1) {
+				editorWindows[i].closeTab(index)
+				return
+			}
+		}
+	}
 </script>
 
 <div class="editors">
@@ -98,6 +121,7 @@
 						
 						tabs = newTabs
 					} else {
+						tabs[0] = []
 						editorWindows[0]?.setActive()
 					}
 				}}

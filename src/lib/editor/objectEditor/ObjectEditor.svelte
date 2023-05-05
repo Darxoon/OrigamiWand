@@ -99,8 +99,8 @@
 			objects = objects.children as any[]
 		
 		
-		// TODO: In future, make this handled by BasicObjectArray by using a dispatch
-		// to prevent this ^
+		// TODO: In future, make this handled by
+		// BasicObjectArray by using a dispatch to prevent this ^
 		
 		showModal(FieldOptionAlert, {
 			title: `Field '${toReadableString(fieldName)}'`,

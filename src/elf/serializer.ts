@@ -133,11 +133,11 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					crossPointers: dataRelocations,
 				}
 				
-				serializeObjects(data, dataType, binary.data.main)
-				serializeObjects(data, dataType, [FILE_TYPES[dataType].instantiate()])
+				serializeObjects(data, dataType, binary.data.main, { padding: 1 })
 				
-				let rodataReferences = binary.data.main.map(npc => 
-					[npc.id, binary.modelSymbolReference.get(npc), npc.assetGroups, npc.states] as RodataReference)
+				// TODO: retire modelSymbolReference in favor of { symbolName: ..., children: ... } constructs
+				let rodataReferences: RodataReference[] = binary.data.main.map(npc => 
+					[npc.id, binary.modelSymbolReference.get(npc), npc.assetGroups, npc.states])
 				
 				let rodata: SectionElements = {
 					writer: new BinaryWriter(),
@@ -353,7 +353,6 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				// model
 				symbolLocationReference.set("wld::btl::data::s_modelBattle", new Pointer(dataWriter.size))
 				symbolSizeOverrides.set("wld::btl::data::s_modelBattle", (binary.data.model.length + 1) * FILE_TYPES[DataType.BtlModel].size)
-				// TODO: use padding amount in all data types
 				serializeObjects(data, DataType.BtlModel, binary.data.model, { padding: 1 })
 				
 				// parts
@@ -716,46 +715,48 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			
 			// step 1: Serialize Asset Groups, States and the strings from animes
 			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				serializeObjects(rodata, DataType.NpcFiles, assetGroups)
-				serializeObjects(rodata, DataType.NpcFiles, [FILE_TYPES[DataType.NpcFiles].instantiate()])
+				let assetGroupSymbolName = `${modelNamespace}::^${originalId}_model_files`
 				
-				serializeObjects(rodata, DataType.NpcState, states)
-				serializeObjects(rodata, DataType.NpcState, [FILE_TYPES[DataType.NpcState].instantiate()])
+				symbolLocationReference.set(assetGroupSymbolName, new Pointer(rodataWriter.size))
+				symbolNameOverrides.set(assetGroupSymbolName, `${modelNamespace}::^${id}_model_files`)
+				symbolSizeOverrides.set(assetGroupSymbolName, (assetGroups.length + 1) * FILE_TYPES[DataType.NpcFiles].size)
 				
-				let animes = (states as any[])
-					.flatMap(state => state.substates)
-					.flatMap(substate => substate.faces)
-					.flatMap(face => face.animations)
+				serializeObjects(rodata, DataType.NpcFiles, assetGroups, { padding: 1 })
 				
-				serializeStringsOnly(DataType.NpcAnime, animes)
-			}
-			
-			// generate symbol reference for asset groups and states
-			for (const [id, originalId, assetGroups, states] of rodataReferences) {
-				let assetGroupOffset = assetGroups.length > 0 ? objectOffsets.get(assetGroups[0]) : objectOffsets.get(assetGroups)
-				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_model_files`, assetGroupOffset)
-				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_model_files`, `${modelNamespace}::^${id}_model_files`)
+				let stateSymbolName = `${modelNamespace}::^${originalId}_state`
 				
-				let stateOffset = states.length > 0 ? objectOffsets.get(states[0]) : objectOffsets.get(states)
-				symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state`, stateOffset)
-				symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state`, `${modelNamespace}::^${id}_state`)
+				symbolLocationReference.set(stateSymbolName, new Pointer(rodataWriter.size))
+				symbolNameOverrides.set(stateSymbolName, `${modelNamespace}::^${id}_state`)
+				symbolSizeOverrides.set(stateSymbolName, (states.length + 1) * FILE_TYPES[DataType.NpcState].size)
+				
+				serializeObjects(rodata, DataType.NpcState, states, { padding: 1 })
+				
+				for (const state of states) {
+					for (const substate of state.substates as Instance<DataType.NpcSubState>[]) {
+						for (const face of substate.faces as Instance<DataType.NpcFace>[]) {
+							serializeStringsOnly(DataType.NpcAnime, face.animations)
+						}
+					}
+				}
 			}
 			
 			// step 2: serialize modelNpc_num
-			symbolLocationReference?.set(FILE_TYPES[dataType].countSymbol, new Pointer(rodataWriter.size))
+			symbolLocationReference.set(FILE_TYPES[dataType].countSymbol, new Pointer(rodataWriter.size))
 			rodataWriter.writeBigInt64(BigInt(modelNumber))
 			
 			// step 3: serialize substates, faces and animes
-			for (const [id, originalId, assetGroups, states] of rodataReferences) {
+			for (const [id, originalId,, states] of rodataReferences) {
 				
 				let animeCount = 0
 				
 				for (const [state, i] of enumerate(states)) {
-					symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}`, new Pointer(rodataWriter.size))
-					symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}`, `${modelNamespace}::^${id}_state${i}`)
+					let symbolName = `${modelNamespace}::^${originalId}_state${i}`
 					
-					serializeObjects(rodata, DataType.NpcSubState, state.substates)
-					serializeObjects(rodata, DataType.NpcSubState, [FILE_TYPES[DataType.NpcSubState].instantiate()])
+					symbolLocationReference.set(symbolName, new Pointer(rodataWriter.size))
+					symbolNameOverrides.set(symbolName, `${modelNamespace}::^${id}_state${i}`)
+					symbolSizeOverrides.set(symbolName, (state.substates.length + 1) * FILE_TYPES[DataType.NpcSubState].size)
+					
+					serializeObjects(rodata, DataType.NpcSubState, state.substates, { padding: 1 })
 				}
 				
 				for (const [state, i] of enumerate(states)) {
@@ -763,27 +764,29 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					
 					for (const [substate, j] of enumerate(substates)) {
 						let { faces } = substate as Instance<DataType.NpcSubState>
+						let symbolName = `${modelNamespace}::^${originalId}_state${i}_face${j}`
 						
-						symbolLocationReference?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, new Pointer(rodataWriter.size))
-						symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_state${i}_face${j}`, `${modelNamespace}::^${id}_state${i}_face${j}`)
+						symbolLocationReference.set(symbolName, new Pointer(rodataWriter.size))
+						symbolNameOverrides.set(symbolName, `${modelNamespace}::^${id}_state${i}_face${j}`)
+						symbolSizeOverrides.set(symbolName, (faces.length + 1) * FILE_TYPES[DataType.NpcFace].size)
 						
-						serializeObjects(rodata, DataType.NpcFace, faces)
-						serializeObjects(rodata, DataType.NpcFace, [FILE_TYPES[DataType.NpcFace].instantiate()])
+						serializeObjects(rodata, DataType.NpcFace, faces, { padding: 1 })
 					}
 					
 					for (const substate of substates) {
 						let faces = substate.faces
 						
 						for (const face of faces) {
-							let animes = face.animations
+							let { animations } = face
+							let symbolName = `${modelNamespace}::^${originalId}_anime${animeCount}`
 							
-							symbolLocationReference?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, new Pointer(rodataWriter.size))
-							symbolNameOverrides?.set(`${modelNamespace}::^${originalId}_anime${animeCount}`, `${modelNamespace}::^${id}_anime${animeCount}`)
+							symbolLocationReference.set(symbolName, new Pointer(rodataWriter.size))
+							symbolNameOverrides.set(symbolName, `${modelNamespace}::^${id}_anime${animeCount}`)
+							symbolSizeOverrides.set(symbolName, (animations.length + 1) * FILE_TYPES[DataType.NpcAnime].size)
 							
 							animeCount += 1
 							
-							serializeObjects(rodata, DataType.NpcAnime, animes)
-							serializeObjects(rodata, DataType.NpcAnime, [FILE_TYPES[DataType.NpcAnime].instantiate()])
+							serializeObjects(rodata, DataType.NpcAnime, animations, { padding: 1 })
 						}
 					}
 				}
@@ -1004,12 +1007,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	const writer = new BinaryWriter()
 	
-	function alignWithPadding(writer: BinaryWriter, byteAlignment: number) {
-		writer.writeUint8Array(new Array((byteAlignment - writer.size % byteAlignment) % byteAlignment).fill(0))
-	}
-	
 	writer.writeArrayBuffer(BINARY_HEADER)
-	
 	
 	// Sort sections by offset
 	const offsetSortedSections = [...sections]
@@ -1018,7 +1016,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	// Serialize sections
 	for (const section of offsetSortedSections) {
 		if (section.addrAlign > 0) {
-			alignWithPadding(writer, section.addrAlign)
+			writer.alignTo(section.addrAlign)
 		}
 		
 		if (section.type != 0 && section.size != 0) {
@@ -1035,7 +1033,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	}
 	
 	// Write section header table
-	alignWithPadding(writer, 8)
+	writer.alignTo(8)
 
 	const sectionHeaderTableLocation = writer.size
 	

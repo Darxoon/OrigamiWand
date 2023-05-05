@@ -58,7 +58,6 @@ export class BinaryReader {
 		this.position = position
 	}
 	
-	// TODO: use this when possible
 	alignTo(alignment: number) {
 		this.position += ((alignment - this.position) % alignment + alignment) % alignment
 	}
@@ -165,7 +164,6 @@ export class BinaryWriter {
 		return this.dataView.byteLength
 	}
 	
-	// TODO: use this when possible
 	alignTo(alignment: number) {
 		this.size += ((alignment - this.size) % alignment + alignment) % alignment
 		

@@ -33,7 +33,6 @@ export class Property<T extends PropertyType> {
 }
 
 
-// TODO: factor out into unique file
 type RawTypedef<T extends number> = (typeof typedefs)[T]
 
 type StrToType<T> = 
