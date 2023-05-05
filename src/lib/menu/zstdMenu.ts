@@ -5,11 +5,11 @@ export function getZstdMenu() {
 		title: "Zstd",
 		items: [
 			{
-				name: "Decompress File",
+				name: "Decompress File(s)",
 				onClick: decompressFileSelector,
 			},
 			{
-				name: "Compress File",
+				name: "Compress File(s)",
 				onClick: compressFileSelector,
 			},
 		],
@@ -21,20 +21,20 @@ function decompressFileSelector() {
 
 	const fileSelector = document.createElement('input')
 	fileSelector.setAttribute('type', 'file')
+	fileSelector.setAttribute('multiple', 'multiple')
 	fileSelector.click()
 	
 	fileSelector.addEventListener('change', async (e: any) => {
-		const file: File = e.target.files[0]
-		
-		const content = await loadFile(file)
-		const decompressed = await decompress(content)
-		
-		const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
-		
-		console.log('decompressing', file.name, newFileName)
-		
-		downloadBlob(decompressed, newFileName)
-		
+		for (const file of e.target.files) {
+			const content = await loadFile(file)
+			const decompressed = await decompress(content)
+			
+			const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
+			
+			console.log('decompressing', file.name, newFileName)
+			
+			downloadBlob(decompressed, newFileName)
+		}
 	})
 }
 
@@ -43,17 +43,17 @@ function compressFileSelector() {
 
 	const fileSelector = document.createElement('input')
 	fileSelector.setAttribute('type', 'file')
+	fileSelector.setAttribute('multiple', 'multiple')
 	fileSelector.click()
 	
 	fileSelector.addEventListener('change', async (e: any) => {
-		const file: File = e.target.files[0]
-		
-		const content = await loadFile(file)
-		const compressed = await compress(content)
-		
-		console.log('compressing', file.name, file.name + '.zst')
-		
-		downloadBlob(compressed, file.name + '.zst')
-		
+		for (const file of e.target.files) {
+			const content = await loadFile(file)
+			const compressed = await compress(content)
+			
+			console.log('compressing', file.name, file.name + '.zst')
+			
+			downloadBlob(compressed, file.name + '.zst')
+		}
 	})
 }

@@ -33,7 +33,6 @@ export class Property<T extends PropertyType> {
 }
 
 
-// TODO: factor out into unique file
 type RawTypedef<T extends number> = (typeof typedefs)[T]
 
 type StrToType<T> = 
@@ -528,10 +527,14 @@ Some examples of functions that are in this namespace:
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
-		field_0x68: "string",
+		itemDrop: "string",
 		field_0x70: "string",
 		field_0x78: "string",
-		field_0x80: "string",
+		positionType: new Property("string", `
+The position of the character in the air or the ground:
+
+* 空中 - Airborne
+* Possibly more.`),
 		landingSfx: "string",
 		jumpedOnSfx: "string",
 		hammeredOnSfx: "string",
@@ -2394,7 +2397,7 @@ Bit field for the attack GFX type. Known values:
 		field_0x48: "int",
 		field_0x4c: "int",
 		field_0x50: "int",
-		field_0x54: "int",
+		field_0x54: new Property("int", "Boss battle, acording to the old btlSet implementation."),
 		field_0x58: "int",
 		field_0x5c: "int",
 		field_0x60: "int",
@@ -2409,9 +2412,14 @@ Bit field for the attack GFX type. Known values:
 		field_0x84: "int",
 		field_0x88: "int",
 		field_0x8c: "int",
-		field_0x90: "string",
-		field_0x98: "string",
-		field_0xa0: "string",
+		battleBackground: new Property("string", `
+The asset group of the map that is shown during the battle; found in romfs/map/battle/.
+
+Asset group contains .bfres, .probe and .light.bfres files.`),
+		battleBgm: new Property("string", `
+The background music .opus file that plays during the battle. It is found in romfs/sound/stream/.
+`),
+		eventScript: "string",
 		field_0xa8: "int",
 		field_0xac: "int",
 		field_0xb0: "string",
@@ -2420,8 +2428,26 @@ Bit field for the attack GFX type. Known values:
 		field_0xc8: "string",
 		field_0xd0: "string",
 		field_0xd8: "string",
-		field_0xe0: "string",
-		field_0xe8: "string",
+		rotationObstacle: new Property("string", `
+The special gimmick for a fight to apply for rotating the board, mostly used by boss battles. Possible values:
+
+ * "Cursor"
+ * "Spiral"
+ * "RubberBand"
+ * "Fire"
+ * "Hole"
+ * "Ice"
+ * "TapeRotate"
+ * "KKThunder"
+ * "QuizGoal
+`),
+		slidingObstacle: new Property("string", `
+The special gimmick for a fight to apply for sliding the board, mostly used by boss battles. Possible values:
+
+ * "PaperTrash"
+ * "BrittleIce"
+ * "TapeSlide"
+`),
 		field_0xf0: "int",
 		field_0xf4: "int",
 		field_0xf8: "int",
@@ -2432,7 +2458,7 @@ Bit field for the attack GFX type. Known values:
 		field_0x10c: "int",
 		field_0x110: "int",
 		field_0x114: "int",
-		field_0x118: "int",
+		field_0x118: new Property("int", "Related to shoe goombas, according to the old btlSet implementation."),
 		field_0x11c: "int",
 	},
 	
@@ -2442,16 +2468,21 @@ Bit field for the attack GFX type. Known values:
 		__nestedAllValues: true,
 		__importantField: "type",
 		
-		type: "string",
-		field_0x8: "int",
-		field_0xc: "int",
+		type: new Property("string", `
+The type of the enemy. References an actor type in data_btl.`),
+		field_0x8: new Property("int", `
+Used to be called ringPosition but is always -1 in the game. Its actual behavior is undetermined.`),
+		field_0xc: new Property("int", `
+Used to be called linePosition but is always -1 in the game. Its actual behavior is undetermined.`),
 		field_0x10: "int",
 		field_0x14: "int",
 		ringSection: "int",
 		lineSection: "int",
-		field_0x20: "string",
-		field_0x28: "string",
-		circle: "string",
+		field_0x20: new Property("string", 'Examples: "koura", "sleep", "turn"'),
+		field_0x28: new Property("string", "Examples: 回転 (rotate), Lab, RetrySecond"),
+		puzzleSolverCircle: new Property("string", `
+Sometimes contains unicode circle character "〇".
+Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
 		field_0x38: "int",
 		field_0x3c: "int",
 	},

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { showModal } from "$lib/modal/modal";
 	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";
-	import { loadedAutosave } from "$lib/stores";
+	import { globalEditorStrip, loadedAutosave } from "$lib/stores";
 	
 	import { insertIntoArrayPure, resizeArray } from "$lib/util";
 	
@@ -202,8 +202,17 @@
 		draggedTab = tab
 	}
 	
-	async function closeTabPrompt(tab: Tab, tabIndex: number) {
-		if (tab.children.length > 0) {
+	async function closeTabPrompt(tab: Tab) {
+		let tabChildren: Tab[] = []
+		
+		for (const childId of tab.children) {
+			let child = $globalEditorStrip.getTab(childId)
+			
+			if (child)
+				tabChildren.push(child)
+		}
+		
+		if (tabChildren.length > 0) {
 			let result = await showModal(TernaryPrompt, {
 				title: "Close all child tabs?",
 				content: `
@@ -215,13 +224,16 @@ Do you want to close those too?`,
 				return
 			
 			if (result == true) {
-				// TODO close tabs by id
-				
-				for (const tabId of tabs[tabIndex].children) {
-					alert(`(Todo) Closing tab ${tabId.toString()}`)
+				for (const tab of tabChildren) {
+					$globalEditorStrip.closeTab(tab, true)
 				}
 			}
 		}
+		
+		let tabIndex = tabs.indexOf(tab)
+		
+		if (tabIndex == -1)
+			throw new Error("Tab to be removed is not in the editor window.")
 		
 		closeTab(tabIndex)
 	}
@@ -271,7 +283,7 @@ Do you want to close those too?`,
 				>
 				
 				<span class="tabName">{tab.name}</span>
-				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation use:nonnativeButton={() => closeTabPrompt(tab, i)}>
+				<div class="close_button" class:white-x={draggedSelectedIndex == i} on:mousedown|stopPropagation use:nonnativeButton={() => closeTabPrompt(tab)}>
 					<i data-feather="x" class="icon-close"></i>
 				</div>
 			</li>
