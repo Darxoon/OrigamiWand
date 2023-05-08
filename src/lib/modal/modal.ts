@@ -22,6 +22,7 @@ export function showModal(
 	modalVisible.set(true)
 	currentModal.set({ constructor, properties })
 	
+	getHtmlHtmlElement().classList.add("dummy-scrollbar")
 	document.body.classList.add("noscroll")
 	
 	if (onClose) {
@@ -35,8 +36,22 @@ export function showModal(
 
 export function hideActiveModal(success: any) {
 	document.body.classList.remove("noscroll")
+	getHtmlHtmlElement().classList.remove("dummy-scrollbar")
 	
 	modalVisible.set(false)
 	if (onCloseCallback)
 		onCloseCallback(success)
+}
+
+/**
+ * Returns the root <html></html> element
+ */
+function getHtmlHtmlElement(): HTMLHtmlElement {
+	const html = document.getRootNode().lastChild
+	
+	if (html instanceof HTMLHtmlElement) {
+		return html
+	} else {
+		throw new Error("<html> element unavailable")
+	}
 }

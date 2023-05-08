@@ -2,6 +2,7 @@
 import { afterUpdate } from "svelte";
 
 import Alert from "./Alert.svelte";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 
 	export let title: string
 	export let selectedIndex = 0
@@ -25,7 +26,7 @@ import Alert from "./Alert.svelte";
 <Alert title={title}>
 	<ul class="tab_bar">
 		{#each tabNames as tabName, i}
-			<li class:active={selectedIndex == i} on:click={e => selectedIndex = i}>{tabName}</li>
+			<li class:active={selectedIndex == i} use:nonnativeButton={() => selectedIndex = i}>{tabName}</li>
 		{/each}
 	</ul>
 	
