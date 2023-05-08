@@ -5,6 +5,8 @@ import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
 import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
 import type { Tab } from "./editor/globalDragging"
 
+export function noop() {}
+
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		const fileSelector = document.createElement('input')
@@ -124,6 +126,17 @@ export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {
 	return newArr
 }
 
+export function excludeFromArrayPure<T>(arr: T[], toExclude: T): T[] {
+	let newArr = [...arr]
+	let index = arr.indexOf(toExclude)
+	
+	if (index != -1) {
+		newArr.splice(index, 1)
+	}
+	
+	return newArr
+}
+
 export function resizeArray<T>(arr: T[], newSize: number, defaultValue: T) {
     while(newSize > arr.length)
         arr.push(defaultValue);
@@ -134,6 +147,15 @@ export function resizeArray<T>(arr: T[], newSize: number, defaultValue: T) {
 
 export function map2d<T,U>(arr: T[][], fn: (value: T, index: number, array: T[]) => U): U[][] {
 	return arr.map(arr2 => arr2.map(fn))
+}
+
+export function clamp(n: number, minimum: number, maximum: number): number {
+	if (n < minimum)
+		return minimum
+	else if (maximum < n)
+		return maximum
+	else
+		return n
 }
 
 export function toReadableString(camelCaseStr: string) {

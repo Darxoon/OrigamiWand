@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterUpdate, onMount } from "svelte";
 
-	import EditorWindow from "./EditorWindow.svelte";
+	import EditorWindow from "./windowing/EditorWindow.svelte";
 	import type { Tab } from "./globalDragging";
 	import type { SaveFile } from "$lib/save/autosave";
 
@@ -22,7 +22,6 @@
 		isWide = mediaQuery.matches
 	})
 	
-	let afterUpdateHandlers: Function[] = []
 	let tabToAdd: Tab
 	let tabToAddEditorIndex = 0
 	
@@ -32,9 +31,6 @@
 			activeEditor = tabToAddEditorIndex
 			tabToAdd = null
 		}
-		
-		afterUpdateHandlers.forEach(fn => fn())
-		afterUpdateHandlers = []
 	})
 	
 	export function load(newTabs: Tab[][]) {
@@ -108,6 +104,7 @@
 </script>
 
 <div class="editors">
+	<!-- TODO: replace tabs with windows and use a proper persistent each key -->
 	{#each tabs as tabList, i (tabList)}
 		<div on:mousedown|capture={e => activeEditor = i}>
 			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}

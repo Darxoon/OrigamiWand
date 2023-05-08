@@ -17,7 +17,8 @@ export interface Tab {
     children: TabID[]
 }
 
-export const globalDraggedTab = writable<{tab: Tab, width: number}>(undefined)
-export const wasDraggingGlobally = writable<boolean>(false)
+export const globalDraggedTab = writable<Tab>(undefined)
+export const tabWasAccepted = writable<Tab>(undefined)
 
 export const globalDragEndEvent: TypeSafeEventEmitter<{end: void}> = new EventEmitter()
+
