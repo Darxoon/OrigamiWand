@@ -137,6 +137,19 @@ export function excludeFromArrayPure<T>(arr: T[], toExclude: T): T[] {
 	return newArr
 }
 
+export function replaceInArrayPure<T>(arr: T[], source: T, replaceWith: T): T[] {
+	let newArr = [...arr]
+	let index = arr.indexOf(source)
+	
+	if (index == -1) {
+		console.error("Item", source, "was not found in array", arr)
+		return newArr
+	}
+	
+	newArr[index] = replaceWith
+	return newArr
+}
+
 export function resizeArray<T>(arr: T[], newSize: number, defaultValue: T) {
     while(newSize > arr.length)
         arr.push(defaultValue);

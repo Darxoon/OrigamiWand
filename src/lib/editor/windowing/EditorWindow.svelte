@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { globalDraggedTab, tabWasAccepted, type Tab } from "$lib/editor/globalDragging";
+	import { globalDraggedTab, tabWasAccepted, type Tab, type DockDirection } from "$lib/editor/globalDragging";
 	import TernaryPrompt from "$lib/modals/TernaryPrompt.svelte";
 	import { showModal } from "$lib/modal/modal";
 	import { globalEditorStrip, loadedAutosave } from "$lib/stores";
@@ -11,15 +11,16 @@
 	export let selectedIndex: number = 0
 	export let isActive = true
 	export let showBugReporter: boolean = false
+	export let debugIndex: number
 	
 	const dispatch = createEventDispatcher()
 	
-	let draggingVertically = false
 	let mouseOutside = false
+	let disableSideDocking = false
 	
 	let contentElements = []
 	
-	$: console.log(draggingVertically)
+	$: dockAreaShown = !mouseOutside && $globalDraggedTab != undefined
 	
 	export function collapseAll() {
 		contentElements[selectedIndex].collapseAll()
@@ -62,11 +63,11 @@
 		mouseOutside = false
 	}
 	
-	function onDockMouseUp(isRight: boolean) {
-		$tabWasAccepted = $globalDraggedTab
+	function onDockMouseUp(direction: DockDirection) {
+		$tabWasAccepted = $globalDraggedTab.tab
 		
 		dispatch('dockTab', {
-			isRight,
+			direction,
 			tab: $globalDraggedTab,
 		})
 		
@@ -114,8 +115,8 @@ Do you want to close those too?`,
 
 <div class="main" class:inactive={!isActive} on:mouseleave={onMouseLeave} on:mouseenter={onMouseEnter}>
 	
-	<EditorTabBar bind:tabs={tabs} bind:activeIndex={selectedIndex} bind:draggingDetached={draggingVertically}
-		showBugReporter={showBugReporter} on:closeTab={e => closeTabPrompt(e.detail)} />
+	<EditorTabBar bind:tabs={tabs} bind:activeIndex={selectedIndex} bind:disableSideDocking={disableSideDocking}
+		showBugReporter={showBugReporter} debugIndex={debugIndex} on:closeTab={e => closeTabPrompt(e.detail)} />
 	
 	<div class="content">
 		{#if !$loadedAutosave && tabs.length == 0}
@@ -128,16 +129,22 @@ Do you want to close those too?`,
 			</div>
 		{/each}
 		
-		<div class="card dockArea dockLeft" on:mouseup={() => onDockMouseUp(false)}
-			class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside}>
+		<div class="card dockArea dockLeft" on:mouseup={() => onDockMouseUp('left')}
+			class:hidden={!dockAreaShown || disableSideDocking}>
 			
 			<i data-feather="chevron-left" class="icon-dock"></i>
 		</div>
 		
-		<div class="card dockArea dockRight" on:mouseup={() => onDockMouseUp(true)}
-			class:hidden={!draggingVertically || tabs.length <= 1 || mouseOutside}>
+		<div class="card dockArea dockRight" on:mouseup={() => onDockMouseUp('right')}
+			class:hidden={!dockAreaShown || disableSideDocking}>
 			
 			<i data-feather="chevron-right" class="icon-dock"></i>
+		</div>
+		
+		<div class="card dockArea dockUp" on:mouseup={() => onDockMouseUp('origin')}
+			class:hidden={!dockAreaShown || tabs.includes($globalDraggedTab.tab)}>
+			
+			<i data-feather="chevron-up" class="icon-dock"></i>
 		</div>
 	</div>
 	
@@ -176,24 +183,27 @@ Do you want to close those too?`,
 		}
 		
 		.dockArea {
-			background: #dfdfdf;
+			--translate-x: 0;
+			
+			background: #61697c;
+			color: white;
 			cursor: pointer;
+			
 			position: absolute;
 			top: calc(14vh + 5rem);
 			
-			--size: 48px;
-			
-			width: var(--size);
-			height: var(--size);
+			width: 48px;
+			height: 48px;
 			
 			transition: transform 0.3s;
+			transform: translateX(var(--translate-x));
 			
 			&:hover {
-				transform: scale(1.4);
+				transform: translateX(var(--translate-x)) scale(1.4);
 			}
 			
 			&.hidden {
-				transform: scale(0);
+				transform: translateX(var(--translate-x)) scale(0);
 				pointer-events: none;
 			}
 			
@@ -209,6 +219,13 @@ Do you want to close those too?`,
 		
 		.dockRight {
 			right: 4rem;
+		}
+		
+		.dockUp {
+			left: 50%;
+			top: 0.7rem;
+			
+			--translate-x: -50%;
 		}
 	}
 	

@@ -1,17 +1,28 @@
 <script lang="ts">
     import { nonnativeButton } from "$lib/nonnativeButton";
     import { clamp, excludeFromArrayPure, insertIntoArrayPure, noop } from "$lib/util";
-    import { afterUpdate, createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { type Tab, tabWasAccepted, globalDraggedTab } from "../globalDragging";
     import { browser } from "$app/environment";
+    import logging from "$lib/logging";
 
 	export let tabs: Tab[]
 	export let activeIndex: number
-	export let draggingDetached: boolean
 	export let showBugReporter: boolean
+	export let disableSideDocking: boolean
+	export let debugIndex: number
 	
 	const dispatch = createEventDispatcher()
 	
+	/**
+	 * Current state of the tab bar.
+	 * 
+	 * "default": All tabs are standing still and are not being moved around.
+	 * 
+	 * "dragging": A tab is being moved around inside the bounds of the tab bar. Could be owned by this window or by another.
+	 * 
+	 * "draggingDetached": A tab that is owned by this window is being dragged around outside of the bounds of this tab bar.
+	 */
 	let state: 'default' | 'dragging' | 'draggingDetached' = 'default'
 	
 	let tabBar: HTMLUListElement
@@ -21,19 +32,21 @@
 	let floatingInsertIndex = 0
 	let hasFloatingOwnership = false
 	
-	let afterDetached = false
 	let mouseX = 0
 	let baseMouseX = 0
 	
 	$: tabsWithoutFloating = state == 'default' ? tabs : excludeFromArrayPure(tabs, floating)
-	$: immediateTabs = state == 'default' ? tabs : state == 'draggingDetached' ? tabsWithoutFloating : insertIntoArrayPure(tabsWithoutFloating, floatingInsertIndex, floating)
+	$: immediateTabs = state == 'default' ? tabs : insertIntoArrayPure(tabsWithoutFloating, floatingInsertIndex, floating)
+	$: immediateActiveIndex = state == 'default' ? activeIndex : floatingInsertIndex
 	
 	$: floatingOverlayX = state == 'dragging' && getOverlayX(mouseX, floatingInsertIndex)
 	
-	// updating exported variable
-	$: draggingDetached = state == 'draggingDetached'
+	// exported variable
+	$: disableSideDocking = hasFloatingOwnership && tabs.length <= 1
 	
-	$: console.log('tabbar', floatingInsertIndex)
+	$: logging.trace('state', debugIndex, state)
+	$: logging.trace('floatingInsertIndex', debugIndex, floatingInsertIndex)
+	$: logging.trace('tabs', debugIndex, tabs)
 	
 	onMount(() => {
 		document.addEventListener('mousemove', onMouseMove)
@@ -50,26 +63,35 @@
 		}
 	})
 	
-	afterUpdate(() => {
-		if (afterDetached) {
-			// @ts-ignore
-			feather.replace()
-			afterDetached = false
-			
-			if ($tabWasAccepted) {
-				tabs = excludeFromArrayPure(tabs, $tabWasAccepted)
-				activeIndex = clamp(activeIndex, 0, tabs.length - 1)
-				
-				$tabWasAccepted = undefined
-			}
-		}
-	})
-	
 	function getOverlayX(mouseX: number, floatingInsertIndex: number) {
+		if (tabElements[floatingInsertIndex] == undefined) {
+			console.error("Attempting to access a nonexistant tab", debugIndex, 'index', floatingInsertIndex, 'in', [...tabElements])
+			
+			return 0
+		}
+		
 		let floatingWidth = tabElements[floatingInsertIndex].getBoundingClientRect().width
 		let tabBarBounds = tabBar?.getBoundingClientRect()
 		
 		return clamp(mouseX - baseMouseX, tabBarBounds.x, tabBarBounds.x + tabBarBounds.width - floatingWidth)
+	}
+	
+	function afterDetached() {
+		console.log('afterDetached happening', debugIndex)
+		
+		// @ts-ignore
+		feather.replace()
+		
+		if ($tabWasAccepted) {
+			console.log('tab was accepted', debugIndex, $tabWasAccepted)
+			tabs = excludeFromArrayPure(tabs, $tabWasAccepted)
+			activeIndex = clamp(activeIndex, 0, tabs.length - 1)
+			
+			$tabWasAccepted = undefined
+		} else {
+			console.log('tab was not accepted, returning home', debugIndex, $tabWasAccepted)
+			$globalDraggedTab = undefined
+		}
 	}
 	
 	function onMouseMove(e: MouseEvent) {
@@ -80,35 +102,47 @@
 		if (state == 'default')
 			return
 		
-		if (state == 'draggingDetached') {
-			activeIndex = tabs.indexOf(floating)
+		if (state == 'dragging') {
+			console.log('ending movement', debugIndex, floatingInsertIndex, floating)
+			
+			tabs = [...immediateTabs]
+			activeIndex = clamp(floatingInsertIndex, 0, tabs.length - 1)
+			
+			if (!hasFloatingOwnership) {
+				console.log('setting tabWasAccepted', $tabWasAccepted?.id, floating?.id)
+				$tabWasAccepted = floating
+				$globalDraggedTab = undefined
+			}
+			
 			floating = undefined
-			afterDetached = true
 			hasFloatingOwnership = false
 			
 			state = 'default'
 			return
 		}
 		
-		if (state == 'dragging') {
-			tabs = [...immediateTabs]
-			
-			activeIndex = clamp(floatingInsertIndex, 0, tabs.length - 1)
+		if (state == 'draggingDetached') {
+			activeIndex = tabs.indexOf(floating)
 			floating = undefined
 			
-			if (!hasFloatingOwnership) {
-				// global dragging
-				// ...
-			}
+			if (hasFloatingOwnership)
+				setTimeout(afterDetached, 0)
 			
 			hasFloatingOwnership = false
-			
 			state = 'default'
 			return
 		}
 	}
 	
 	function onMouseEnter() {
+		if ($globalDraggedTab && !hasFloatingOwnership) {
+			logging.trace('entering tab bar with global dragged tab', debugIndex, $globalDraggedTab)
+			floating = $globalDraggedTab.tab
+			baseMouseX = $globalDraggedTab.baseMouseX
+			floatingInsertIndex = tabs.length
+			state = 'dragging'
+		}
+		
 		if (state == 'draggingDetached') {
 			state = 'dragging'
 			
@@ -119,10 +153,12 @@
 	
 	function onMouseLeave() {
 		if (state == 'dragging') {
-			state = 'draggingDetached'
-			
-			if (hasFloatingOwnership)
-				$globalDraggedTab = floating
+			if (hasFloatingOwnership) {
+				$globalDraggedTab = { tab: floating, baseMouseX }
+				state = 'draggingDetached'
+			} else {
+				state = 'default'
+			}
 		}
 	}
 	
@@ -160,8 +196,6 @@
 				floatingInsertIndex -= 1
 			}
 		}
-		
-		activeIndex = floatingInsertIndex
 	}
 </script>
 
@@ -180,13 +214,13 @@
 	{/if}
 	{#each immediateTabs as tab, i}
 		<li bind:this={tabElements[i]} use:nonnativeButton={() => activeIndex = i}
-			class:active={activeIndex == i}
+			class:active={immediateActiveIndex == i}
 			class:colorInvisible={tab == floating}
 			on:mousedown={() => onTabMouseDown(tab, i)} 
 			on:mousemove={e => onTabMouseMove(tab, i)}>
 			
 			<span class="tabName">{tab.name}</span>
-			<div class="close_button" class:white-x={state == 'default' && activeIndex == i}
+			<div class="close_button" class:white-x={state == 'default' && immediateActiveIndex == i}
 				on:mousedown|stopPropagation={noop} use:nonnativeButton={() => dispatch('closeTab', tab)}>
 				<i data-feather="x" class="icon-close"></i>
 			</div>
