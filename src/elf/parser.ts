@@ -221,11 +221,12 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data.main = header
 			
 			// maplink nodes
-			let maplinkSymbol = findSymbol(header[0].maplinks)
-			let maplinks = parseSymbol(dataSection, dataStringSection, maplinkSymbol, DataType.Maplink, header[0].linkAmount)
+			let { maplinks: symbolName, linkAmount } = header[0]
+			let maplinkSymbol = findSymbol(symbolName)
+			let maplinks = parseSymbol(dataSection, dataStringSection, maplinkSymbol, DataType.Maplink, linkAmount)
 			
 			let maplinkObj = {
-				symbolName: `wld::fld::data::maplink::${header[0].stage}_nodes`,
+				symbolName,
 				children: maplinks,
 			}
 			
@@ -431,6 +432,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					parseRawDataSection(dataSection, propertyCount, offset, FILE_TYPES[DataType.UiModelProperty].typedef), 
 				)
 				
+				// TODO: try to find the symbol name at offset `offset` rather than making this assumption
 				let attackRange = {
 					symbolName: `wld::fld::data::^s_uiModelPropertyData_${model.id}`,
 					children,
@@ -465,7 +467,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				let children = parseSymbol(dataSection, stringSection, symbol, DataType.UiSellItem, soldItemCount)
 				
 				let soldItem = {
-					symbolName: `wld::fld::data::s_sellData_${shop.id}`,
+					symbolName,
 					children,
 				}
 				
@@ -510,7 +512,6 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		case DataType.DataBtl: {
 			const dataSection = findSection('.data')
 			const stringSection = findSection('.rodata.str1.1')
-			const rodataSection = findSection('.rodata')
 			
 			data = {}
 			
@@ -556,7 +557,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				)
 				
 				let attackRange = {
-					symbolName: `wld::btl::data::s_weaponRangeData_${headerNode.id}`,
+					symbolName,
 					item,
 				}
 				
@@ -608,7 +609,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				let resources = parseSymbol(dataSection, stringSection, resourceSymbol, DataType.BtlResource, resourceCount)
 				
 				let resourcesObj = {
-					symbolName: "wld::btl::data::s_resourceElementData_" + resourceField.id,
+					symbolName,
 					children: resources,
 				}
 				
@@ -660,7 +661,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle)
 				
 				let battleObj = {
-					symbolName: "wld::btl::data::s_setData_battle_" + area.id,
+					symbolName,
 					children: battles,
 				}
 				
@@ -678,7 +679,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					let enemies = parseSymbol(dataSection, stringSection, enemySymbol, DataType.SetEnemy, enemyCount)
 					
 					let enemyObj = {
-						symbolName: "wld::btl::data::s_setElementData_" + battle.id,
+						symbolName,
 						children: enemies,
 					}
 					
