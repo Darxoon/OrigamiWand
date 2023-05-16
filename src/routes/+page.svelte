@@ -144,7 +144,7 @@ to me, the developer (Darxoon). Thanks.`
 	<meta name="twitter:image" content="https://darxoon.neocities.org/res/origamiwand.png">
 </svelte:head>
 
-<section class="main" class:noOverflow={$modalVisible} on:dragover={fileDragHandler} on:dragleave={dragLeaveHandler} on:drop={fileDropHandler}>
+<section class="main" on:dragover={fileDragHandler} on:dragleave={dragLeaveHandler} on:drop={fileDropHandler}>
 	<div class="title_card">
 		<TitleCard menu={menuItems} />
 	</div>
@@ -178,10 +178,6 @@ to me, the developer (Darxoon). Thanks.`
 	
 	.title_card {
 		padding: 1.5rem;
-	}
-	
-	.noOverflow {
-		overflow-y: hidden;
 	}
 	
 	.dragOverlay {

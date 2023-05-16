@@ -13,10 +13,39 @@ html, body {
 	font-variant-numeric: tabular-nums;
 }
 
+/* scrolling behavior, especially for modals */
+html {
+	overflow-y: scroll;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+	display: none;
+}
+
+html.dummy-scrollbar {
+	scrollbar-width: initial;
+	-ms-overflow-style: initial;
+}
+
+html.dummy-scrollbar::-webkit-scrollbar {
+	display: initial;
+}
+
 body {
 	overflow-y: scroll;
 }
 
+body.noscroll {
+	overflow-y: hidden;
+}
+
+main {
+	position: relative;
+}
+
+/* common controls */
 h1 {
 	font-size: calc(1.375rem + 1.5vw);
 	margin-top: 0;
@@ -50,8 +79,4 @@ h1 {
 
 .visibilityHidden {
 	visibility: hidden;
-}
-
-.noscroll {
-	overflow-y: scroll;
 }

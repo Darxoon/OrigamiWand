@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { afterUpdate, onMount } from "svelte";
 
-	import EditorWindow from "./EditorWindow.svelte";
-	import type { Tab } from "./globalDragging";
+	import EditorWindow from "./windowing/EditorWindow.svelte";
+	import { globalDraggedTab, tabWasAccepted, type Tab } from "./globalDragging";
 	import type { SaveFile } from "$lib/save/autosave";
+    import { excludeFromArrayPure, insertIntoArrayPure, replaceInArrayPure } from "$lib/util";
+    import logging from "$lib/logging";
 
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = [0]
@@ -12,6 +14,9 @@
 	let editorWindows: EditorWindow[] = []
 	
 	let isWide = false
+	
+	$: logging.trace('~~ globalDraggedTab', $globalDraggedTab)
+	$: logging.trace('~~ tabWasAccepted', $tabWasAccepted)
 	
 	onMount(() => {
 		let mediaQuery = window.matchMedia("(min-width: 1000px)")
@@ -22,7 +27,6 @@
 		isWide = mediaQuery.matches
 	})
 	
-	let afterUpdateHandlers: Function[] = []
 	let tabToAdd: Tab
 	let tabToAddEditorIndex = 0
 	
@@ -33,8 +37,15 @@
 			tabToAdd = null
 		}
 		
-		afterUpdateHandlers.forEach(fn => fn())
-		afterUpdateHandlers = []
+		// close all windows with no tabs, except window #0
+		if (tabs.length > 1)
+			for (let i = tabs.length - 1; i >= 0; i--) {
+				if (tabs[i].length == 0)
+					tabs = excludeFromArrayPure(tabs, tabs[i])
+			}
+		
+		if (tabs.length == 0)
+			tabs = [[]]
 	})
 	
 	export function load(newTabs: Tab[][]) {
@@ -108,9 +119,10 @@
 </script>
 
 <div class="editors">
+	<!-- TODO: replace tabs with windows and use a proper persistent each key -->
 	{#each tabs as tabList, i (tabList)}
 		<div on:mousedown|capture={e => activeEditor = i}>
-			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0}
+			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0} debugIndex={i}
 				bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
 				on:removeEditor={e => {
 					if (tabs.length > 1) {
@@ -126,9 +138,16 @@
 					}
 				}}
 				on:dockTab={e => {
-					let { tab, isRight } = e.detail
-					tabs.splice(isRight ? i + 1 : i, 0, [tab])
-					tabs = tabs
+					let { tab, direction } = e.detail
+					
+					if (direction == 'origin') {
+						tabs = replaceInArrayPure(tabs, tabs[i], [...tabs[i], tab])
+						selectedTabs[i] = tabs[i].length - 1
+					} else {
+						let index = direction == 'right' ? i + 1 : i
+						tabs = insertIntoArrayPure(tabs, index, [tab])
+						selectedTabs = insertIntoArrayPure(selectedTabs, index, 0)
+					}
 				}}
 				on:open={e => {
 					if (e.detail.type === "window") {
@@ -149,11 +168,11 @@
 						
 						if (isWide) {
 							if (tabs.length < 2) {
-								tabs = [...tabs, []]
+								tabs = [...tabs, [tab]]
+							} else {
+								tabToAddEditorIndex = 1
+								tabToAdd = tab
 							}
-							
-							tabToAddEditorIndex = 1
-							tabToAdd = tab
 						} else {
 							editorWindows[0].addTab(tab)
 						}
