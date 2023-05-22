@@ -527,7 +527,7 @@ Some examples of functions that are in this namespace:
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
-		itemDrop: "string",
+		firstStrikeItemDrop: "string",
 		field_0x70: "string",
 		field_0x78: "string",
 		positionType: new Property("string", `
