@@ -103,9 +103,15 @@
 			return
 		
 		if (state == 'dragging') {
-			console.log('ending movement', debugIndex, floatingInsertIndex, floating)
+			logging.trace('ending movement', debugIndex, floatingInsertIndex, floating)
 			
-			tabs = [...immediateTabs]
+			let tabsUnchanged = immediateTabs.length == tabs.length
+				&& immediateTabs.every((value, index) => value === tabs[index])
+			
+			if (!tabsUnchanged) {
+				tabs = [...immediateTabs]
+			}
+			
 			activeIndex = clamp(floatingInsertIndex, 0, tabs.length - 1)
 			
 			if (!hasFloatingOwnership) {

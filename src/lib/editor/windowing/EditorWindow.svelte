@@ -123,9 +123,9 @@ Do you want to close those too?`,
 			<p class="loadinglabel">Loading...</p>
 		{/if}
 		
-		{#each tabs as tab, i}
+		{#each tabs as tab, i (tab.id)}
 			<div class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
+				<svelte:component this={tab.component} tabVisible={selectedIndex == i} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
 			</div>
 		{/each}
 		
