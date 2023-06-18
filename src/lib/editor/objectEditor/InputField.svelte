@@ -1,8 +1,8 @@
 <script lang="ts">
-import { DataType, Pointer } from "paper-mario-elfs/elfBinary";
-
+	import { Pointer } from "paper-mario-elfs/elfBinary";
 	import { Vector3 } from "paper-mario-elfs/misc";
-	import { createEventDispatcher, onMount } from "svelte";
+	
+	import { createEventDispatcher } from "svelte";
 
 	const dispatch = createEventDispatcher()
 	

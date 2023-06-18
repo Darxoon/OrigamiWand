@@ -4,7 +4,7 @@ import type { Instance } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
 import { demangle, mangleIdentifier } from "./nameMangling";
 import { Relocation, Section, Symbol } from "./types";
-import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
+import { ValueUuid, VALUE_UUID, DATA_TYPE } from "./valueIdentifier";
 
 type Typedef<T> = {[fieldName: string]: T}
 
@@ -636,7 +636,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let areaSymbol = findSymbol("wld::btl::data::s_setDataTable")
 			let areaReferences = parseSymbol(dataSection, stringSection, areaSymbol, DataType.SetAreaReference, -1)
-			let areas = [] as Instance<DataType.DataBtlSet>[]
+			let areas: Instance<DataType.DataBtlSet>[] = []
 			
 			for (const ref of areaReferences) {
 				// remove "wld::btl::data::s_setData_battle_" from symbol name to get area name
@@ -644,6 +644,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				
 				areas.push({
 					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.DataBtlSet,
+					
 					id,
 					battles: ref.value,
 				})

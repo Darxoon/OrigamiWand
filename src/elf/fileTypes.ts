@@ -1,6 +1,6 @@
-import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
+import { dataDivisions, DataType, Pointer, type DataDivision } from "./elfBinary";
 import { Vector3 } from "./misc";
-import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
+import { ValueUuid, VALUE_UUID, type UuidTagged } from "./valueIdentifier";
 
 export type Typedef<T> = {[fieldName: string]: T}
 
@@ -60,7 +60,7 @@ type UnfilteredInstance<T extends number> = {
 export type Instance<T extends number> = Pick<
 	UnfilteredInstance<T>, 
 	{[p in keyof UnfilteredInstance<T>]: UnfilteredInstance<T>[p] extends never ? never : p}[keyof UnfilteredInstance<T>]
-> & { [VALUE_UUID]?: Symbol }
+> & UuidTagged
 
 const defaultDescriptions: Typedef<string> = {
 	stage: "The stage that the {type} is on. It's the same for every {type} in the same file.",

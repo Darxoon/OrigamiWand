@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { afterUpdate, createEventDispatcher } from "svelte";
+	import { afterUpdate } from "svelte";
 	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
-	import { FILE_TYPES, type Instance } from "paper-mario-elfs/fileTypes";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
 	import type { SearchIndex } from "../search/searchIndex";
     import FileToolbar from "./FileToolbar.svelte";
