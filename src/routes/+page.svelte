@@ -11,10 +11,10 @@
 	import EditorStrip from '$lib/editor/EditorStrip.svelte';
 	import { getZstdMenu } from '$lib/menu/zstdMenu';
 	import { getHelpMenu } from '$lib/menu/helpMenu';
-	import { getFileMenu } from '$lib/menu/fileMenu';
+	import { getFileMenu, openFileToEditor } from '$lib/menu/fileMenu';
 	import { getViewMenu } from '$lib/menu/viewMenu';
 	import { globalEditorStrip, loadedAutosave } from '$lib/stores';
-	import { loadFile, map2d, createFileTab } from '$lib/util';
+	import { map2d, createFileTab } from '$lib/util';
 	
 	import TitleCard from '$lib/TitleCard.svelte';
     import VersionIdentifier from '$lib/VersionIdentifier.svelte';
@@ -110,7 +110,8 @@ to me, the developer (Darxoon). Thanks.`
 					if (e.dataTransfer.items[i].kind === 'file') {
 						var file = e.dataTransfer.items[i].getAsFile();
 						console.log('... file[' + i + '].name = ' + file.name);
-						await loadFile(file)
+						
+						await openFileToEditor(file)
 					}
 				}
 			} else {

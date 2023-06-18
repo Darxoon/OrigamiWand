@@ -49,22 +49,20 @@
         visibility: hidden;
         
         &.shown { visibility: visible }
+    }
+    
+    .button {
+        margin-left: 8px;
+        font-size: 20px;
+        color: #b6b8be;
         
-        .button {
-            margin-left: 8px;
-            font-size: 20px;
-            color: #b6b8be;
-            
-            transition: color 0.1s;
-            
-            &:hover { color: #777a80 }
-            
-            .icon-field {
-                width: 18px;
-                height: 18px;
-                transform: translateY(1px);
-                stroke-width: 3px;
-            }
+        &:hover { color: #777a80 }
+        
+        .icon-field {
+            width: 18px;
+            height: 18px;
+            transform: translateY(1px);
+            stroke-width: 3px;
         }
     }
     

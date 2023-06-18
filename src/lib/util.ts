@@ -42,7 +42,7 @@ export function downloadBlob(data: Uint8Array | BlobPart, fileName: string, mime
 	}, 1000);
 };
 
-export function loadFile(file: File): Promise<ArrayBuffer> {
+export function getFileContent(file: File): Promise<ArrayBuffer> {
 	return new Promise<ArrayBuffer>((resolve, reject) => {
 		const fileReader = new FileReader()
 		
