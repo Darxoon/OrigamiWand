@@ -7,6 +7,22 @@ import type { Tab } from "./editor/globalDragging"
 
 export function noop() {}
 
+// credit: https://github.com/ghosh/Micromodal/blob/master/lib/src/index.js#L4
+// https://github.com/ghosh/Micromodal/blob/master/LICENSE.md
+export const HTML_FOCUSABLE_ELEMENTS = [
+	'a[href]',
+	'area[href]',
+	'input:not([disabled]):not([type="hidden"]):not([aria-hidden])',
+	'select:not([disabled]):not([aria-hidden])',
+	'textarea:not([disabled]):not([aria-hidden])',
+	'button:not([disabled]):not([aria-hidden])',
+	'iframe',
+	'object',
+	'embed',
+	'[contenteditable]',
+	'[tabindex]:not([tabindex^="-"])'
+] as const
+
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		const fileSelector = document.createElement('input')

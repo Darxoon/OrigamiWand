@@ -1,1 +1,1 @@
-export type MenuStripEntry = { name: string, onClick: (e: MouseEvent | KeyboardEvent) => void }
+export type MenuStripEntry = { name: string, onClick: () => void }
