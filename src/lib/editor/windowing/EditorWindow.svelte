@@ -221,7 +221,7 @@ Do you want to close those too?`,
 <style lang="scss">
 	:root {
 		--selected-tab-height: 6;
-		--editor-bg: #3a4d7d;
+		--editor-bg: #3a4d7d; // alternate color: #4b709b
 		--inactive-editor-bg: #2b3141;
 	}
 	

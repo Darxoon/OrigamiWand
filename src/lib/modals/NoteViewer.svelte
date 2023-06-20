@@ -20,7 +20,7 @@
 </script>
 
 <Alert title="All User Notes">
-	<div class="wrapper" bind:this={wrapper}>
+	<div class="wrapper tabbable" bind:this={wrapper}>
 		{#each allNotes as [id, content], i}
 			<div class="element">
 				<b>{FILE_TYPES[DataType[id[0]]].displayName + ' > ' + toReadableString(id[1])}:</b>

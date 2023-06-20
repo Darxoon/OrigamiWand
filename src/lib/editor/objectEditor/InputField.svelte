@@ -198,7 +198,7 @@
 		<label for="z">Z</label>
 		<input type="number" name="z" bind:value={vectorStrings[2]} disabled={readonly} />
 	{:else}
-		<input bind:value={str} disabled={readonly} on:keypress={onInput}
+		<input bind:value={str} readonly={readonly} on:keypress={onInput} tabindex="0"
 			class:str={typeof value === 'string'}
 		 	class:null={value === null}
 			class:boolean={typeof value === 'boolean'} />

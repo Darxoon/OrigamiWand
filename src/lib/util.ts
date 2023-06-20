@@ -1,5 +1,4 @@
-import { dataDivisions, DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
-import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
+import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary"
 import { ZstdCodec } from "zstd-codec"
 import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
 import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
@@ -20,6 +19,7 @@ export const HTML_FOCUSABLE_ELEMENTS = [
 	'object',
 	'embed',
 	'[contenteditable]',
+	'.tabbable',
 	'[tabindex]:not([tabindex^="-"])'
 ] as const
 

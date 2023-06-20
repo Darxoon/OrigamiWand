@@ -46,9 +46,9 @@
         right: 0; top: 0;
         
         margin: -1px 2px 0 2px;
-        visibility: hidden;
+        opacity: 0;
         
-        &.shown { visibility: visible }
+        &.shown, &:focus-within { opacity: 1; }
     }
     
     .button {
