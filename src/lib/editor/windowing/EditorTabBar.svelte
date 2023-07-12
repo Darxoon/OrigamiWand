@@ -103,9 +103,15 @@
 			return
 		
 		if (state == 'dragging') {
-			console.log('ending movement', debugIndex, floatingInsertIndex, floating)
+			logging.trace('ending movement', debugIndex, floatingInsertIndex, floating)
 			
-			tabs = [...immediateTabs]
+			let tabsUnchanged = immediateTabs.length == tabs.length
+				&& immediateTabs.every((value, index) => value === tabs[index])
+			
+			if (!tabsUnchanged) {
+				tabs = [...immediateTabs]
+			}
+			
 			activeIndex = clamp(floatingInsertIndex, 0, tabs.length - 1)
 			
 			if (!hasFloatingOwnership) {
@@ -213,7 +219,8 @@
 		<li>&nbsp</li>
 	{/if}
 	{#each immediateTabs as tab, i}
-		<li bind:this={tabElements[i]} use:nonnativeButton={() => activeIndex = i}
+		<li bind:this={tabElements[i]} use:nonnativeButton={() => { activeIndex = i; dispatch('selectTabContent', i) }}
+			class="tab_button"
 			class:active={immediateActiveIndex == i}
 			class:colorInvisible={tab == floating}
 			on:mousedown={() => onTabMouseDown(tab, i)} 
@@ -231,7 +238,7 @@
 		{floating?.name}
 		
 		<!-- decoration only -->
-		<div class="close_button white-x">
+		<div class="close_button dummy_close_button white-x">
 			<i data-feather="x" class="icon-close"></i>
 		</div>
 	</li>

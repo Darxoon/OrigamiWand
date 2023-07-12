@@ -4,7 +4,7 @@ import type { Instance } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";
 import { demangle, mangleIdentifier } from "./nameMangling";
 import { Relocation, Section, Symbol } from "./types";
-import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
+import { ValueUuid, VALUE_UUID, DATA_TYPE, type UuidTagged } from "./valueIdentifier";
 
 type Typedef<T> = {[fieldName: string]: T}
 
@@ -127,7 +127,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					allRelocations.get('.rodata'),
 					symbolTable,
 					
-					parseRawDataSection(rodataSection, count, offset.value, FILE_TYPES[dataType].typedef), 
+					parseRawDataSection(rodataSection, count, offset.value, dataType), 
 				)
 				
 				offsetReference?.set(offset.value, result)
@@ -260,7 +260,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				Pointer.ZERO, dataType, dataStringSection, 
 				allRelocations.get('.data'), symbolTable,
 				
-				parseRawDataSection(dataSection, dataCount, 0, FILE_TYPES[dataType].typedef), 
+				parseRawDataSection(dataSection, dataCount, 0, dataType), 
 			)
 			
 			modelSymbolReference = new WeakMap(data.main.map(obj => [obj, obj.id as string]))
@@ -286,7 +286,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				Pointer.ZERO, dataType, dataStringSection, 
 				allRelocations.get('.data'), symbolTable,
 				
-				parseRawDataSection(dataSection, count, 0, FILE_TYPES[dataType].typedef), 
+				parseRawDataSection(dataSection, count, 0, dataType), 
 			)
 			
 			break
@@ -314,7 +314,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				dataSymbol.location, DataType.ConfettiData, dataStringSection,
 				allRelocations.get('.rodata'), symbolTable,
 				
-				parseRawDataSection(rodataSection, 1, dataSymbol.location.value, FILE_TYPES[DataType.ConfettiData].typedef), 
+				parseRawDataSection(rodataSection, 1, dataSymbol.location.value, DataType.ConfettiData), 
 			)
 			
 			data.dataHeader = dataArray
@@ -326,7 +326,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				mapListOffset, DataType.ConfettiMap, dataStringSection,
 				allRelocations.get('.rodata'), symbolTable,
 				
-				parseRawDataSection(rodataSection, mapCount, mapListOffset.value, FILE_TYPES[DataType.ConfettiMap].typedef), 
+				parseRawDataSection(rodataSection, mapCount, mapListOffset.value, DataType.ConfettiMap), 
 			)
 			console.log(maps)
 			
@@ -342,7 +342,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					holeOffset, DataType.ConfettiHole, dataStringSection,
 					allRelocations.get('.rodata'), symbolTable,
 					
-					parseRawDataSection(rodataSection, holeCount, holeOffset.value, FILE_TYPES[DataType.ConfettiHole].typedef), 
+					parseRawDataSection(rodataSection, holeCount, holeOffset.value, DataType.ConfettiHole), 
 				)
 				
 				holesByOffset.set(holeOffset.value, result)
@@ -392,7 +392,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				dataSymbol.location, dataType, dataStringSection,
 				allRelocations.get('.rodata'), symbolTable,
 				
-				parseRawDataSection(rodataSection, dataCount, dataSymbol.location.value, FILE_TYPES[dataType].typedef), 
+				parseRawDataSection(rodataSection, dataCount, dataSymbol.location.value, dataType), 
 			)
 			
 			data.main = dataObjects
@@ -429,7 +429,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					offset, DataType.UiModelProperty, stringSection, 
 					allRelocations.get('.data'), symbolTable,
 					
-					parseRawDataSection(dataSection, propertyCount, offset, FILE_TYPES[DataType.UiModelProperty].typedef), 
+					parseRawDataSection(dataSection, propertyCount, offset, DataType.UiModelProperty), 
 				)
 				
 				// TODO: try to find the symbol name at offset `offset` rather than making this assumption
@@ -553,7 +553,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					offset, DataType.BtlAttackRange, stringSection, 
 					allRelocations.get('.data'), symbolTable,
 					
-					parseRawDataSection(dataSection, 1, offset, FILE_TYPES[DataType.BtlAttackRange].typedef), 
+					parseRawDataSection(dataSection, 1, offset, DataType.BtlAttackRange), 
 				)
 				
 				let attackRange = {
@@ -636,7 +636,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			let areaSymbol = findSymbol("wld::btl::data::s_setDataTable")
 			let areaReferences = parseSymbol(dataSection, stringSection, areaSymbol, DataType.SetAreaReference, -1)
-			let areas = [] as Instance<DataType.DataBtlSet>[]
+			let areas: Instance<DataType.DataBtlSet>[] = []
 			
 			for (const ref of areaReferences) {
 				// remove "wld::btl::data::s_setData_battle_" from symbol name to get area name
@@ -644,6 +644,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				
 				areas.push({
 					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.DataBtlSet,
+					
 					id,
 					battles: ref.value,
 				})
@@ -709,7 +711,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				Pointer.ZERO, dataType,  dataStringSection, 
 				allRelocations.get('.data'), symbolTable,
 				
-				parseRawDataSection(dataSection, count, 0, FILE_TYPES[dataType].typedef), 
+				parseRawDataSection(dataSection, count, 0, dataType), 
 			)
 			
 			break
@@ -738,13 +740,13 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		return applyStrings(
 			symbol.location, dataType, stringSection, allRelocations.get(containingSection.name), symbolTable,
 			
-			parseRawDataSection(containingSection, count, symbol.location, FILE_TYPES[dataType].typedef),
+			parseRawDataSection(containingSection, count, symbol.location, dataType),
 		)
 	}
 }
 
 
-function parseRawDataSection(section: Section, count: number, initialPosition: number | Pointer, typedef: Typedef<string>): object[] {
+function parseRawDataSection(section: Section, count: number, initialPosition: number | Pointer, dataType: DataType): UuidTagged[] {
 	const reader = new BinaryReader(section.content)
 	
 	reader.position = initialPosition instanceof Pointer ? initialPosition.value : initialPosition
@@ -753,18 +755,19 @@ function parseRawDataSection(section: Section, count: number, initialPosition: n
 	let i = 0
 	
 	while (reader.position < section.content.byteLength && i < count) {
-		result.push(objFromReader(reader, typedef))
+		result.push(objFromReader(reader, dataType))
 		i += 1
 	}
 	
 	return result
 	
-	function objFromReader(reader: BinaryReader, typedef: {[fieldName: string]: string}): object {
-		let result = {}
+	function objFromReader(reader: BinaryReader, dataType: DataType): UuidTagged {
+		let result = {
+			[VALUE_UUID]: ValueUuid(),
+			[DATA_TYPE]: dataType,
+		}
 		
-		result[VALUE_UUID] = ValueUuid()
-		
-		for (const [fieldName, fieldType] of Object.entries(typedef)) {
+		for (const [fieldName, fieldType] of Object.entries(FILE_TYPES[dataType].typedef)) {
 			
 			switch (fieldType) {
 				case "string":
@@ -818,7 +821,7 @@ function parseRawDataSection(section: Section, count: number, initialPosition: n
 }
 
 function applyStrings<T extends DataType>(baseOffsetPointer: Pointer, dataType: T, stringSection: Section, 
-	relocationTable: Map<number, Relocation>, symbolTable: Symbol[], objects: object[]): Instance<T>[] {
+	relocationTable: Map<number, Relocation>, symbolTable: Symbol[], objects: UuidTagged[]): Instance<T>[] {
 	
 	let result = []
 	

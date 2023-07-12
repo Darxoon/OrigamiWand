@@ -1,6 +1,6 @@
-import { dataDivisions, DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
+import { dataDivisions, DataType, Pointer, type DataDivision } from "./elfBinary";
 import { Vector3 } from "./misc";
-import { ValueUuid, VALUE_UUID } from "./valueIdentifier";
+import { ValueUuid, VALUE_UUID, type UuidTagged } from "./valueIdentifier";
 
 export type Typedef<T> = {[fieldName: string]: T}
 
@@ -60,7 +60,7 @@ type UnfilteredInstance<T extends number> = {
 export type Instance<T extends number> = Pick<
 	UnfilteredInstance<T>, 
 	{[p in keyof UnfilteredInstance<T>]: UnfilteredInstance<T>[p] extends never ? never : p}[keyof UnfilteredInstance<T>]
-> & { [VALUE_UUID]?: Symbol }
+> & UuidTagged
 
 const defaultDescriptions: Typedef<string> = {
 	stage: "The stage that the {type} is on. It's the same for every {type} in the same file.",
@@ -522,12 +522,14 @@ Some examples of functions that are in this namespace:
 		field_0x48: "float",
 		field_0x4c: "float",
 		field_0x50: "float",
-		field_0x54: "int",
-		field_0x58: "int",
+		jumpDefeatMaxReq: new Property("int", "\
+For instant defeat from a jump first strike, Mario's **Max HP** is required to be this value or greater."),
+		hammerDefeatMaxReq: new Property("int", "\
+For instant defeat from a hammer first strike, Mario's **Max HP** is required to be this value or greater."),
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
-		itemDrop: "string",
+		firstStrikeItemDrop: "string",
 		field_0x70: "string",
 		field_0x78: "string",
 		positionType: new Property("string", `
@@ -539,8 +541,8 @@ The position of the character in the air or the ground:
 		jumpedOnSfx: "string",
 		hammeredOnSfx: "string",
 		jumpSfx: "string",
-		field_0xa8: new Property("int", "Alwasy zero, for some reason"),
-		field_0xac: new Property("int", "Alwasy zero, for some reason"),
+		field_0xa8: new Property("int", "Always zero, for some reason"),
+		field_0xac: new Property("int", "Always zero, for some reason"),
 		field_0xb0: "string",
 		talkSfx: "string",
 		field_0xc0: "string",
@@ -630,19 +632,17 @@ The position of the character in the air or the ground:
 		field_0x34: "int",
 		field_0x38: "int",
 		field_0x3c: "int",
-		walkRadius: "Vector3",
+		walkOrigin: "Vector3",
 		walkDistance: "Vector3",
 		field_0x58: "float",
 		field_0x5c: "int",
-		field_0x60: "float",
-		field_0x64: "float",
-		field_0x68: "float",
+		field_0x60: "Vector3",
 		field_0x6c: "float",
 		field_0x70: "int",
 		field_0x74: "int",
 		field_0x78: "int",
 		field_0x7c: "int",
-		chaseRadius: "Vector3",
+		chaseOrigin: "Vector3",
 		chaseDistance: "Vector3",
 		field_0x98: "float",
 		field_0x9c: "int",
@@ -889,10 +889,10 @@ The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 * 'S' for bundled shop set items,
 * 'C' for accessories and 'K' for key items
 `),
-		field_0x68: "bool8",
+		useKeyItem: "bool8",
 		useInBattle: "bool8",
 		useInField: "bool8",
-		useInMenu: "bool8",
+		useOnCollect: "bool8",
 		field_0x6c: "int",
 		field_0x70: "int",
 		field_0x74: "int",
@@ -2386,7 +2386,7 @@ Bit field for the attack GFX type. Known values:
 		field_0x1c: "int",
 		field_0x20: "int",
 		field_0x24: "int",
-		field_0x28: "int",
+		ringMoveCount: "int",
 		field_0x2c: "int",
 		field_0x30: "int",
 		field_0x34: "int",
@@ -2397,10 +2397,10 @@ Bit field for the attack GFX type. Known values:
 		field_0x48: "int",
 		field_0x4c: "int",
 		field_0x50: "int",
-		field_0x54: new Property("int", "Boss battle, acording to the old btlSet implementation."),
-		field_0x58: "int",
-		field_0x5c: "int",
-		field_0x60: "int",
+		battleType: new Property("int", "0 for Normal, 1 for Boss, 10 for Battle Lab Normal, 12 for Battle Lab Boss."),
+		clearBonus: "int",
+		noDamageBonus: "int",
+		puzzleClearBonus: "int",
 		field_0x64: "int",
 		field_0x68: "int",
 		field_0x6c: "int",

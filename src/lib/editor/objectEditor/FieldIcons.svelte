@@ -46,25 +46,23 @@
         right: 0; top: 0;
         
         margin: -1px 2px 0 2px;
-        visibility: hidden;
+        opacity: 0;
         
-        &.shown { visibility: visible }
+        &.shown, &:focus-within { opacity: 1; }
+    }
+    
+    .button {
+        margin-left: 8px;
+        font-size: 20px;
+        color: #b6b8be;
         
-        .button {
-            margin-left: 8px;
-            font-size: 20px;
-            color: #b6b8be;
-            
-            transition: color 0.1s;
-            
-            &:hover { color: #777a80 }
-            
-            .icon-field {
-                width: 18px;
-                height: 18px;
-                transform: translateY(1px);
-                stroke-width: 3px;
-            }
+        &:hover { color: #777a80 }
+        
+        .icon-field {
+            width: 18px;
+            height: 18px;
+            transform: translateY(1px);
+            stroke-width: 3px;
         }
     }
     

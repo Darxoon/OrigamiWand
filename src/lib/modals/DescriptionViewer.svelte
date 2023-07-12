@@ -25,7 +25,7 @@
 </script>
 
 <Alert title="All Field Descriptions">
-	<div class="wrapper" bind:this={wrapper}>
+	<div class="wrapper tabbable" bind:this={wrapper}>
 		{#each allMetadataEntries as [dataType, typeMetadata]}
 		{#if Object.entries(typeMetadata).filter(s => s[1].description).length > 0}
 			<h2>{toPlural(FILE_TYPES[dataType].getDynamicDisplayName(null))}:</h2>

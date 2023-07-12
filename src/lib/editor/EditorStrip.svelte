@@ -122,7 +122,7 @@
 	<!-- TODO: replace tabs with windows and use a proper persistent each key -->
 	{#each tabs as tabList, i (tabList)}
 		<div on:mousedown|capture={e => activeEditor = i}>
-			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0} debugIndex={i}
+			<EditorWindow isActive={activeEditor == i} showBugReporter={i == 0} index={i}
 				bind:this={editorWindows[i]} bind:selectedIndex={selectedTabs[i]} bind:tabs={tabList} 
 				on:removeEditor={e => {
 					if (tabs.length > 1) {
@@ -179,7 +179,26 @@
 					} else
 						throw new Error(`Can't open ${JSON.stringify(e.detail.type)}, unknown type`)
 				}}
-				
+				on:selectTabBar={e => {
+					// detail stores difference of new window and old window: normally either -1 or 1
+					let windowIndex = i + e.detail
+					
+					logging.trace("Selecting tab bar", e.detail, i)
+					
+					// if detail is 1 for the last window, it will wrap around to the first selectable object on the page.
+					// windowIndex == -1 should never happen but for safety, will be accounted for
+					// by also selecting the first selectable object on the page
+					if (windowIndex < 0 || windowIndex >= editorWindows.length) {
+						// @ts-ignore
+						document.querySelector('[role="button"]').focus()
+						return
+					}
+					
+					editorWindows[windowIndex].selectTabBarElement(e.detail > 0 ? 0 : -1)
+				}}
+				on:activate={() => {
+					activeEditor = i
+				}}
 				on:valueChanged={e => {
 					console.log('valueChanged', e)
 				}}

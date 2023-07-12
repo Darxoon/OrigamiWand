@@ -1,11 +1,27 @@
-import { dataDivisions, DataType, ElfBinary,  } from "paper-mario-elfs/elfBinary"
-import { FILE_TYPES } from "paper-mario-elfs/fileTypes"
+import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary"
 import { ZstdCodec } from "zstd-codec"
 import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
 import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
 import type { Tab } from "./editor/globalDragging"
 
 export function noop() {}
+
+// credit: https://github.com/ghosh/Micromodal/blob/master/lib/src/index.js#L4
+// https://github.com/ghosh/Micromodal/blob/master/LICENSE.md
+export const HTML_FOCUSABLE_ELEMENTS = [
+	'a[href]',
+	'area[href]',
+	'input:not([disabled]):not([type="hidden"]):not([aria-hidden])',
+	'select:not([disabled]):not([aria-hidden])',
+	'textarea:not([disabled]):not([aria-hidden])',
+	'button:not([disabled]):not([aria-hidden])',
+	'iframe',
+	'object',
+	'embed',
+	'[contenteditable]',
+	'.tabbable',
+	'[tabindex]:not([tabindex^="-"])'
+] as const
 
 export function openBlob(): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
@@ -42,7 +58,7 @@ export function downloadBlob(data: Uint8Array | BlobPart, fileName: string, mime
 	}, 1000);
 };
 
-export function loadFile(file: File): Promise<ArrayBuffer> {
+export function getFileContent(file: File): Promise<ArrayBuffer> {
 	return new Promise<ArrayBuffer>((resolve, reject) => {
 		const fileReader = new FileReader()
 		

@@ -5,6 +5,7 @@ import { BinaryWriter } from "./misc";
 import { Relocation, Section, Symbol } from "./types";
 import { demangle, mangleIdentifier } from "./nameMangling";
 import { enumerate, noUndefinedMap } from "./util";
+import { DATA_TYPE, VALUE_UUID, ValueUuid } from "./valueIdentifier";
 
 type SectionName = string
 type Offset = number
@@ -531,8 +532,11 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				// areas
 				// Since the area (DataType.DataBtlSet) struct is entirely constructed,
 				// it has to be converted into SetAreaReference first
-				let areaReferences: Instance<DataType.SetAreaReference>[]
-						= binary.data.main.map(area => ({ value: area.battles }))
+				let areaReferences = binary.data.main.map(area => ({
+					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.SetAreaReference,
+					value: area.battles,
+				}) satisfies Instance<DataType.SetAreaReference>)
 				
 				symbolLocationReference.set(`wld::btl::data::s_setDataTable`, new Pointer(dataWriter.size))
 				symbolSizeOverrides.set(`wld::btl::data::s_setDataTable`, (areaReferences.length + 1) * FILE_TYPES[DataType.SetAreaReference].size)

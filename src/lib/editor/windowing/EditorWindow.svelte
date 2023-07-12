@@ -6,19 +6,29 @@
     import EditorTabBar from "./EditorTabBar.svelte";
 	
 	import { createEventDispatcher } from "svelte";
+    import logging from "$lib/logging";
+    import { HTML_FOCUSABLE_ELEMENTS } from "$lib/util";
+	
+	interface ContentComponent {
+		collapseAll(): void
+		expandAll(): void
+	}
 	
 	export let tabs: Tab[] = []
 	export let selectedIndex: number = 0
 	export let isActive = true
 	export let showBugReporter: boolean = false
-	export let debugIndex: number
+	export let index: number
 	
 	const dispatch = createEventDispatcher()
+	
+	let mainElement: HTMLDivElement
+	let contentDivElements: HTMLDivElement[] = []
+	let contentElements: ContentComponent[] = []
 	
 	let mouseOutside = false
 	let disableSideDocking = false
 	
-	let contentElements = []
 	
 	$: dockAreaShown = !mouseOutside && $globalDraggedTab != undefined
 	
@@ -55,6 +65,51 @@
 		}
 	}
 	
+	export function selectTabBarElement(index: number) {
+		let focusable = getAllFocusableInTabBar()
+		let element = focusable.at(index)
+		
+		if (!(element instanceof HTMLElement)) {
+			throw new Error("Cannot focus an element that is not an HTMLElement")
+		}
+		
+		element.focus()
+	}
+	
+	function getAllFocusableInTabBar() {
+		return Array.from(mainElement.querySelectorAll('li.tab_button, .close_button:not(.dummy_close_button)'))
+	}
+	
+	function onKeyDown(e: KeyboardEvent) {
+		if (e.key == "Tab") {
+			// if the selected element before tab is the last tab close button or the first tab button,
+			// cancel the event and emit a custom event to select the first tab button of the next window
+			// or the last close button of the previous window to trap focus inside header area including menu bar
+			let headerFocusable = getAllFocusableInTabBar()
+			let activeElementIndex = headerFocusable.indexOf(document.activeElement)
+			
+			logging.trace('onKeyDown', headerFocusable, activeElementIndex)
+			
+			if (activeElementIndex == 0 && index != 0 && e.shiftKey) {
+				logging.trace('beginning surpassed in window tab bar')
+				
+				e.preventDefault()
+				e.stopPropagation()
+				
+				dispatch('selectTabBar', -1)
+			}
+			
+			if (activeElementIndex == headerFocusable.length - 1 && !e.shiftKey) {
+				logging.trace('end reached of window tab bar')
+				
+				e.preventDefault()
+				e.stopPropagation()
+				
+				dispatch('selectTabBar', 1)
+			}
+		}
+	}
+	
 	function onMouseLeave(e: MouseEvent) {
 		mouseOutside = true
 	}
@@ -72,6 +127,18 @@
 		})
 		
 		$globalDraggedTab = undefined
+	}
+	
+	function selectTabContent(tabIndex: number) {
+		let firstFocusable = contentDivElements[tabIndex].querySelector(HTML_FOCUSABLE_ELEMENTS.join(', '))
+		
+		dispatch('activate')
+		
+		if (firstFocusable instanceof HTMLElement) {
+			firstFocusable.focus()
+		} else {
+			throw new Error("Cannot focus a not-HTML element")
+		}
 	}
 	
 	async function closeTabPrompt(tab: Tab) {
@@ -113,19 +180,20 @@ Do you want to close those too?`,
 
 <svelte:options accessors={true} />
 
-<div class="main" class:inactive={!isActive} on:mouseleave={onMouseLeave} on:mouseenter={onMouseEnter}>
+<div class="main" bind:this={mainElement} class:inactive={!isActive} on:mouseleave={onMouseLeave} on:mouseenter={onMouseEnter} on:keydown={onKeyDown}>
 	
 	<EditorTabBar bind:tabs={tabs} bind:activeIndex={selectedIndex} bind:disableSideDocking={disableSideDocking}
-		showBugReporter={showBugReporter} debugIndex={debugIndex} on:closeTab={e => closeTabPrompt(e.detail)} />
+		on:closeTab={e => closeTabPrompt(e.detail)} on:selectTabContent={e => selectTabContent(e.detail)}
+		showBugReporter={showBugReporter} debugIndex={index} />
 	
 	<div class="content">
 		{#if !$loadedAutosave && tabs.length == 0}
 			<p class="loadinglabel">Loading...</p>
 		{/if}
 		
-		{#each tabs as tab, i}
-			<div class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
+		{#each tabs as tab, i (tab.id)}
+			<div bind:this={contentDivElements[i]} class:invisible={selectedIndex != i}>
+				<svelte:component this={tab.component} tabVisible={selectedIndex == i} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
 			</div>
 		{/each}
 		
@@ -153,7 +221,7 @@ Do you want to close those too?`,
 <style lang="scss">
 	:root {
 		--selected-tab-height: 6;
-		--editor-bg: #3a4d7d;
+		--editor-bg: #3a4d7d; // alternate color: #4b709b
 		--inactive-editor-bg: #2b3141;
 	}
 	

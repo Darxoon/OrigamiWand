@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { afterUpdate, createEventDispatcher } from "svelte";
+	import { afterUpdate } from "svelte";
 	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
-	import { FILE_TYPES, type Instance } from "paper-mario-elfs/fileTypes";
+	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
 	import type { SearchIndex } from "../search/searchIndex";
     import FileToolbar from "./FileToolbar.svelte";
@@ -13,6 +13,10 @@
 	export let dataType: DataType
 	// TODO: will be replaced by separate tab object types for implicit objects or explicitly added objects
 	export let overrideObjects: UuidTagged[] | undefined = undefined
+	// TODO: move this into the future tab switch component
+	export let tabVisible: boolean
+	
+	let initialized = tabVisible
 	
 	let arrayComponent: BasicObjectArray
 	
@@ -25,6 +29,8 @@
 	
 	$: objects = overrideObjects ?? binary.data[FILE_TYPES[dataType].objectType]
 	$: index = createIndex(objects)
+	
+	$: if (tabVisible) initialized = true
 	
 	$: highlightedFields = searchResults && new WeakMap(
 		searchResultObjects.map(obj => [
@@ -132,6 +138,7 @@
 	}
 </script>
 
+{#if initialized}
 <div class="editor">
 	<!-- TODO: if objects contain symbol references, it's important that there is always one object left -->
 	<!-- Ask for confirmation in this case when pressing Delete All -->
@@ -154,6 +161,7 @@
 			dataType={DataType.MaplinkHeader} showButtons={false} binary={binary} />
 	{/if}
 </div>
+{/if}
 
 <style lang="scss">
 	.resultlabel {

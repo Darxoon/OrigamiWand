@@ -4,7 +4,7 @@ import TextAlert from "$lib/modal/TextAlert.svelte"
 import DataTypePrompt from "$lib/modals/DataTypePrompt.svelte"
 import SaveAsDialog from "$lib/modals/SaveAsDialog.svelte"
 import { globalEditorStrip, loadedAutosave } from "$lib/stores"
-import { compress, decompress, downloadBlob, loadFile, createFileTab } from "$lib/util"
+import { compress, decompress, downloadBlob, getFileContent, createFileTab } from "$lib/util"
 import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary"
 import parseElfBinary, { EmptyFileError } from "paper-mario-elfs/parser"
 import serializeElfBinary from "paper-mario-elfs/serializer"
@@ -44,6 +44,45 @@ export function getFileMenu() {
 	}
 }
 
+export async function openFileToEditor(file: File) {
+	const contentPromise = getFileContent(file)
+	
+	const {dataType, isCompressed} = await showModal(DataTypePrompt, {
+		fileName: file.name,
+	})
+
+	if (!dataType) {
+		return
+	}
+	
+	console.log(DataType[dataType])
+	
+	const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
+	
+	let binary: ElfBinary
+	
+	try {
+		binary = parseElfBinary(dataType, content)
+	} catch (e) {
+		if (e instanceof EmptyFileError) {
+			showModal(TextAlert, {
+				title: "Opening File",
+				content: "File is empty. Generating a new file instead."
+			})
+				.then(() => {
+					showModal(TextAlert, {
+						title: "Error",
+						content: "Error: Not implemented yet."
+					})
+				})
+		}
+		
+		throw e
+	}
+
+	editorStrip.appendTab(createFileTab(file.name, binary, dataType, isCompressed))
+}
+
 function openFileSelector() {
 	console.log("opening file")
 
@@ -54,42 +93,7 @@ function openFileSelector() {
 	fileSelector.addEventListener('change', async (e: any) => {
 		const file: File = e.target.files[0]
 		
-		const contentPromise = loadFile(file)
-		
-		const {dataType, isCompressed} = await showModal(DataTypePrompt, {
-			fileName: file.name,
-		})
-
-		if (!dataType) {
-			return
-		}
-		
-		console.log(DataType[dataType])
-		
-		const content = isCompressed ? await decompress(await contentPromise) : await contentPromise
-		
-		let binary: ElfBinary
-		
-		try {
-			binary = parseElfBinary(dataType, content)
-		} catch (e) {
-			if (e instanceof EmptyFileError) {
-				showModal(TextAlert, {
-					title: "Opening File",
-					content: "File is empty. Generating a new file instead."
-				})
-					.then(() => {
-						showModal(TextAlert, {
-							title: "Error",
-							content: "Error: Not implemented yet."
-						})
-					})
-			}
-			
-			throw e
-		}
-
-		editorStrip.appendTab(createFileTab(file.name, binary, dataType, isCompressed))
+		await openFileToEditor(file)
 	})
 }
 

@@ -250,7 +250,7 @@
 			
 			&.bold { font-weight: bold }
 			&.italic { font-style: italic }
-			&.highlighted { background: #fff11c; border-radius: 3px }
+			&.highlighted { background: #ffe687; border-radius: 3px }
 		}
 		
 		.value {

@@ -72,7 +72,7 @@
 				<label for="hideNull">Hide all "null" values</label>
 			</div>
 		{/if}
-		<div class="allValues local">
+		<div class="allValues local tabbable">
 			{#each objects as obj, i}
 				{#if hideNulls ? obj[fieldName] !== null : true}
 					<div class="index">
@@ -99,7 +99,7 @@
 					<label for="hideNull">Hide all "null" values</label>
 				</div>
 			{/if}
-			<div class="allValues nested">
+			<div class="allValues nested tabbable">
 				{#each binary.data[FILE_TYPES[dataType].objectType] as arr, i}
 					{#each arr.objects ?? arr.children ?? arr as obj, j}
 						{#if hideNulls ? obj[fieldName] !== null : true}

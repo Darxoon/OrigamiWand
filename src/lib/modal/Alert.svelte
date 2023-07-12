@@ -2,19 +2,24 @@
     import { onDestroy, onMount } from "svelte";
 	import { hideActiveModal } from "./modal";
     import { nonnativeButton } from "$lib/nonnativeButton";
-
+    import { HTML_FOCUSABLE_ELEMENTS } from "$lib/util";
+	
 	export let title: string
-
+	
 	let alertDiv: HTMLDivElement
+	let slotWrapper: HTMLDivElement
 	
 	function close() {
 		hideActiveModal(false)
 	}
 	
 	// TODO: Split into FocusTrapZone
-	function getAllFocusable(): HTMLElement[] {
-		let focusable: HTMLElement[] = Array.from(alertDiv.querySelectorAll(FOCUSABLE_ELEMENTS.join(', ')))
-		focusable.push(...focusable.splice(0, 1))
+	function getAllFocusable(includeCloseButton: boolean): HTMLElement[] {
+		let parentElement = includeCloseButton ? alertDiv : slotWrapper
+		let focusable: HTMLElement[] = Array.from(parentElement.querySelectorAll(HTML_FOCUSABLE_ELEMENTS.join(', ')))
+		
+		if (focusable.length > 0 && includeCloseButton)
+			focusable.push(focusable.shift())
 		
 		return focusable
 	}
@@ -36,8 +41,14 @@
 	}
 	
 	function trapFocusKeyboard(e: KeyboardEvent) {
-		let focusable = getAllFocusable()
-			
+		let focusable = getAllFocusable(true)
+		
+		// checkVisibility is not supported in safari but focus trapping works without this code,
+		// it just allows the possibility that .alert-pre or .alert-post is selected
+		if (Element.prototype.checkVisibility) {
+			focusable = focusable.filter(element => element.checkVisibility({ checkVisibilityCSS: true }))
+		}
+		
 		if (!(document.activeElement instanceof HTMLElement) || focusable.length == 0)
 			return
 		
@@ -89,33 +100,27 @@
 		// @ts-ignore
 		feather.replace()
 		
-		let focusable = getAllFocusable()
-		
-		if (focusable.length > 0)
-			focusable[0].focus()
-		
 		document.addEventListener('keydown', onKeydown)
+		
+		// try focusing the first focusable element in the alert
+		let focusable = getAllFocusable(false)
+		
+		if (focusable.length > 0) {
+			focusable[0].focus()
+			return
+		}
+		
+		// if that does not work out, try selecting the root element of the slot
+		let focusableRoot = Array.from(slotWrapper.children).find(child => child instanceof HTMLElement)
+		
+		if (focusableRoot instanceof HTMLElement) {
+			focusableRoot.focus()
+		}
 	})
 	
 	onDestroy(() => {
 		document.removeEventListener('keydown', onKeydown)
 	})
-	
-	// credit: https://github.com/ghosh/Micromodal/blob/master/lib/src/index.js#L4
-	// https://github.com/ghosh/Micromodal/blob/master/LICENSE.md
-	const FOCUSABLE_ELEMENTS = [
-		'a[href]',
-		'area[href]',
-		'input:not([disabled]):not([type="hidden"]):not([aria-hidden])',
-		'select:not([disabled]):not([aria-hidden])',
-		'textarea:not([disabled]):not([aria-hidden])',
-		'button:not([disabled]):not([aria-hidden])',
-		'iframe',
-		'object',
-		'embed',
-		'[contenteditable]',
-		'[tabindex]:not([tabindex^="-"])'
-	]
 </script>
 
 <!-- pre and post elements are for focus trapping, any focus on them will immediately be revoked again -->
@@ -128,7 +133,7 @@
 	</div>
 	
 	<h2>{title}</h2>
-	<div>
+	<div bind:this={slotWrapper}>
 		<slot />
 	</div>
 </div>

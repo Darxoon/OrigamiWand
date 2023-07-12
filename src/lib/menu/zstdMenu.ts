@@ -1,4 +1,4 @@
-import { compress, decompress, downloadBlob, loadFile } from "../util"
+import { compress, decompress, downloadBlob, getFileContent } from "../util"
 
 export function getZstdMenu() {
 	return {
@@ -26,7 +26,7 @@ function decompressFileSelector() {
 	
 	fileSelector.addEventListener('change', async (e: any) => {
 		for (const file of e.target.files) {
-			const content = await loadFile(file)
+			const content = await getFileContent(file)
 			const decompressed = await decompress(content)
 			
 			const newFileName = file.name.replaceAll('.zstd', '').replaceAll('.zst', '')
@@ -48,7 +48,7 @@ function compressFileSelector() {
 	
 	fileSelector.addEventListener('change', async (e: any) => {
 		for (const file of e.target.files) {
-			const content = await loadFile(file)
+			const content = await getFileContent(file)
 			const compressed = await compress(content)
 			
 			console.log('compressing', file.name, file.name + '.zst')

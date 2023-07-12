@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { MenuStripEntry } from "$lib/types";
 	import { openedMenu } from "$lib/stores";
+    import { nonnativeButton } from "$lib/nonnativeButton";
+    import logging from "$lib/logging";
 
 	export let name: string
 	export let items: MenuStripEntry[] = []
@@ -14,31 +16,38 @@
 			openedMenu.set(name)
 	}
 	
-	function nop() {
-		
-	}
-	
 	function open(e) {
+		let isInvalidKey = e instanceof KeyboardEvent && e.key != " " && e.key != "Enter"
+		
+		if (isInvalidKey) {
+			return
+		}
+		
 		if ($openedMenu == name) {
 			li.blur()
 			e.preventDefault()
 		}
 		
+		logging.trace("Changing opened menu", $openedMenu, name)
 		openedMenu.set($openedMenu == name ? null : name)
+	}
+	
+	function activate(item: MenuStripEntry) {
+		logging.trace("Activating item", item.name)
+		openedMenu.set(null)
+		item.onClick()
 	}
 </script>
 
 <li role="button" tabindex="0" on:mouseenter={updateOpenedMenu} bind:this={li}
-	on:mousedown|stopPropagation={open} on:keypress|stopPropagation={open}>
+	on:mousedown|stopPropagation={open} on:keyup|stopPropagation={open}>
 	
 	{name}
 	
-	<div on:mousedown|stopPropagation={nop} class="menu" class:shown={shown}>
+	<div on:mousedown|stopPropagation={() => {}} class="menu" class:shown={shown}>
 		<ul>
 			{#each items as item}
-				<li class="menu_item" role="button" tabindex="0"
-						on:click={e => {openedMenu.set(null); item.onClick(e);}}
-						on:keypress={e => {openedMenu.set(null); item.onClick(e);}}>{item.name}</li>
+				<li class="menu_item" role="button" tabindex="0" use:nonnativeButton={() => activate(item)}>{item.name}</li>
 			{/each}
 		</ul>
 	</div>

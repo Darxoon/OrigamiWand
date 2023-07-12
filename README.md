@@ -8,7 +8,7 @@ An advanced Data Editor for Paper Mario: The Origami King
 
 ## Usage
 
-Open the link above. To use this tool, you need a full dump of Paper Mario: The Origami King's RomFS, which can be obtained through various sources like NXDumptool or the Yuzu emulator.
+Open the link above. To use this tool, you need a full dump of Paper Mario: The Origami King's RomFS, which can be obtained through various sources like NXDumptool or the Yuzu emulator, assuming that you have a copy of the game already.
 
 If you want to open one of the game's files to modify them and place them back into the game, head to `File > Open` and select the file from there.
 

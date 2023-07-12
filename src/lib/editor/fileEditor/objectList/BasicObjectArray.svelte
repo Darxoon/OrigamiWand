@@ -1,11 +1,13 @@
 <script lang="ts">
     import ObjectEditor from "$lib/editor/objectEditor/ObjectEditor.svelte";
-    import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+    import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
     import { demangle } from "paper-mario-elfs/nameMangling";
     import { duplicateObjectInBinary, duplicateSymbolInBinary } from "paper-mario-elfs/util";
-    import { VALUE_UUID, type UuidTagged } from "paper-mario-elfs/valueIdentifier";
+    import { VALUE_UUID, type UuidTagged, DATA_TYPE } from "paper-mario-elfs/valueIdentifier";
     import Debouncer from "./Debouncer.svelte";
+    import { onMount } from "svelte";
+    import { PUBLIC_DEBUG } from "$env/static/public";
 
 	export let binary: ElfBinary
 	export let objects: UuidTagged[]
@@ -23,10 +25,21 @@
 	
 	$: if (objects && debouncer) debouncer.reset()
 	
-	$: if (objects.find(x => x[VALUE_UUID] == undefined) != undefined) {
-		console.error("Not all objects have a UUID")
-		debugger
-	}
+	onMount(() => {
+		let isDebug = !!parseInt(PUBLIC_DEBUG)
+		
+		if (isDebug && !objects.every(x => x[VALUE_UUID] != undefined)) {
+			debugger
+			throw new Error("Not all objects have a UUID")
+		}
+		
+		// TODO: replace with opt-in entry-specific data type handling
+		if (isDebug && !objects.every(value => value[DATA_TYPE] == dataType)) {
+			debugger
+			throw new Error("Objects of inconsistent data types passed to BasicObjectArray of data type " + DataType[dataType])
+		}
+	})
+	
 	
 	export function scrollIntoView(object?: UuidTagged) {
 		let index = object ? objects.indexOf(object) : objects.length - 1
@@ -97,7 +110,7 @@
 	}
 </script>
 
-<Debouncer bind:this={debouncer} autoStart={true} on:finished={() => countShown += 80} />
+<Debouncer bind:this={debouncer} requiredDelaySeconds={2} autoStart={true} on:finished={() => countShown += 80} />
 
 {#each objectSlice as obj, i (obj[VALUE_UUID])}
 	<ObjectEditor bind:this={objectEditors[i]} bind:obj={obj} bind:open={areEditorsOpen[i]}
