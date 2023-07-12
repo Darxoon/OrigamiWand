@@ -20,7 +20,7 @@
 
 {#if dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)}
 	<InnerIndexPageEditor bind:dataType={dataType} bind:binary={binary} bind:fileName={fileName} 
-			bind:this={inner} self={inner} on:open />
+			bind:this={inner} on:open />
 {:else}
 	<div>This file does not have an editor yet.</div>
 {/if}

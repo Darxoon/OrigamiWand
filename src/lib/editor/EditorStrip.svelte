@@ -199,7 +199,6 @@
 				on:activate={() => {
 					activeEditor = i
 				}}
-				
 				on:valueChanged={e => {
 					console.log('valueChanged', e)
 				}}

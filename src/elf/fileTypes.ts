@@ -522,8 +522,10 @@ Some examples of functions that are in this namespace:
 		field_0x48: "float",
 		field_0x4c: "float",
 		field_0x50: "float",
-		jumpDefeatHPReq1: new Property("int", "Minimum HP Mario's Max HP should be to allow instant defeat from a jump first strike."),
-		hammerDefeatHPReq2: new Property("int", "Minimum HP Mario's Max HP should be to allow instant defeat from a hammer first strike."),
+		jumpDefeatMaxReq: new Property("int", "\
+For instant defeat from a jump first strike, Mario's **Max HP** is required to be this value or greater."),
+		hammerDefeatMaxReq: new Property("int", "\
+For instant defeat from a hammer first strike, Mario's **Max HP** is required to be this value or greater."),
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",

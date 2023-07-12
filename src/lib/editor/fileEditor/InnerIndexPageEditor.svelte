@@ -10,7 +10,6 @@
 	export let dataType: DataType
 	export let binary: ElfBinary
 	export let fileName: string
-	export let self
 	
 	let editorElements = []
 	
@@ -44,7 +43,6 @@
 				properties: {
 					binary,
 					dataType,
-					parent: self,
 				}
 			})
 		}}>
