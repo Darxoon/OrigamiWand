@@ -25,6 +25,14 @@ export function nonnativeButton(node: HTMLElement, onActivate: () => void): Svel
 			keyboardListener = clickToKeyboardListener(onActivate)
 			node.addEventListener('click', onActivate, true)
 			node.addEventListener('keyup', keyboardListener)
+		},
+		
+		destroy() {
+			delete node.role
+			delete node.tabIndex
+			
+			node.removeEventListener('click', onActivate, true)
+			node.removeEventListener('keyup', keyboardListener)
 		}
 	}
 }

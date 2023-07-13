@@ -4,16 +4,19 @@
 	
 	import { createEventDispatcher, onMount } from "svelte";
 	import ElfEditor from "../fileEditor/ElfEditor.svelte";
+    import { nonnativeButton } from "$lib/nonnativeButton";
 
 	const dispatch = createEventDispatcher()
 	
-	export let targetObjects: any[] | {symbolName: string, children: any[]}
+	export let targetObjects: any[] | {symbolName: string, children: any[]} | undefined
 	export let binary: ElfBinary
 	export let sourceDataType: DataType
 	export let targetDataType: DataType
 	export let objectId: string
 	export let tabTitle: string
 	export let error: any = undefined
+	
+	let link: HTMLDivElement
 	
 	$: label = targetObjects != undefined
 		? `Click to open (${length(targetObjects)} item${length(targetObjects) < 2 ? '' : 's'})`
@@ -27,40 +30,20 @@
 	})
 	
 	function click() {
-		if (targetObjects != undefined)
-			openContent()
-		else 
-			createContent()
-	}
-	
-	function keyDown(e: KeyboardEvent) {
-		if (e.key == " " || e.key == "Enter") {
-			click()
-			e.stopPropagation()
-			e.preventDefault()
+		if (targetObjects == undefined) {
+			dispatch('create')
+			
+			return
 		}
-	}
-	
-	function createContent() {
-		dispatch('create')
-	}
-	
-	function openContent() {
-		let title = tabTitle.replaceAll('{id}', objectId).replaceAll('{type}', FILE_TYPES[sourceDataType].displayName)
-		let objects: any[]
 		
-		if (!(targetObjects instanceof Array) && "children" in targetObjects) {
-			objects = (targetObjects as any).children
-		} else {
-			objects = targetObjects
-		}
+		let title = tabTitle.replaceAll('{id}', objectId).replaceAll('{type}', FILE_TYPES[sourceDataType].displayName)
+		let objects = targetObjects instanceof Array ? targetObjects : targetObjects.children
 		
 		console.log('opening', objects)
 		
 		dispatch("open", {
 			type: "window",
 			title,
-			shortTitle: title.replaceAll(/\[.+?\]/g, ""),
 			component: ElfEditor,
 			properties: {
 				binary,
@@ -83,12 +66,27 @@
 			throw new Error(`Argument is not an array, ${arrayOrObj}`)
 		}
 	}
+	
+	function focusLink() {
+		link.focus({ focusVisible: true })
+	}
 </script>
 
-<input type="text" role="button" value={label} readonly on:click={click} on:keydown={keyDown} />
+<div class="linkWrapper">
+	<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+	<div class="link"
+		bind:this={link} on:mousedown={focusLink}
+		use:nonnativeButton={click}><span class="text">{label}</span></div>
+</div>
 
 <style lang="scss">
-	input {
+	.linkWrapper {
+		position: relative;
+		display: flex;
+		width: 100%;
+	}
+	
+	.link {
 		border: 1px solid #8f8f9d;
 		border-radius: 4px;
 		padding: 5px 2px 3px 1px;
@@ -103,5 +101,14 @@
 		cursor: pointer;
 
 		width: 100%;
+	}
+	
+	// webkit alternative to unsupported focusVisible (see function focusLink)
+	.link:focus {
+		outline: -webkit-focus-ring-color auto 1px;
+	}
+	
+	.text {
+		user-select: none;
 	}
 </style>

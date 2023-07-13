@@ -12,4 +12,8 @@ declare global {
 		thisArg?: any
 	  ): number
 	}
+	
+	interface FocusOptions {
+		focusVisible?: boolean
+	}
 }
