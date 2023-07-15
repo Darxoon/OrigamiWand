@@ -827,7 +827,7 @@ That's probably because they don't contain any meshes, and instead, they only co
 		__importantField: "type",
 		
 		stage: "string",
-		type: "string",
+		type: new Property("string", "The type of the Gobj Resource, which is a reference to data_gobj_model_GobjModel.elf."),
 		field_0x10: "int",
 		field_0x14: "int",
 	},
