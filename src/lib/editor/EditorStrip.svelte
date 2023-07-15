@@ -6,6 +6,7 @@
 	import type { SaveFile } from "$lib/save/autosave";
     import { excludeFromArrayPure, insertIntoArrayPure, replaceInArrayPure } from "$lib/util";
     import logging from "$lib/logging";
+    import { OpenWindowEvent } from "./events";
 
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = [0]
@@ -150,19 +151,23 @@
 					}
 				}}
 				on:open={e => {
-					if (e.detail.type === "window") {
-						const { title, component, properties, isCompressed } = e.detail
+					if (e.detail instanceof OpenWindowEvent) {
+						const event = e.detail
 						
-						const childID = Symbol(`Tab ID ${title}`)
+						const childID = Symbol(`Tab ID ${event.title}`)
 						tabList[selectedTabs[i]].children.push(childID)
 						
 						const tab = {
 							id: childID,
 							parentId: tabList[selectedTabs[i]].id,
-							name: title,
-							component,
-							properties,
-							isCompressed: isCompressed ?? false,
+							name: event.title,
+							component: event.component,
+							properties: {
+								dataType: event.dataType,
+								binary: event.binary,
+								overrideObjects: event.overrideObjects,
+							},
+							isCompressed: false,
 							children: [],
 						}
 						

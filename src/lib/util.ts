@@ -1,8 +1,7 @@
 import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary"
 import { ZstdCodec } from "zstd-codec"
-import ElfEditor from "./editor/fileEditor/ElfEditor.svelte"
-import SpecialElfEditor from "./editor/fileEditor/SpecialElfEditor.svelte"
 import type { Tab } from "./editor/globalDragging"
+import CardListEditor from "./editor/fileEditor/CardListEditor.svelte"
 
 export function noop() {}
 
@@ -129,7 +128,7 @@ export function createFileTab(fileName: string, binary: ElfBinary, dataType: Dat
 	return {
 		id: Symbol(),
 		name: fileName,
-		component: isNonStandard ? SpecialElfEditor : ElfEditor,
+		component: CardListEditor,
 		children: [],
 		isCompressed,
 		properties,

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { createEventDispatcher, onMount } from "svelte";
-    import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";
-	import ElfEditor from "./ElfEditor.svelte";
+    import { DataTypeExtension, dataTypeExtensions } from "../dataTypeExtensions";
     import { nonnativeButton } from "$lib/nonnativeButton";
+    import { OpenWindowEvent } from "$lib/editor/events";
 
 	const dispatch = createEventDispatcher()
 	
@@ -21,10 +21,6 @@
 		editorElements.forEach(editor => editor.open = true)
 	}
 	
-	export function applyChangedValue(instance: any) {
-		binary = binary
-	}
-	
 	onMount(() => {
 		// @ts-ignore
 		feather.replace()
@@ -36,15 +32,7 @@
 <div class="editor">
 	{#each items as [name, {dataType, label}]}
 		<div class="card link" use:nonnativeButton={() => {
-			dispatch("open", {
-				type: "window",
-				title: `${name} (${fileName})`,
-				component: ElfEditor,
-				properties: {
-					binary,
-					dataType,
-				}
-			})
+			dispatch("open", new OpenWindowEvent(`${name} (${fileName})`, dataType, binary))
 		}}>
 			<i data-feather="external-link" class="icon-link"></i>
 			<div style="user-select: none">

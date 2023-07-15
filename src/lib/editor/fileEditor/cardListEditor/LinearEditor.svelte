@@ -2,16 +2,15 @@
 	import { afterUpdate } from "svelte";
 	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
-	import ObjectEditor from "../objectEditor/ObjectEditor.svelte"
-	import type { SearchIndex } from "../search/searchIndex";
+	import ObjectEditor from "$lib/editor/objectEditor/ObjectEditor.svelte"
+	import type { SearchIndex } from "$lib/editor/search/searchIndex";
     import FileToolbar from "./FileToolbar.svelte";
-    import BasicObjectArray from "./objectList/BasicObjectArray.svelte";
+    import BasicObjectArray from "./BasicObjectArray.svelte";
     import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
     import { incrementName, mangleIdentifier } from "paper-mario-elfs/nameMangling";
 
 	export let binary: ElfBinary
 	export let dataType: DataType
-	// TODO: will be replaced by separate tab object types for implicit objects or explicitly added objects
 	export let overrideObjects: UuidTagged[] | undefined = undefined
 	// TODO: move this into the future tab switch component
 	export let tabVisible: boolean
@@ -27,6 +26,8 @@
 	
 	let searchResultObjectBuffer: UuidTagged[]
 	
+	// TODO: move this logic out into a parent component specifically for parent files which own their elf binary
+	// for better separation of concerns
 	$: objects = overrideObjects ?? binary.data[FILE_TYPES[dataType].objectType]
 	$: index = createIndex(objects)
 	

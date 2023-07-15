@@ -3,8 +3,8 @@
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	
 	import { createEventDispatcher, onMount } from "svelte";
-	import ElfEditor from "../fileEditor/ElfEditor.svelte";
     import { nonnativeButton } from "$lib/nonnativeButton";
+    import { OpenWindowEvent } from "../events";
 
 	const dispatch = createEventDispatcher()
 	
@@ -41,16 +41,7 @@
 		
 		console.log('opening', objects)
 		
-		dispatch("open", {
-			type: "window",
-			title,
-			component: ElfEditor,
-			properties: {
-				binary,
-				dataType: targetDataType,
-				overrideObjects: objects,
-			}
-		})
+		dispatch("open", new OpenWindowEvent(title, targetDataType, binary, objects))
 	}
 	
 	function length(arrayOrObj) {

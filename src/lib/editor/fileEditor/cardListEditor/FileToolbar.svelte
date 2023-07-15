@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import SearchBar from "../search/SearchBar.svelte";
-    import type { SearchIndex } from "../search/searchIndex";
+    import SearchBar from "../../search/SearchBar.svelte";
+    import type { SearchIndex } from "../../search/searchIndex";
     import { nonnativeButton } from "$lib/nonnativeButton";
 	
 	export let searchIndex: SearchIndex
