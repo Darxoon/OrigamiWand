@@ -131,6 +131,7 @@ export function createFileTab(fileName: string, binary: ElfBinary, dataType: Dat
 		component: CardListEditor,
 		children: [],
 		isCompressed,
+		binary,
 		properties,
 	}
 }

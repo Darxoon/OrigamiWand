@@ -8,7 +8,6 @@
 	const dispatch = createEventDispatcher()
 	
 	export let dataType: DataType
-	export let binary: ElfBinary
 	export let fileName: string
 	
 	let editorElements = []
@@ -32,7 +31,7 @@
 <div class="editor">
 	{#each items as [name, {dataType, label}]}
 		<div class="card link" use:nonnativeButton={() => {
-			dispatch("open", new OpenWindowEvent(`${name} (${fileName})`, dataType, binary))
+			dispatch("open", new OpenWindowEvent(`${name} (${fileName})`, dataType))
 		}}>
 			<i data-feather="external-link" class="icon-link"></i>
 			<div style="user-select: none">

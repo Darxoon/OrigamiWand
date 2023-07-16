@@ -1,4 +1,5 @@
 import EventEmitter from "events";
+import type { ElfBinary } from "paper-mario-elfs/elfBinary";
 import { writable } from "svelte/store";
 import type { TypeSafeEventEmitter } from "typesafe-event-emitter";
 
@@ -13,6 +14,7 @@ export interface Tab {
     name: string
     
     isCompressed: boolean,
+    binary: ElfBinary
     
     component: any
     properties: any

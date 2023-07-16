@@ -9,7 +9,6 @@
 	const dispatch = createEventDispatcher()
 	
 	export let targetObjects: any[] | {symbolName: string, children: any[]} | undefined
-	export let binary: ElfBinary
 	export let sourceDataType: DataType
 	export let targetDataType: DataType
 	export let objectId: string
@@ -41,7 +40,7 @@
 		
 		console.log('opening', objects)
 		
-		dispatch("open", new OpenWindowEvent(title, targetDataType, binary, objects))
+		dispatch("open", new OpenWindowEvent(title, targetDataType, objects))
 	}
 	
 	function length(arrayOrObj) {

@@ -18,6 +18,12 @@
 	
 	let inner: InnerIndexPageEditor | ElfEditor
 	
+	$: requiresIndexEditor = dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)
+	
+	$: if (requiresIndexEditor && fileName == undefined) {
+		throw new Error("filename property must be set in CardListEditor component with inner index editor.")
+	}
+	
 	export function collapseAll() {
 		inner.collapseAll
 	}
@@ -27,8 +33,8 @@
 	}
 </script>
 
-{#if dataTypeExtensions(DataTypeExtension.HasComplexEditor, dataType)}
-	<InnerIndexPageEditor bind:this={inner} bind:binary={binary} bind:dataType={dataType} fileName={fileName} on:open />
+{#if requiresIndexEditor}
+	<InnerIndexPageEditor bind:this={inner} bind:dataType={dataType} fileName={fileName} on:open />
 {:else if nonStandardDataTypes.has(dataType)}
 	<div>This file does not have an editor yet.</div>
 {:else}

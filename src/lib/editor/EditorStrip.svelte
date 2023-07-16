@@ -7,6 +7,7 @@
     import { excludeFromArrayPure, insertIntoArrayPure, replaceInArrayPure } from "$lib/util";
     import logging from "$lib/logging";
     import { OpenWindowEvent } from "./events";
+    import CardListEditor from "./fileEditor/CardListEditor.svelte";
 
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = [0]
@@ -151,21 +152,28 @@
 					}
 				}}
 				on:open={e => {
-					if (e.detail instanceof OpenWindowEvent) {
-						const event = e.detail
+					let { detail } = e
+					
+					if (detail instanceof OpenWindowEvent) {
+						const { title, component, dataType, overrideObjects, parentTab } = detail
 						
-						const childID = Symbol(`Tab ID ${event.title}`)
+						if (parentTab == undefined) {
+							throw new Error(`OpenWindowEvent with title "${title}" does not have a parentTab set and thus cannot be handled.`)
+						}
+						
+						const childID = Symbol(`Tab ID ${detail.title}`)
 						tabList[selectedTabs[i]].children.push(childID)
 						
-						const tab = {
+						let tab = {
 							id: childID,
-							parentId: tabList[selectedTabs[i]].id,
-							name: event.title,
-							component: event.component,
+							parentId: parentTab.id,
+							name: title,
+							component: component ?? CardListEditor,
+							binary: parentTab.binary,
 							properties: {
-								dataType: event.dataType,
-								binary: event.binary,
-								overrideObjects: event.overrideObjects,
+								dataType,
+								binary: parentTab.binary,
+								overrideObjects: overrideObjects,
 							},
 							isCompressed: false,
 							children: [],

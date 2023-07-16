@@ -86,7 +86,7 @@
 				?.getBoundingClientRect()?.y || entryLabelElements.length - 1 <= i);
 	}
 	
-	function showFieldMenu(dataType, fieldName) {
+	function showFieldMenu(dataType: DataType, fieldName: string) {
 		let objects = binary.data[FILE_TYPES[dataType].objectType]
 		
 		// find sub array if necessary
@@ -182,7 +182,7 @@
 				<!-- Value Input -->
 				<div class="value">
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol")}
-						<CrossObjectLink binary={binary} targetObjects={value} sourceDataType={dataType} objectId={objectId}
+						<CrossObjectLink targetObjects={value} sourceDataType={dataType} objectId={objectId}
 							targetDataType={FILE_TYPES[dataType].childTypes[field]}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} error={fieldErrors[field]}
 							on:open on:create={() => createContent(obj, field)} />

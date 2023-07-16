@@ -8,6 +8,7 @@
 	import { createEventDispatcher } from "svelte";
     import logging from "$lib/logging";
     import { HTML_FOCUSABLE_ELEMENTS } from "$lib/util";
+    import { OpenWindowEvent } from "../events";
 	
 	interface ContentComponent {
 		collapseAll(): void
@@ -141,6 +142,14 @@
 		}
 	}
 	
+	function handleOpenWindowEvent(e: unknown, tab: Tab): OpenWindowEvent {
+		if (!(e instanceof OpenWindowEvent))
+			throw new TypeError("Expected an OpenWindowEvent as event detail for open event, not " + e)
+		
+		e.parentTab = tab
+		return e
+	}
+	
 	async function closeTabPrompt(tab: Tab) {
 		let tabChildren: Tab[] = []
 		
@@ -193,7 +202,8 @@ Do you want to close those too?`,
 		
 		{#each tabs as tab, i (tab.id)}
 			<div bind:this={contentDivElements[i]} class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} tabVisible={selectedIndex == i} {...tab.properties} bind:this={contentElements[i]} on:open on:valueChanged />
+				<svelte:component this={tab.component} tabVisible={selectedIndex == i} {...tab.properties} bind:this={contentElements[i]}
+					on:valueChanged on:open={e => handleOpenWindowEvent(e.detail, tab)} />
 			</div>
 		{/each}
 		
