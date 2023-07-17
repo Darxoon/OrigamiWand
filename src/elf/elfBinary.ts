@@ -8,18 +8,15 @@ export class ElfBinary {
 	sections: Section[]
 	data: {[division in DataDivision]?: any[]}
 	symbolTable: Symbol[]
-	modelSymbolReference: WeakMap<object[]|object, string>
 	
 	constructor(
 		sections: Section[], 
 		data: {[division in DataDivision]?: any[]}, 
 		symbolTable: Symbol[], 
-		modelSymbolReference: WeakMap<any | any[], string>,
 	) {
 		this.sections = sections
 		this.data = data
 		this.symbolTable = symbolTable
-		this.modelSymbolReference = modelSymbolReference
 	}
 	
 	public findSection(name: string): Section {
@@ -145,11 +142,11 @@ export enum DataType {
 	
 	MaplinkHeader,
 	
-	NpcFiles,
-	NpcState,
-	NpcSubState,
-	NpcFace,
-	NpcAnime,
+	ModelAssetGroup,
+	ModelState,
+	ModelFaceGroup,
+	ModelFace,
+	ModelAnimation,
 	
 	ConfettiVersion,
 	ConfettiData,

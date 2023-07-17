@@ -969,14 +969,14 @@ Usage unknown.
 		__displayName: "NPC Model",
 		__countSymbol: "wld::fld::data::modelNpc_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
 	},
 	
-	[DataType.NpcFiles]: {
+	[DataType.ModelAssetGroup]: {
 		__displayName: "Asset Group",
 		__importantField: "fileName",
 		__nestedAllValues: true,
@@ -991,7 +991,7 @@ Usage unknown.
 		field_0x24: "int",
 	},
 	
-	[DataType.NpcState]: {
+	[DataType.ModelState]: {
 		__displayName: "State",
 		__importantField: "description",
 		__childFieldLabel: "faceArrays",
@@ -999,7 +999,7 @@ Usage unknown.
 		__nestedAllValues: true,
 		__objectType: dataDivisions.state,
 		__childTypes: {
-			substates: DataType.NpcSubState,
+			substates: DataType.ModelFaceGroup,
 		},
 		
 		description: new Property("string", `
@@ -1015,13 +1015,13 @@ Some commonly found translations:
 		field_0x14: new Property("int", undefined, {hidden: true}),
 	},
 	
-	[DataType.NpcSubState]: {
+	[DataType.ModelFaceGroup]: {
 		__displayName: "Face Array",
 		__childField: "faces",
 		__nestedAllValues: true,
 		__objectType: dataDivisions.subState,
 		__childTypes: {
-			faces: DataType.NpcFace,
+			faces: DataType.ModelFace,
 		},
 		
 		field_0x0: "int",
@@ -1031,13 +1031,13 @@ Some commonly found translations:
 		field_0x14: "int",
 	},
 	
-	[DataType.NpcFace]: {
+	[DataType.ModelFace]: {
 		__displayName: "Face",
 		__childField: "animations",
 		__nestedAllValues: true,
 		__objectType: dataDivisions.face,
 		__childTypes: {
-			animations: DataType.NpcAnime,
+			animations: DataType.ModelAnimation,
 		},
 		
 		field_0x0: "int",
@@ -1048,7 +1048,7 @@ Some commonly found translations:
 		field_0x14: "int",
 	},
 	
-	[DataType.NpcAnime]: {
+	[DataType.ModelAnimation]: {
 		__displayName: "Animation",
 		__nestedAllValues: true,
 		__objectType: dataDivisions.anime,
@@ -1127,8 +1127,8 @@ Some commonly found translations:
 		__displayName: "Item Model",
 		__countSymbol: "wld::fld::data::modelItem_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1138,8 +1138,8 @@ Some commonly found translations:
 		__displayName: "Gobj Model",
 		__countSymbol: "wld::fld::data::modelGobj_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1149,8 +1149,8 @@ Some commonly found translations:
 		__displayName: "Hariko Model",
 		__countSymbol: "wld::fld::data::modelHariko_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1160,8 +1160,8 @@ Some commonly found translations:
 		__displayName: "Navigator Model",
 		__countSymbol: "wld::fld::data::modelNavi_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1171,8 +1171,8 @@ Some commonly found translations:
 		__displayName: "Mobj Model",
 		__countSymbol: "wld::fld::data::modelMobj_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1182,8 +1182,8 @@ Some commonly found translations:
 		__displayName: "Player Model",
 		__countSymbol: "wld::fld::data::modelPlayer_num",
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,
@@ -1629,8 +1629,8 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		__countSymbol: "wld::btl::data::modelBattle_num",
 		__objectType: dataDivisions.model,
 		__childTypes: {
-			assetGroups: DataType.NpcFiles,
-			states: DataType.NpcState,
+			assetGroups: DataType.ModelAssetGroup,
+			states: DataType.ModelState,
 		},
 		
 		__parent: modelDataType,

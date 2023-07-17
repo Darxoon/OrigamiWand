@@ -102,97 +102,166 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	// there are multiple file formats
 	
 	let data: {[division in DataDivision]?: any[]}
-	let modelSymbolReference: WeakMap<any | any[], string>
-	
 	
 	// Parses the .rodata section from a data_x_model file, since these are always the same and can be reused
-	function parseModelRodata(data: {[division in DataDivision]?: any[]}, mainDataDivision: DataDivision, modelFilesIndices: [Pointer, number][], stateIndices: [Pointer, number][]) {
+	interface RawModelInstance {
+		assetGroups: Pointer
+		assetGroupCount: number
+		states: Pointer
+		stateCount: number
+	}
+	
+	interface ModelInstance {
+		assetGroups: { symbolName: string, children: Instance<DataType.ModelAssetGroup>[] }
+		assetGroupCount: number
+		states: { symbolName: string, children: Instance<DataType.ModelState>[] }
+		stateCount: number
+	}
+	
+	function parseModelRodata(data: {[division in DataDivision]?: any[]}, models: RawModelInstance[]) {
 		const rodataSection = findSection('.rodata')
-		const dataStringSection = findSection('.rodata.str1.1')
+		const stringSection = findSection('.rodata.str1.1')
 		
-		// Why have I been doing it like this anyway?
-		// Wouldn't it be smarter to go through each NPC model, parse its asset groups and states,
-		// then link them back to the original model and then do this recursively for all child objects?
-		// Not even necessarily recursively, just nested instead of this very linear approach
-		// So kind of like how I've been doing it in the serializer
+		// TODO: this could be significantly cleaned up with symbolAddr
 		
-		// wouldn't that be way too much nesting? no thanks
+		// asset groups
+		let allAssetGroups = []
 		
-		function parseObjectsByIndices<T extends DataType>(dataType: T, indices: [Pointer, number][], offsetReference?: Map<number, any>) {
-			return indices.map(([ offset, count ]) => {
-				let result = applyStrings(
-					offset,
-					dataType, 
-					dataStringSection, 
-					allRelocations.get('.rodata'),
-					symbolTable,
+		for (const model of models) {
+			const { assetGroups: offset, assetGroupCount } = model
+			
+			if (offset == undefined || offset == Pointer.NULL) {
+				model.assetGroups = null
+				continue
+			}
+			
+			let children = applyStrings(
+				offset, DataType.ModelAssetGroup, stringSection, 
+				allRelocations.get('.rodata'), symbolTable,
+				
+				parseRawDataSection(rodataSection, assetGroupCount, offset, DataType.ModelAssetGroup), 
+			)
+			
+			let assetGroupObj = {
+				symbolName: findSymbolAt(rodataSection, offset).name,
+				children,
+			}
+			
+			allAssetGroups.push(assetGroupObj);
+			(model as unknown as ModelInstance).assetGroups = assetGroupObj
+		}
+		
+		data.assetGroup = allAssetGroups
+		
+		// states
+		let allStates = []
+		let allFaceGroups = []
+		let allFaces = []
+		let allAnimations = []
+		
+		for (const model of models) {
+			const { states: offset, stateCount } = model
+			
+			if (offset == undefined || offset == Pointer.NULL) {
+				model.states = null
+				continue
+			}
+			
+			let states = applyStrings(
+				offset, DataType.ModelState, stringSection, 
+				allRelocations.get('.rodata'), symbolTable,
+				
+				parseRawDataSection(rodataSection, stateCount, offset, DataType.ModelState), 
+			)
+			
+			let stateObj = {
+				symbolName: findSymbolAt(rodataSection, offset).name,
+				children: states,
+			}
+			
+			allStates.push(stateObj);
+			(model as unknown as ModelInstance).states = stateObj
+			
+			// faceGroups
+			for (const state of states) {
+				const { substates: offset, substateCount } = state
+				
+				if (offset == undefined || offset == Pointer.NULL) {
+					state.substates = null
+					continue
+				}
+				
+				let faceGroups = applyStrings(
+					offset, DataType.ModelFaceGroup, stringSection, 
+					allRelocations.get('.rodata'), symbolTable,
 					
-					parseRawDataSection(rodataSection, count, offset.value, dataType), 
+					parseRawDataSection(rodataSection, substateCount, offset, DataType.ModelFaceGroup), 
 				)
 				
-				offsetReference?.set(offset.value, result)
+				let faceGroupObj = {
+					symbolName: findSymbolAt(rodataSection, offset).name,
+					children: faceGroups,
+				}
 				
-				return result
-			})
+				allFaceGroups.push(faceGroupObj);
+				state.substates = faceGroupObj
+				
+				// faces
+				for (const faceGroup of faceGroups) {
+					const { faces: offset, faceCount } = faceGroup
+					
+					if (offset == undefined || offset == Pointer.NULL) {
+						faceGroup.faces = null
+						continue
+					}
+					
+					let faces = applyStrings(
+						offset, DataType.ModelFace, stringSection, 
+						allRelocations.get('.rodata'), symbolTable,
+						
+						parseRawDataSection(rodataSection, faceCount, offset, DataType.ModelFace), 
+					)
+					
+					let faceObj = {
+						symbolName: findSymbolAt(rodataSection, offset).name,
+						children: faces,
+					}
+					
+					allFaces.push(faceObj);
+					faceGroup.faces = faceObj
+					
+					// animations
+					for (const face of faces) {
+						const { animations: offset, animationCount } = face
+						
+						if (offset == undefined || offset == Pointer.NULL) {
+							face.animations = null
+							continue
+						}
+						
+						let animations = applyStrings(
+							offset, DataType.ModelAnimation, stringSection, 
+							allRelocations.get('.rodata'), symbolTable,
+							
+							parseRawDataSection(rodataSection, animationCount, offset, DataType.ModelAnimation), 
+						)
+						
+						let animationObj = {
+							symbolName: findSymbolAt(rodataSection, offset).name,
+							children: animations,
+						}
+						
+						allAnimations.push(animationObj);
+						face.animations = animationObj
+					}
+				}
+			}
 		}
 		
-		let modelFilesByOffset: Map<number, any> = new Map()
-		let modelFiles = parseObjectsByIndices(DataType.NpcFiles, modelFilesIndices, modelFilesByOffset)
-		
-		data.assetGroup = modelFiles
-		
-		// Replace pointers in Main with the objects they're pointing to
-		for (const instance of data[mainDataDivision]) {
-			instance.assetGroups = modelFilesByOffset.get((instance.assetGroups as Pointer).value)
-		}
-		
-		
-		let statesByOffset = new Map()
-		let states = parseObjectsByIndices(DataType.NpcState, stateIndices, statesByOffset)
-		
-		data.state = states
-		
-		for (const instance of data[mainDataDivision]) {
-			instance.states = statesByOffset.get(instance.states.value)
-		}
-		
-		
-		let substateIndices: [Pointer, number][] = states.flat().map(obj => [obj.substates, obj.substateCount])
-		let substatesByOffset = new Map()
-		
-		let substates = parseObjectsByIndices(DataType.NpcSubState, substateIndices, substatesByOffset)
-		
-		data.subState = substates
-		
-		for (const instance of states.flat()) {
-			instance.substates = substatesByOffset.get(instance.substates.value)
-		}
-		
-		
-		
-		let faceIndices: [Pointer, number][] = substates.flat().map(obj => [obj.faces, obj.faceCount])
-		let facesByOffset = new Map()
-		
-		let faces = parseObjectsByIndices(DataType.NpcFace, faceIndices, facesByOffset)
-		
-		data.face = faces
-		
-		for (const instance of substates.flat()) {
-			instance.faces = facesByOffset.get(instance.faces.value)
-		}
-		
-		
-		let animeIndices: [Pointer, number][] = faces.flat().map(obj => [obj.animations, obj.animationCount])
-		let animesByOffset = new Map()
-		
-		let animes = parseObjectsByIndices(DataType.NpcAnime, animeIndices, animesByOffset)
-		
-		data.anime = animes
-		
-		for (const instance of faces.flat()) {
-			instance.animations = animesByOffset.get(instance.animations.value)
-		}
-
+		data.anime = allAnimations
+		data.face = allFaces
+		data.subState = allFaceGroups
+		data.state = allStates
 	}
 	
 	function findSection(sectionName: string): Section {
@@ -203,6 +272,16 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		let mangledName = mangleIdentifier(name)
 		return symbolTable.find(symbol => symbol.name === mangledName)
 	}
+	
+	function findSymbolAt(section: Section, location: Pointer) {
+		return symbolTable.find(symbol => symbol.location.equals(location) && sections[symbol.sectionHeaderIndex] == section)
+	}
+	
+	// TODO: useful for future symbolAddr
+	// function findLinkedToSymbol(section: Section, location: Pointer): Symbol {
+	// 	let relocation = allRelocations.get(section.name).get(location.value)
+	// 	return symbolTable.find(s => s.location.equals(relocation.targetOffset))
+	// }
 	
 	// parse data according to data type
 	switch (dataType) {
@@ -263,12 +342,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(dataSection, dataCount, 0, dataType), 
 			)
 			
-			modelSymbolReference = new WeakMap(data.main.map(obj => [obj, obj.id as string]))
-			
-			let modelFilesIndices: [Pointer, number][] = data.main.map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
-			let stateIndices: [Pointer, number][] = data.main.map((obj: any) => [obj.states, obj.stateCount])
-			
-			parseModelRodata(data, 'main', modelFilesIndices, stateIndices)
+			parseModelRodata(data, data.main)
 			
 			break
 		}
@@ -521,12 +595,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			data.model = models
 			
 			// model rodata stuff (same as in data_npc_model.elf)
-			let modelFilesIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.assetGroups, obj.assetGroupCount])
-			let stateIndices: [Pointer, number][] = data.model.map((obj: any) => [obj.states, obj.stateCount])
-			
-			modelSymbolReference = new WeakMap(data.model.map(obj => [obj, obj.id as string]))
-			
-			parseModelRodata(data, 'model', modelFilesIndices, stateIndices)
+			parseModelRodata(data, data.model)
 			
 			let partsSymbol = findSymbol("wld::btl::data::s_partsData")
 			let parts = parseSymbol(dataSection, stringSection, partsSymbol, DataType.BtlPart, -1)
@@ -556,6 +625,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					parseRawDataSection(dataSection, 1, offset, DataType.BtlAttackRange), 
 				)
 				
+				// attackRange is singular because it ony contains one item per symbol
 				let attackRange = {
 					symbolName,
 					item,
@@ -718,7 +788,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 		}
 	}
 	
-	let binary = new ElfBinary(sections, data, symbolTable, modelSymbolReference)
+	let binary = new ElfBinary(sections, data, symbolTable)
 	
 	console.log('binary', binary)
 	console.log('data', data)
