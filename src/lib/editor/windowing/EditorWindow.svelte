@@ -142,12 +142,12 @@
 		}
 	}
 	
-	function handleOpenWindowEvent(e: unknown, tab: Tab): OpenWindowEvent {
+	function handleOpenWindowEvent(e: unknown, tab: Tab) {
 		if (!(e instanceof OpenWindowEvent))
 			throw new TypeError("Expected an OpenWindowEvent as event detail for open event, not " + e)
 		
 		e.parentTab = tab
-		return e
+		dispatch('open', e)
 	}
 	
 	async function closeTabPrompt(tab: Tab) {

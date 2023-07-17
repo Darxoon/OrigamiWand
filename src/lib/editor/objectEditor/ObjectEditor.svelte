@@ -2,7 +2,7 @@
 	import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { toReadableString } from "$lib/util";
-	import { createEventDispatcher, onMount } from "svelte";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	
 	import { dataTypeColors, defaultDataTypeColor, defaultObjectEditorHighlight, objectEditorHighlights } from "./dataTypeColors";
 	import CrossObjectLink from "./CrossObjectLink.svelte";
@@ -65,19 +65,27 @@
 		// @ts-ignore
 		feather.replace()
 		
-		function viewportCheck() {
-			if (!hasEnteredViewport && editor?.getBoundingClientRect().y < window.innerHeight) {
-				hasEnteredViewport = true
-				dispatch('appear')
-			}
-		}
-		
-		window.addEventListener('scroll', e => {
-			viewportCheck()
-		})
+		window.addEventListener('scroll', viewportCheck)
+		window.addEventListener('mousemove', onMouseMove)
 		
 		viewportCheck()
 	})
+	
+	onDestroy(() => {
+		window.removeEventListener('scroll', viewportCheck)
+		window.removeEventListener('mousemove', onMouseMove)
+	})
+	
+	function viewportCheck() {
+		if (!hasEnteredViewport && editor?.getBoundingClientRect().y < window.innerHeight) {
+			hasEnteredViewport = true
+			dispatch('appear')
+		}
+	}
+	
+	function onMouseMove(e: MouseEvent) {
+		mouseY = e.clientY
+	}
 	
 	function areIconsShown(i: number, mouseY: number) {
 		return mouseInside
@@ -151,7 +159,7 @@
 <svelte:options accessors={true} />
 
 <div class="card editor" style="--bg-card: {actualBackgroundColor}; --bg-label-highlight: {actualLabelHighlightColor}" bind:this={editor}
-		on:mousemove={e => mouseY = e.clientY} on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
+		on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	
 	<div class="title" class:rotated={open}
 		on:click={onTitleClick} on:keypress={keyPress} tabindex="0" role="button">
