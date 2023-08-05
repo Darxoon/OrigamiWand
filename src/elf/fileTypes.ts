@@ -1705,12 +1705,33 @@ To give mutiple attributes, pick them and add them together. Known Values:
 		field_0x100: "int",
 		jumpResistance: new Property("float", `
 Resistance to this type of attack.
-Known Values:
-
-* -1012.0 = -998440960 = 0.5 Damage
-* -999.0 = -998653952 = No Damage
-* -2001.0 = -990240768 = Does 2 Damage
-* -1001.0 = -998621184 =  Does 1.5 damage`),
+-999    Nullifies all damage
+-1001    1.5x damage multiplier
+-1002    2x damage multiplier
+-1003    3x damage multiplier
+-1004    4x damage multiplier
+-1005    5x damage multiplier
+-1006    6x damage multiplier
+-1007    8x damage multiplier
+-1008    10x damage multiplier
+-1011    Deals 3/4th of original damage
+-1012    Deals 1/2th of original damage
+-1013    Deals 1/3rd of original damage
+-1014    Deals 1/4th of original damage
+-1015    Deals 1/5th of original damage
+-1016    Deals 1/6th of original damage
+-1017    Deals 1/8th of original damage
+-1018    Deals 1/10th of original damage
+-2000    All damage is reduced to 1
+-2001    All damage is reduced to 2
+-2002    All damage is reduced to 3
+-2003    All damage is reduced to 4
+-2004    All damage is reduced to 5
+-2005    All damage is reduced to 6
+-2006    All damage is reduced to 7
+-2007    All damage is reduced to 8
+-2008    All damage is reduced to 9
+-2009    Nullifies all damage`),
 		hammerResistance: "float",
 		throwHammerResistance: "float",
 		powResistance: "float",
@@ -1773,43 +1794,43 @@ Example:
 		field_0xb8: "int",
 		field_0xbc: "int",
 		skill1Description: "string",
-		skill1MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill1Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0xcc: "int",
 		skill1: "string",
 		skill2Description: "string",
-		skill2MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill2Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0xe4: "int",
 		skill2: "string",
 		skill3Description: "string",
-		skill3MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill3Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0xfc: "int",
 		skill3: "string",
 		skill4Description: "string",
-		skill4MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill4Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x114: "int",
 		skill4: "string",
 		skill5Description: "string",
-		skill5MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill5Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x12c: "int",
 		skill5: "string",
 		skill6Description: "string",
-		skill6MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill6Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x144: "int",
 		skill6: "string",
 		skill7Description: "string",
-		skill7MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill7Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x15c: "int",
 		skill7: "string",
 		skill8Description: "string",
-		skill8MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill8Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x174: "int",
 		skill8: "string",
 		skill9Description: "string",
-		skill9MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill9Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x18c: "int",
 		skill9: "string",
 		skill10Description: "string",
-		skill10MissRate: new Property("float", "Chance that the skill will miss. Higher value means higher miss chance."),
+		skill10Rate: new Property("float", "Chance rate for this skill to activate."),
 		field_0x1a4: "int",
 		skill10: "string",
 		field_0x1b0: "int",
