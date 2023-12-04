@@ -522,11 +522,11 @@ Some examples of functions that are in this namespace:
 		field_0x48: "float",
 		field_0x4c: "float",
 		field_0x50: "float",
+		field_0x54: "int",
 		jumpDefeatMaxReq: new Property("int", "\
 For instant defeat from a jump first strike, Mario's **Max HP** is required to be this value or greater."),
 		hammerDefeatMaxReq: new Property("int", "\
 For instant defeat from a hammer first strike, Mario's **Max HP** is required to be this value or greater."),
-		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
 		firstStrikeItemDrop: "string",
@@ -651,7 +651,7 @@ The position of the character in the air or the ground:
 		field_0xac: "int",
 		field_0xb0: "int",
 		field_0xb4: "int",
-		field_0xb8: "string",
+		initFunction: "string",
 		field_0xc0: "int",
 		field_0xc4: "int",
 		field_0xc8: "int",
@@ -1062,9 +1062,10 @@ Some commonly found translations:
 		
 		id: "string",
 		modelId: "string",
-		field_0x10: "string",
-		field_0x18: "string",
-		field_0x20: "int",
+		scriptName: "string",
+		scriptInstanceName: "string",
+		health: new Property("int", `
+The amount of hits the enemy can take after removing the stickers before it's defeated.`),
 		field_0x24: "int",
 		field_0x28: "float",
 		field_0x2c: "int",
@@ -1076,9 +1077,12 @@ Some commonly found translations:
 		field_0x44: "int",
 		field_0x48: "int",
 		field_0x4c: "int",
-		field_0x50: "string",
-		field_0x58: "string",
-		field_0x60: "string",
+		stopAnimation: new Property("string", `
+Animation that plays when enemy is stopped. Usually from being hit.`),
+		actionAnimation: new Property("string", `
+Animation that plays when enemy performs an action. Usually an attack.`),
+		flagEmitterSet: new Property("string", `
+Flag pop-up effect for when the enemy is hit. Found in effect/particle/EMY.ptcl.zst.`),
 	},
 	
 	// [DataType.DataMuseum]: {
@@ -1705,33 +1709,33 @@ To give mutiple attributes, pick them and add them together. Known Values:
 		field_0x100: "int",
 		jumpResistance: new Property("float", `
 Resistance to this type of attack.
--999    Nullifies all damage
--1001    1.5x damage multiplier
--1002    2x damage multiplier
--1003    3x damage multiplier
--1004    4x damage multiplier
--1005    5x damage multiplier
--1006    6x damage multiplier
--1007    8x damage multiplier
--1008    10x damage multiplier
--1011    Deals 3/4th of original damage
--1012    Deals 1/2th of original damage
--1013    Deals 1/3rd of original damage
--1014    Deals 1/4th of original damage
--1015    Deals 1/5th of original damage
--1016    Deals 1/6th of original damage
--1017    Deals 1/8th of original damage
--1018    Deals 1/10th of original damage
--2000    All damage is reduced to 1
--2001    All damage is reduced to 2
--2002    All damage is reduced to 3
--2003    All damage is reduced to 4
--2004    All damage is reduced to 5
--2005    All damage is reduced to 6
--2006    All damage is reduced to 7
--2007    All damage is reduced to 8
--2008    All damage is reduced to 9
--2009    Nullifies all damage`),
+-999.0    Nullifies all damage
+-1001.0    1.5x damage multiplier
+-1002.0    2x damage multiplier
+-1003.0    3x damage multiplier
+-1004.0    4x damage multiplier
+-1005.0    5x damage multiplier
+-1006.0    6x damage multiplier
+-1007.0    8x damage multiplier
+-1008.0    10x damage multiplier
+-1011.0    Deals 3/4th of original damage
+-1012.0    Deals 1/2th of original damage
+-1013.0    Deals 1/3rd of original damage
+-1014.0    Deals 1/4th of original damage
+-1015.0    Deals 1/5th of original damage
+-1016.0    Deals 1/6th of original damage
+-1017.0    Deals 1/8th of original damage
+-1018.0    Deals 1/10th of original damage
+-2000.0    All damage is reduced to 1
+-2001.0    All damage is reduced to 2
+-2002.0    All damage is reduced to 3
+-2003.0    All damage is reduced to 4
+-2004.0    All damage is reduced to 5
+-2005.0    All damage is reduced to 6
+-2006.0    All damage is reduced to 7
+-2007.0    All damage is reduced to 8
+-2008.0    All damage is reduced to 9
+-2009.0    Nullifies all damage`),
 		hammerResistance: "float",
 		throwHammerResistance: "float",
 		powResistance: "float",
@@ -1886,26 +1890,26 @@ Example:
 		field_0x18: "int",
 		field_0x1c: "int",
 		field_0x20: "int",
-		field_0x24: "int",
-		field_0x28: "int",
-		field_0x2c: "int",
-		field_0x30: "int",
+		ringSection2: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
+		rotation2: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
+		rangeWidth2: new Property("int", "The width that the attack range has"),
+		rangeLength2: new Property("int", "The length that the arrack range has"),
 		field_0x34: "int",
 		field_0x38: "int",
 		field_0x3c: "int",
 		field_0x40: "int",
-		field_0x44: "int",
-		field_0x48: "int",
-		field_0x4c: "int",
-		field_0x50: "int",
+		ringSection3: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
+		rotation3: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
+		rangeWidth3: new Property("int", "The width that the attack range has"),
+		rangeLength3: new Property("int", "The length that the arrack range has"),
 		field_0x54: "int",
 		field_0x58: "int",
 		field_0x5c: "int",
 		field_0x60: "int",
-		field_0x64: "int",
-		field_0x68: "int",
-		field_0x6c: "int",
-		field_0x70: "int",
+		ringSection4: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
+		rotation4: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
+		rangeWidth4: new Property("int", "The width that the attack range has"),
+		rangeLength4: new Property("int", "The length that the arrack range has"),
 		field_0x74: "int",
 		field_0x78: "int",
 		field_0x7c: "int",
@@ -2447,7 +2451,9 @@ The background music .opus file that plays during the battle. It is found in rom
 		field_0xb8: "string",
 		field_0xc0: "string",
 		field_0xc8: "string",
-		field_0xd0: "string",
+		linkedWaveBattles: new Property("string", `
+Specific battles that link to this one to start a wave battle.
+`),
 		field_0xd8: "string",
 		rotationObstacle: new Property("string", `
 The special gimmick for a fight to apply for rotating the board, mostly used by boss battles. Possible values:
