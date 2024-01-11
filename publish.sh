@@ -18,14 +18,6 @@ if [ $? != 0 ]; then
     exit
 fi
 
-git switch build > /dev/null
-
 echo
-git merge master
-
-echo
-git switch master > /dev/null
-
-echo
-echo 'Build instruction (ran in build branch):'
+echo 'Build instruction:'
 echo PUBLIC_OW_VERSION='"'"$tag"'"' PUBLIC_VERSION_TIMESTAMP=$(date +%s)000 PUBLIC_IS_DEV_VERSION=0 PUBLIC_DEBUG=0 npm run build

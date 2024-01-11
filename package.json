@@ -15,7 +15,6 @@
 		"@sveltejs/kit": "^1.7.2",
 		"@tsconfig/svelte": "^3.0.0",
 		"@types/cookie": "^0.4.1",
-		"node-sass": "^7.0.1",
 		"sass": "^1.54.0",
 		"svelte": "^3.49.0",
 		"svelte-check": "^2.8.0",
