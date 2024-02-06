@@ -1,6 +1,8 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
 
+const isDevVersion = !!parseInt(process.env.PUBLIC_IS_DEV_VERSION ?? "1")
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
@@ -8,6 +10,9 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
+		paths: {
+			base: isDevVersion ? "" : "/OrigamiWand",
+		},
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
