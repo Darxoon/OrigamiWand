@@ -16,13 +16,16 @@ jobs:
       
     - name: Install npm dependencies
       run: npm install
-      
+    
+    - name: Print latest tag name
+      run: git for-each-ref --count=1 --sort=-taggerdate --format '%(tag)' refs/tags
+    
     - name: Get latest git tag
       id: get_latest_tag
-      run: echo "TAG_NAME=$(git for-each-ref --count=1 --sort=-taggerdate --format '%(tag)' refs/tags)" >> $GITHUB_OUTPUT
+      run: echo "TAG_NAME=$(git for-each-ref --count=1 --sort=-taggerdate --format '%(tag)' refs/tags)" >> $GITHUB_ENV
       
     - name: Build OrigamiWand
-      run: PUBLIC_OW_VERSION="${{ steps.get_latest_tag.outputs.TAG_NAME }}" PUBLIC_VERSION_TIMESTAMP=$(date +%s)000 PUBLIC_IS_DEV_VERSION=0 PUBLIC_DEBUG=0 npm run build
+      run: PUBLIC_OW_VERSION="$TAG_NAME" PUBLIC_VERSION_TIMESTAMP=$(date +%s)000 PUBLIC_IS_DEV_VERSION=0 PUBLIC_DEBUG=0 npm run build
     
     - name: Upload build folder
       uses: actions/upload-artifact@v4
