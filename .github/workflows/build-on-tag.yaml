@@ -17,6 +17,9 @@ jobs:
     - name: Install npm dependencies
       run: npm install
     
+    - name: Print all tags
+      run: git tag
+    
     - name: Print latest tag name
       run: git for-each-ref --count=1 --sort=-taggerdate --format '%(tag)' refs/tags
     
