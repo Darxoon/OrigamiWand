@@ -143,7 +143,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			)
 			
 			let assetGroupObj = {
-				symbolName: findSymbolAt(rodataSection, offset).name,
+				symbolName: demangle(findSymbolAt(rodataSection, offset).name),
 				children,
 			}
 			
@@ -175,7 +175,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			)
 			
 			let stateObj = {
-				symbolName: findSymbolAt(rodataSection, offset).name,
+				symbolName: demangle(findSymbolAt(rodataSection, offset).name),
 				children: states,
 			}
 			
@@ -199,7 +199,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				)
 				
 				let faceGroupObj = {
-					symbolName: findSymbolAt(rodataSection, offset).name,
+					symbolName: demangle(findSymbolAt(rodataSection, offset).name),
 					children: faceGroups,
 				}
 				
@@ -223,7 +223,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					)
 					
 					let faceObj = {
-						symbolName: findSymbolAt(rodataSection, offset).name,
+						symbolName: demangle(findSymbolAt(rodataSection, offset).name),
 						children: faces,
 					}
 					
@@ -247,7 +247,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 						)
 						
 						let animationObj = {
-							symbolName: findSymbolAt(rodataSection, offset).name,
+							symbolName: demangle(findSymbolAt(rodataSection, offset).name),
 							children: animations,
 						}
 						
@@ -274,7 +274,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	}
 	
 	function findSymbolAt(section: Section, location: Pointer) {
-		return symbolTable.find(symbol => symbol.location.equals(location) && sections[symbol.sectionHeaderIndex] == section)
+		return symbolTable.find(symbol => symbol.location.equals(location) && sections[symbol.sectionHeaderIndex] == section && symbol.info != 0)
 	}
 	
 	// TODO: useful for future symbolAddr
