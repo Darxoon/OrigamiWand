@@ -1510,17 +1510,20 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		field_0x1c: "int",
 		field_0x20: "int",
 		field_0x24: "int",
-		availabilityEvent: "string",
+		availabilityEvent: new Property("string", `
+The name of the event function that needs to be triggered before this item shows up in the shop.`),
 		field_0x30: "string",
 		field_0x38: "string",
 		field_0x40: "string",
 		field_0x48: "int",
 		field_0x4c: "int",
-		placementBone: "string",
+		placementBone: new Property("string", `
+The name of the bone on the map model's skeleton that the item will be tied to. This is how items are shown in shops.`),
 		field_0x58: "int",
 		field_0x5c: "int",
 		field_0x60: "int",
-		field_0x64: "int",
+		selectionOrder: new Property("int", `
+The order in which items can be selected starting from 0, 1, 2 etc.`),
 		field_0x68: "int",
 		field_0x6c: "int",
 	},
@@ -1653,8 +1656,10 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0x18: "int",
 		field_0x1c: "float",
 		field_0x20: "string",
-		jumpWalkDistance: "float",
-		jumpHeightDistance: "float",
+		jumpWalkDistance: new Property("float", `
+The distance forward Mario will walk before jumping.`),
+		jumpHeightDistance: new Property("float", `
+The distance upward Mario will jump before landing the attack.`),
 		field_0x30: "float",
 		field_0x34: "float",
 		field_0x38: "float",
@@ -1668,10 +1673,10 @@ TODO: verify that every field that is marked as a string is actually a string`),
 		field_0x58: "float",
 		field_0x5c: "float",
 		field_0x60: "float",
-		field_0x64: "float",
+		damageNumberPosition: "float",
 		field_0x68: "float",
 		field_0x6c: "float",
-		field_0x70: "float",
+		targetCursorPosition: "float",
 		field_0x74: "float",
 		field_0x78: "float",
 		field_0x7c: "float",
@@ -1701,8 +1706,9 @@ To give mutiple attributes, pick them and add them together. Known Values:
 * 2 = Floating
 * 4 = Flying
 * 16 = On Fire
-* 32 = Is Cold?
+* 32 = Is Cold
 * 256 = Spiked
+* 1024 = Shelled
 * 2048 = Transforms
 * 4096 = Flippable`),
 		field_0xfc: "int",
@@ -2004,13 +2010,20 @@ For some reason, the naming scheme of the attacks themselves does not say much a
 Many with the tier 'kirakira' only have 'kira' in their name while many 'kira' attacks do not have
 any indicator in ther name.`),
 		gFXType: new Property("int", `
-Bit field for the attack GFX type. Known values:
+Bit field for the attack GFX type. To have multiple effects, add the values together.
+Known values:
 
 * 2 - normal
 * 128 - earth
 * 256 - water
 * 512 - fire
 * 1024 - ice
+* 2048 - electric
+* 4096 - rubber band effect 1
+* 8192 - rubber band effect 2 (binding effect)
+* 16384 - rubber band effect 3? (blast effect)
+* 131072 - confetti effect? (confetti is red so unsure if its fire related)
+* 262144 - Blooper Ink
 * ...`),
 		field_0xec: "int",
 		scriptPath: "string",
@@ -2484,8 +2497,8 @@ The special gimmick for a fight to apply for sliding the board, mostly used by b
 		field_0x108: "int",
 		field_0x10c: "int",
 		field_0x110: "int",
-		field_0x114: "int",
-		field_0x118: new Property("int", "Related to shoe goombas, according to the old btlSet implementation."),
+		spawnMechaKoopa: new Property("int", "Percentage out of 100 that a Mecha Koopa will spawn in battle."),
+		spawnShoeGoomba: new Property("int", "Percentage out of 100 that a Shoe Goomba will spawn in battle."),
 		field_0x11c: "int",
 	},
 	
@@ -2505,7 +2518,14 @@ Used to be called linePosition but is always -1 in the game. Its actual behavior
 		field_0x14: "int",
 		ringSection: "int",
 		lineSection: "int",
-		field_0x20: new Property("string", 'Examples: "koura", "sleep", "turn"'),
+		startingState: new Property("string", `
+The state the enemy will start the battle in. Possible values:
+
+ * "koura" = Inside Shell
+ * "sleep" = Sleeping
+ * "turn" = Flipped Over
+ * "pichi" = Fish out of water
+`),
 		field_0x28: new Property("string", "Examples: 回転 (rotate), Lab, RetrySecond"),
 		puzzleSolverCircle: new Property("string", `
 Sometimes contains unicode circle character "〇".
