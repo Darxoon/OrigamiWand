@@ -8,6 +8,15 @@ const config = {
 	build: {
 		target: [ 'es2020' ],
 		sourcemap: false,
+		rollupOptions: {
+			output: {
+				manualChunks(id) {
+					if (id.includes('zstd-codec')) {
+						return 'zstd-codec'
+					}
+				}
+			}
+		}
 	},
 	resolve: {
 		alias: {

@@ -1,6 +1,5 @@
 import type { ElfBinary } from "paper-mario-elfs/elfBinary"
 import { DataType } from "paper-mario-elfs/dataType"
-import { ZstdCodec } from "zstd-codec"
 import type { Tab } from "./editor/globalDragging"
 import CardListEditor from "./editor/fileEditor/CardListEditor.svelte"
 
@@ -88,7 +87,10 @@ function downloadURL(url: string, fileName: string) {
 	a.remove();
 };
 
-export function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+export async function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+	const { ZstdCodec } = await import('zstd-codec')
+	console.log('loading zstd-codec')
+	
 	return new Promise((resolve, reject) => {
 		ZstdCodec.run(zstd => {
 			const simple = new zstd.Simple();
@@ -98,7 +100,10 @@ export function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
 	})
 }
 
-export function compress(buffer: ArrayBuffer) {
+export async function compress(buffer: ArrayBuffer) {
+	const { ZstdCodec } = await import('zstd-codec')
+	console.log('loading zstd-codec')
+	
 	return new Promise<ArrayBuffer>((resolve, reject) => {
 		ZstdCodec.run(zstd => {
 			let simple = new zstd.Simple()
