@@ -1,4 +1,4 @@
-import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+import type { DataType } from "paper-mario-elfs/dataType";
 import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
 import { SvelteComponent } from "svelte";
 import type { Tab } from "./globalDragging";

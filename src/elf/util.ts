@@ -1,4 +1,5 @@
-import { DataType, ElfBinary } from "./elfBinary"
+import type { ElfBinary } from "./elfBinary"
+import { DataType } from "./dataType"
 import { FILE_TYPES } from "./fileTypes"
 import { demangle, incrementName, mangleIdentifier } from "./nameMangling"
 import type { Symbol } from "./types"

@@ -1,4 +1,4 @@
-import { dataDivisions, DataType } from "paper-mario-elfs/elfBinary";
+import { DataType } from "paper-mario-elfs/dataType";
 
 export enum DataTypeExtension {
 	HasComplexEditor,

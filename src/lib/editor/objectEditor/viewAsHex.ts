@@ -1,4 +1,4 @@
-import type { DataType } from "paper-mario-elfs/elfBinary";
+import type { DataType } from "paper-mario-elfs/dataType";
 import { writable } from "svelte/store";
 
 export const hexFields = writable({})

@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { toReadableString } from "$lib/util";
-    import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import type { ElfBinary } from "paper-mario-elfs/elfBinary";
+	import type { DataType } from "paper-mario-elfs/dataType";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
     import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
     import { afterUpdate } from "svelte";
-    import ObjectEditor from "./ObjectEditor.svelte";
+	
+    import { toReadableString } from "$lib/util";
     import { nonnativeButton } from "$lib/nonnativeButton";
+	
+    import ObjectEditor from "./ObjectEditor.svelte";
 
 	export let dataType: DataType
 	export let visible: boolean

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DataType } from "paper-mario-elfs/elfBinary";
+	import { DataType } from "paper-mario-elfs/dataType";
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte";
 	

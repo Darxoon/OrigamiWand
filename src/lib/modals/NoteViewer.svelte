@@ -3,7 +3,7 @@
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import Alert from "../modal/Alert.svelte";
 	import StringViewer from "../modal/StringViewer.svelte";
-	import { DataType } from "paper-mario-elfs/elfBinary";
+	import { DataType } from "paper-mario-elfs/dataType";
 	import { toReadableString } from "$lib/util";
 
 	let wrapper: HTMLDivElement

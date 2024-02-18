@@ -1,7 +1,7 @@
 <script lang="ts">
-import { afterUpdate } from "svelte";
+	import { afterUpdate } from "svelte";
 
-import Alert from "./Alert.svelte";
+	import Alert from "./Alert.svelte";
     import { nonnativeButton } from "$lib/nonnativeButton";
 
 	export let title: string

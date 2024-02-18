@@ -47,7 +47,7 @@ export class BinaryReader {
 			this.dataView = buffer
 		} else if (buffer instanceof Uint8Array) {
 			this.arrayBuffer = buffer.buffer
-			this.dataView = new DataView(buffer)
+			this.dataView = new DataView(buffer.buffer)
 		}
 		
 		this.littleEndian = littleEndian
@@ -156,7 +156,7 @@ export class BinaryWriter {
 			this.dataView = buffer
 		} else if (buffer instanceof Uint8Array) {
 			this.arrayBuffer = buffer.buffer
-			this.dataView = new DataView(buffer)
+			this.dataView = new DataView(buffer.buffer)
 		}
 	}
 	

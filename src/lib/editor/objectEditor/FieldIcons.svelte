@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataType } from "paper-mario-elfs/elfBinary";
+	import type { DataType } from "paper-mario-elfs/dataType";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { showModal } from "$lib/modal/modal";
 	import TextAlert from "$lib/modal/TextAlert.svelte";

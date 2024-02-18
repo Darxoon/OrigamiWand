@@ -1,4 +1,5 @@
-import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary"
+import type { ElfBinary } from "paper-mario-elfs/elfBinary"
+import { DataType } from "paper-mario-elfs/dataType"
 import { ZstdCodec } from "zstd-codec"
 import type { Tab } from "./editor/globalDragging"
 import CardListEditor from "./editor/fileEditor/CardListEditor.svelte"

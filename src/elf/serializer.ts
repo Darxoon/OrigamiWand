@@ -1,4 +1,5 @@
-import { DataType, ElfBinary, Pointer } from "./elfBinary";
+import { ElfBinary, Pointer } from "./elfBinary";
+import { DataType } from "./dataType";
 import { FILE_TYPES } from "./fileTypes";
 import type { Instance } from "./fileTypes";
 import { BinaryWriter } from "./misc";

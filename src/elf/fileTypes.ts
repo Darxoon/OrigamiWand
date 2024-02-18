@@ -1,4 +1,5 @@
-import { dataDivisions, DataType, Pointer, type DataDivision } from "./elfBinary";
+import { dataDivisions, Pointer, type DataDivision } from "./elfBinary";
+import { DataType } from "./dataType";
 import { Vector3 } from "./misc";
 import { ValueUuid, VALUE_UUID, type UuidTagged } from "./valueIdentifier";
 

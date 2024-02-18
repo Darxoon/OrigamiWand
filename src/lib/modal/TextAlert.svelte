@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Alert from "./Alert.svelte";
-import StringViewer from "./StringViewer.svelte";
+	import StringViewer from "./StringViewer.svelte";
 
 	export let title: string
 	export let content: string

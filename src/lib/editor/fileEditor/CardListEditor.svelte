@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
+    import type { ElfBinary } from "paper-mario-elfs/elfBinary";
     import type { UuidTagged } from "paper-mario-elfs/valueIdentifier";
+	import { DataType } from "paper-mario-elfs/dataType";
     import ElfEditor from "./cardListEditor/LinearEditor.svelte";
     import InnerIndexPageEditor from "./cardListEditor/InnerIndexPageEditor.svelte";
     import { DataTypeExtension, dataTypeExtensions } from "./dataTypeExtensions";

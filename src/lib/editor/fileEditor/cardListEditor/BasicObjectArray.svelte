@@ -1,6 +1,7 @@
 <script lang="ts">
     import ObjectEditor from "$lib/editor/objectEditor/ObjectEditor.svelte";
-    import { DataType, type ElfBinary } from "paper-mario-elfs/elfBinary";
+    import type { ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType } from "paper-mario-elfs/dataType";
     import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
     import { demangle } from "paper-mario-elfs/nameMangling";
     import { duplicateObjectInBinary, duplicateSymbolInBinary } from "paper-mario-elfs/util";

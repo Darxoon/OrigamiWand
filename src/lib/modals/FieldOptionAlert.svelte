@@ -1,11 +1,13 @@
 <script lang="ts">
 	import InputField from "$lib/editor/objectEditor/InputField.svelte";
 	import { hexFields, setHexField } from "$lib/editor/objectEditor/viewAsHex";
-	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	
+	import type { ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType } from "paper-mario-elfs/dataType";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import { onMount } from "svelte";
-	import StringViewer from "../modal/StringViewer.svelte";
 
+	import StringViewer from "../modal/StringViewer.svelte";
 	import TabbedAlert from "../modal/TabbedAlert.svelte"
 
 	export let dataType: DataType

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import type { DataType } from "paper-mario-elfs/dataType";
 	import { FILE_TYPES, type Property, type PropertyType } from "paper-mario-elfs/fileTypes";
 	import Alert from "../modal/Alert.svelte";
 	import StringViewer from "../modal/StringViewer.svelte";
     import { toReadableString } from "$lib/util";
-    import type { DataType } from "paper-mario-elfs/elfBinary";
 
 	export let allMetadata: Map<DataType, {[fieldName: string]: Property<PropertyType>}>
 	

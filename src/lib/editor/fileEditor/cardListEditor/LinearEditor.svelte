@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { afterUpdate } from "svelte";
-	import { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import type { ElfBinary } from "paper-mario-elfs/elfBinary";
+	import { DataType } from "paper-mario-elfs/dataType";
 	import { FILE_TYPES } from "paper-mario-elfs/fileTypes";
 	import ObjectEditor from "$lib/editor/objectEditor/ObjectEditor.svelte"
 	import type { SearchIndex } from "$lib/editor/search/searchIndex";

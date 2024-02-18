@@ -1,4 +1,5 @@
-import { DataType, ElfBinary, Pointer, type DataDivision } from "./elfBinary";
+import { ElfBinary, Pointer, type DataDivision } from "./elfBinary";
+import { DataType } from "./dataType";
 import { FILE_TYPES } from "./fileTypes";
 import type { Instance } from "./fileTypes";
 import { BinaryReader, Vector3 } from "./misc";

@@ -1,4 +1,4 @@
-import type { DataType } from "./elfBinary"
+import type { DataType } from "./dataType"
 
 export const VALUE_UUID = Symbol("VALUE_UUID")
 export const DATA_TYPE = Symbol("DATA_TYPE")
