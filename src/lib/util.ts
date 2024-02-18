@@ -103,7 +103,7 @@ export function compress(buffer: ArrayBuffer) {
 			let simple = new zstd.Simple()
 			
 			console.log('compressing file with size of', buffer.byteLength)
-			resolve(simple.compress(new Uint8Array(buffer)).buffer)
+			resolve(simple.compress(new Uint8Array(buffer), 5).buffer)
 		})
 	})
 }
