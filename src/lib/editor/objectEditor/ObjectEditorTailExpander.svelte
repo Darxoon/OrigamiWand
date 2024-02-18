@@ -48,7 +48,7 @@
 					{#each childContent as child2, i}
 						<ObjectEditor title={`${FILE_TYPES[childDataType].displayName} ${i}`
 							+ (child2[FILE_TYPES[dataType].identifyingField] ? `: ${child2[FILE_TYPES[dataType].identifyingField]}` : "")}
-							dataType={childDataType} obj={child2} />
+							binary={binary} dataType={childDataType} obj={child2} />
 					{/each}
 				{:else}
 					<ObjectEditor dataType={childDataType} obj={childContent} title={`${FILE_TYPES[childDataType].displayName}`

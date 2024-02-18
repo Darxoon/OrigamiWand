@@ -21,7 +21,7 @@
 	export let obj: object
 	export let dataType: DataType | undefined = undefined
 	export let showButtons = true
-	export let binary: ElfBinary = undefined
+	export let binary: ElfBinary
 	
 	export let backgroundColor: string = dataTypeColors[dataType] ?? defaultDataTypeColor
 	export let labelHighlightColor: string = objectEditorHighlights[dataType] ?? defaultObjectEditorHighlight
