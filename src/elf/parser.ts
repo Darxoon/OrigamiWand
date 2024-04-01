@@ -540,14 +540,15 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					parseRawDataSection(dataSection, propertyCount, offset, DataType.UiModelProperty), 
 				)
 				
-				// TODO: try to find the symbol name at offset `offset` rather than making this assumption
-				let attackRange = {
-					symbolName: `wld::fld::data::^s_uiModelPropertyData_${model.id}`,
+				let symbol = findSymbolAt(dataSection, offset) ?? createMissingSymbol(`wld::fld::data::^s_uiModelPropertyData_${model.id}`, dataSection)
+				
+				let properties = {
+					symbolName: demangle(symbol.name),
 					children,
 				}
 				
-				modelProperties.push(attackRange)
-				model.properties = attackRange
+				modelProperties.push(properties)
+				model.properties = properties
 			}
 			
 			data.modelProperty = modelProperties
