@@ -46,15 +46,7 @@ export function duplicateObjectInBinary<T extends object>(binary: ElfBinary, dat
 		for (const [fieldName, fieldValue] of Object.entries(obj) as [string, unknown][]) {
 			const fieldType = FILE_TYPES[dataType].typedef[fieldName]
 			
-			if (fieldType === "pointer" && fieldValue != null) {
-				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
-				const childObjectType = FILE_TYPES[childDataType].objectType
-				
-				let clonedChild = duplicateObjectInBinary(binary, childDataType, binary.data[childObjectType], fieldValue as object, false)
-				clone[fieldName] = clonedChild
-			}
-			
-			if (fieldType === "symbol" && fieldValue != null) {
+			if (fieldType === "symbol" || fieldType === "pointer" && fieldValue != null) {
 				const childDataType = FILE_TYPES[dataType].childTypes[fieldName]
 				const childObjectType = FILE_TYPES[childDataType].objectType
 				
@@ -113,6 +105,8 @@ export function duplicateSymbolInBinary(binary: ElfBinary, originalSymbol: Symbo
 	// insert new symbol into symboltable
 	let originalSymbolIndex = binary.symbolTable.indexOf(originalSymbol)
 	binary.symbolTable.splice(originalSymbolIndex + 1, 0, clonedSymbol)
+	
+	console.log("Duplicating symbol", demangle(originalSymbol.name), "new name:", clonedSymbolName)
 	
 	return clonedSymbol
 }

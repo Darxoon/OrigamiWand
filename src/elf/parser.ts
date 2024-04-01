@@ -86,7 +86,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	let symTabReader = new BinaryReader(symTab.content)
 	
 	while (symTabReader.position < symTab.content.byteLength) {
-		let symbol = new Symbol(symTabReader, stringSection)
+		let symbol = Symbol.fromBinaryWriter(symTabReader, stringSection)
 		symbolTable.push(symbol)
 	}
 	
@@ -106,6 +106,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	// Parses the .rodata section from a data_x_model file, since these are always the same and can be reused
 	interface RawModelInstance {
+		id: string
 		assetGroups: Pointer
 		assetGroupCount: number
 		states: Pointer
@@ -143,8 +144,10 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(rodataSection, assetGroupCount, offset, DataType.ModelAssetGroup), 
 			)
 			
+			let symbol = findSymbolAt(rodataSection, offset) ?? createMissingSymbol(`wld::btl::data::^${model.id}_model_files`, rodataSection)
+			
 			let assetGroupObj = {
-				symbolName: demangle(findSymbolAt(rodataSection, offset).name),
+				symbolName: demangle(symbol.name),
 				children,
 			}
 			
@@ -175,8 +178,10 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				parseRawDataSection(rodataSection, stateCount, offset, DataType.ModelState), 
 			)
 			
+			let symbol = findSymbolAt(rodataSection, offset) ?? createMissingSymbol(`wld::btl::data::^${model.id}_state`, rodataSection)
+			
 			let stateObj = {
-				symbolName: demangle(findSymbolAt(rodataSection, offset).name),
+				symbolName: demangle(symbol.name),
 				children: states,
 			}
 			
@@ -199,8 +204,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 					parseRawDataSection(rodataSection, substateCount, offset, DataType.ModelFaceGroup), 
 				)
 				
+				let symbol = findSymbolAt(rodataSection, offset)
+					?? createMissingSymbol(`wld::btl::data::^${model.id}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`, rodataSection)
+				
 				let faceGroupObj = {
-					symbolName: demangle(findSymbolAt(rodataSection, offset).name),
+					symbolName: demangle(symbol.name),
 					children: faceGroups,
 				}
 				
@@ -223,8 +231,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 						parseRawDataSection(rodataSection, faceCount, offset, DataType.ModelFace), 
 					)
 					
+					let symbol = findSymbolAt(rodataSection, offset)
+						?? createMissingSymbol(`wld::btl::data::^${model.id}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`, rodataSection)
+					
 					let faceObj = {
-						symbolName: demangle(findSymbolAt(rodataSection, offset).name),
+						symbolName: demangle(symbol.name),
 						children: faces,
 					}
 					
@@ -247,8 +258,11 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 							parseRawDataSection(rodataSection, animationCount, offset, DataType.ModelAnimation), 
 						)
 						
+						let symbol = findSymbolAt(rodataSection, offset)
+							?? createMissingSymbol(`wld::btl::data::^${model.id}_${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`, rodataSection)
+					
 						let animationObj = {
-							symbolName: demangle(findSymbolAt(rodataSection, offset).name),
+							symbolName: demangle(symbol.name),
 							children: animations,
 						}
 						
@@ -276,6 +290,25 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 	
 	function findSymbolAt(section: Section, location: Pointer) {
 		return symbolTable.find(symbol => symbol.location.equals(location) && sections[symbol.sectionHeaderIndex] == section && symbol.info != 0)
+	}
+	
+	function createMissingSymbol(name: string, section: Section): Symbol {
+		let symbol = new Symbol()
+		
+		// TODO: these values are only verified to be correct for data_btl's models
+		symbol.name = mangleIdentifier(name)
+		symbol.sectionHeaderIndex = sections.indexOf(section)
+		symbol.info = 1
+		symbol.visibility = 0
+		
+		// will be overwritten in serializer
+		symbol.location = Pointer.NULL
+		symbol.size = 0
+		
+		console.error(`Found missing symbol ${name}, created symbol`, symbol)
+		
+		symbolTable.push(symbol)
+		return symbol
 	}
 	
 	// TODO: useful for future symbolAddr

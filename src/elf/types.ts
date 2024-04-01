@@ -118,15 +118,18 @@ export class Symbol {
 	location: Pointer
 	size: number
 	
-	constructor(reader: BinaryReader, stringSection: Section) {		
-		let namePointer = new Pointer(reader.readInt32())
+	static fromBinaryWriter(reader: BinaryReader, stringSection: Section): Symbol {
+		let symbol = new Symbol()
 		
-		this.name = stringSection.getStringAt(namePointer)
-		this.info = reader.readUint8()
-		this.visibility = reader.readUint8()
-		this.sectionHeaderIndex = reader.readInt16()
-		this.location = new Pointer(Number(reader.readBigInt64()))
-		this.size = Number(reader.readBigInt64())
+		let namePointer = new Pointer(reader.readInt32())
+		symbol.name = stringSection.getStringAt(namePointer)
+		symbol.info = reader.readUint8()
+		symbol.visibility = reader.readUint8()
+		symbol.sectionHeaderIndex = reader.readInt16()
+		symbol.location = new Pointer(Number(reader.readBigInt64()))
+		symbol.size = Number(reader.readBigInt64())
+		
+		return symbol
 	}
 	
 	toBinaryWriter(writer: BinaryWriter, stringTable: Section) {
