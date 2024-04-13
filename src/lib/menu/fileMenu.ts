@@ -120,6 +120,7 @@ async function saveFile() {
 export interface SaveAsDialogResults {
 	fileName: string
 	compressFile: boolean
+	compressionRatio?: number
 	stripFile: boolean
 }
 
@@ -141,7 +142,7 @@ async function openSaveDialog() {
 		compressFile: tab.isCompressed,
 	}
 	
-	let { fileName, compressFile, stripFile } = await showModal<SaveAsDialogResults>(SaveAsDialog, modalOptions)
+	let { fileName, compressFile, compressionRatio, stripFile } = await showModal<SaveAsDialogResults>(SaveAsDialog, modalOptions)
 	
 	fileName = fileName.trim()
 	
@@ -158,7 +159,17 @@ async function openSaveDialog() {
 	}
 	
 	let serialized = serializeElfBinary(dataType, binary)
-	let output = compressFile ? await compress(serialized) : serialized
 	
-	downloadBlob(output, fileName)
+	try {
+		let output = compressFile ? await compress(serialized, compressionRatio) : serialized
+		
+		downloadBlob(output, fileName)
+	} catch (e) {
+		if (typeof e == "string" && e.includes("OOM")) {
+			showModal(TextAlert, {
+				title: "Zstd Error",
+				content: "Not enough memory available for Compression. Try lowering the compression ratio.",
+			})
+		}
+	}
 }

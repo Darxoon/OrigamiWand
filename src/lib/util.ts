@@ -94,22 +94,29 @@ export async function decompress(buffer: ArrayBuffer): Promise<ArrayBuffer> {
 	return new Promise((resolve, reject) => {
 		ZstdCodec.run(zstd => {
 			const simple = new zstd.Simple();
+			const decompressed = simple.decompress(new Uint8Array(buffer))
 			
-			resolve(simple.decompress(new Uint8Array(buffer)).buffer)
+			console.log('decompressed file')
+			resolve(decompressed.buffer)
 		})
 	})
 }
 
-export async function compress(buffer: ArrayBuffer) {
+export async function compress(buffer: ArrayBuffer, compressionRatio = 5): Promise<ArrayBuffer> {
 	const { ZstdCodec } = await import('zstd-codec')
 	console.log('loading zstd-codec')
 	
-	return new Promise<ArrayBuffer>((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		ZstdCodec.run(zstd => {
-			let simple = new zstd.Simple()
-			
-			console.log('compressing file with size of', buffer.byteLength)
-			resolve(simple.compress(new Uint8Array(buffer), 5).buffer)
+			try {
+				let simple = new zstd.Simple()
+				let compressed = simple.compress(new Uint8Array(buffer), compressionRatio)
+				
+				console.log('compressed file with size of', buffer.byteLength, 'and ratio', compressionRatio)
+				resolve(compressed.buffer)
+			} catch (e) {
+				reject(e)
+			}
 		})
 	})
 }

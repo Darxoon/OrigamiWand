@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataType, ElfBinary } from "paper-mario-elfs/elfBinary";
+	import type { DataType } from "paper-mario-elfs/dataType";
 	import { createEventDispatcher, onMount } from "svelte";
     import { DataTypeExtension, dataTypeExtensions } from "../dataTypeExtensions";
     import { nonnativeButton } from "$lib/nonnativeButton";
