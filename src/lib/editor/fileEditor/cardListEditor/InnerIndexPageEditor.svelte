@@ -4,9 +4,11 @@
     import { DataTypeExtension, dataTypeExtensions } from "../dataTypeExtensions";
     import { nonnativeButton } from "$lib/nonnativeButton";
     import { OpenWindowEvent } from "$lib/editor/events";
+    import type { ElfBinary } from "paper-mario-elfs/elfBinary";
 
 	const dispatch = createEventDispatcher()
 	
+	export let binary: ElfBinary
 	export let dataType: DataType
 	export let fileName: string
 	
@@ -31,7 +33,11 @@
 <div class="editor">
 	{#each items as [name, {dataType, label}]}
 		<div class="card link" use:nonnativeButton={() => {
-			dispatch("open", new OpenWindowEvent(`${name} (${fileName})`, dataType))
+			dispatch("open", new OpenWindowEvent(`${name} (${fileName})`, {
+				type: "cardList",
+				binary,
+				dataType,
+			}))
 		}}>
 			<i data-feather="external-link" class="icon-link"></i>
 			<div style="user-select: none">

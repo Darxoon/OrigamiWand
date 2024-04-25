@@ -1,7 +1,6 @@
 import type { ElfBinary } from "paper-mario-elfs/elfBinary"
-import { DataType } from "paper-mario-elfs/dataType"
+import type { DataType } from "paper-mario-elfs/dataType"
 import type { Tab } from "./editor/globalDragging"
-import CardListEditor from "./editor/fileEditor/CardListEditor.svelte"
 
 export function noop() {}
 
@@ -121,31 +120,17 @@ export async function compress(buffer: ArrayBuffer, compressionRatio = 5): Promi
 	})
 }
 
-const nonStandardDataTypes = new Set([
-	DataType.DataConfettiTotalHoleInfo,
-	DataType.DataUi,
-	DataType.DataBtl,
-])
-
 export function createFileTab(fileName: string, binary: ElfBinary, dataType: DataType, isCompressed: boolean): Tab {
-	let isNonStandard = nonStandardDataTypes.has(dataType)
-	
-	let properties: any = {
-		binary,
-		dataType,
-	}
-	
-	if (isNonStandard)
-		properties.fileName = fileName
-	
 	return {
 		id: Symbol(),
 		name: fileName,
-		component: CardListEditor,
 		children: [],
 		isCompressed,
-		binary,
-		properties,
+		content: {
+			type: "cardList",
+			binary,
+			dataType,
+		}
 	}
 }
 

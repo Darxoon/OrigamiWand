@@ -92,6 +92,9 @@
 		objects.push(createObject(dataType))
 		objects = objects
 		
+		if (overrideObjects)
+			overrideObjects = overrideObjects
+		
 		addingNewObject = true
 	}
 	
@@ -137,6 +140,9 @@
 	function deleteAll() {
 		objects.length = 0
 		objects = objects
+		
+		if (overrideObjects)
+			overrideObjects = overrideObjects
 	}
 </script>
 

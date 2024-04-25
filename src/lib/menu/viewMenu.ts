@@ -32,9 +32,15 @@ export function getViewMenu() {
 			{
 				name: "View all Descriptions...",
 				onClick: () => {
-					let dataType = editorStrip.activeTab().properties.dataType
+					let tab = editorStrip.activeTab()
 					
-					viewAllDescriptions(dataType)
+					if (tab.content.type === "cardList") {
+						const { dataType } = tab.content
+						viewAllDescriptions(dataType)
+					} else {
+						// TODO: ideally, this menu option should just be grayed out in the first place
+						throw new Error("Cannot view descriptions on non-card list page")
+					}
 				}
 			},
 		],

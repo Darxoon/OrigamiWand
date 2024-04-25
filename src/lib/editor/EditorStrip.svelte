@@ -8,6 +8,7 @@
     import logging from "$lib/logging";
     import { OpenWindowEvent } from "./events";
     import CardListEditor from "./fileEditor/CardListEditor.svelte";
+    import serializeElfBinary from "paper-mario-elfs/serializer";
 
 	let tabs: Tab[][] = [[]]
 	let selectedTabs = [0]
@@ -80,19 +81,26 @@
 		return tabs[activeEditor][selectedTabs[activeEditor]]
 	}
 	
-	export function serialize(serializer: (dataType, binary) => any) {
-		return tabs.map(currentTabs => {
-			const serializedTabs = currentTabs.flatMap<SaveFile>(tab => {
-				const { dataType, binary } = tab.properties
+	// used for temporary saves
+	export function toSaveData(): SaveFile[][] {
+		return tabs.map(currentTabs => windowToSaveFiles(currentTabs))
+	}
+	
+	function windowToSaveFiles(windowTabs: Tab[]): SaveFile[] {
+		return windowTabs.flatMap(tab => {
+			const { name, isCompressed } = tab
+			const { content } = tab
+			
+			if (content.type === "cardList") {
+				const { dataType, binary } = content
 				
-				return tab.parentId ? [] : {
-					name: tab.name,
+				return {
+					name,
 					dataType,
-					isCompressed: tab.isCompressed,
-					content: serializer(dataType, binary),
+					isCompressed,
+					content: serializeElfBinary(dataType, binary)
 				}
-			})
-			return serializedTabs
+			}
 		})
 	}
 	
@@ -117,6 +125,10 @@
 				return
 			}
 		}
+	}
+	
+	function tabIdentity(tab: Tab): Tab {
+		return tab
 	}
 </script>
 
@@ -155,7 +167,7 @@
 					let { detail } = e
 					
 					if (detail instanceof OpenWindowEvent) {
-						const { title, component, dataType, overrideObjects, parentTab } = detail
+						const { title, parentTab, content } = detail
 						
 						if (parentTab == undefined) {
 							throw new Error(`OpenWindowEvent with title "${title}" does not have a parentTab set and thus cannot be handled.`)
@@ -164,20 +176,14 @@
 						const childID = Symbol(`Tab ID ${detail.title}`)
 						tabList[selectedTabs[i]].children.push(childID)
 						
-						let tab = {
+						let tab = tabIdentity({
 							id: childID,
 							parentId: parentTab.id,
 							name: title,
-							component: component ?? CardListEditor,
-							binary: parentTab.binary,
-							properties: {
-								dataType,
-								binary: parentTab.binary,
-								overrideObjects: overrideObjects,
-							},
 							isCompressed: false,
 							children: [],
-						}
+							content,
+						})
 						
 						if (isWide) {
 							if (tabs.length < 2) {
@@ -211,9 +217,6 @@
 				}}
 				on:activate={() => {
 					activeEditor = i
-				}}
-				on:valueChanged={e => {
-					console.log('valueChanged', e)
 				}}
 			/>
 		</div>

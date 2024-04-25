@@ -67,7 +67,7 @@
 		})
 
 		window.addEventListener('beforeunload', async e => {
-			await createTemporarySave(editorStrip.serialize(serializeElfBinary))
+			await createTemporarySave(editorStrip.toSaveData())
 		})
 		
 		let betaBannerShown = !!localStorage.beta

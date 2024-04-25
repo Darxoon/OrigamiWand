@@ -5,12 +5,14 @@
 	import { createEventDispatcher, onMount } from "svelte";
     import { nonnativeButton } from "$lib/nonnativeButton";
     import { OpenWindowEvent } from "../events";
+    import type { ElfBinary } from "paper-mario-elfs/elfBinary";
 
 	const dispatch = createEventDispatcher()
 	
 	export let targetObjects: any[] | {symbolName: string, children: any[]} | undefined
 	export let sourceDataType: DataType
 	export let targetDataType: DataType
+	export let binary: ElfBinary
 	export let objectId: string
 	export let tabTitle: string
 	export let error: any = undefined
@@ -40,7 +42,12 @@
 		
 		console.log('opening', objects)
 		
-		dispatch("open", new OpenWindowEvent(title, targetDataType, objects))
+		dispatch("open", new OpenWindowEvent(title, {
+			type: "cardList",
+			binary,
+			dataType: targetDataType,
+			overrideObjects: objects,
+		}))
 	}
 	
 	function length(arrayOrObj) {

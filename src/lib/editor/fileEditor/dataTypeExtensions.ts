@@ -10,7 +10,7 @@ const hasComplexEditor = {
 	[DataType.DataBtl]: true,
 }
 
-const complexEditorCategories = {
+const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {
 	[DataType.DataUi]: {
 		"Models": {
 			dataType: DataType.UiModel,
@@ -76,6 +76,8 @@ const complexEditorCategories = {
 	},
 }
 
+export type ComplexCategoryList = {[name: string]: { dataType: DataType, label?: string }}
+
 const extensions = {
 	[DataTypeExtension.HasComplexEditor]: hasComplexEditor,
 	[DataTypeExtension.ComplexEditorCategory]: complexEditorCategories,
@@ -83,8 +85,8 @@ const extensions = {
 
 // TODO: this is totally overengineered, just make a different function for every category
 export function dataTypeExtensions(extension: DataTypeExtension.HasComplexEditor, dataType: DataType): boolean;
-export function dataTypeExtensions(extension: DataTypeExtension.ComplexEditorCategory, dataType: DataType): {[name: string]: any};
+export function dataTypeExtensions(extension: DataTypeExtension.ComplexEditorCategory, dataType: DataType): ComplexCategoryList;
 
-export function dataTypeExtensions(extension: DataTypeExtension, dataType: DataType): any {
+export function dataTypeExtensions(extension: DataTypeExtension, dataType: DataType): unknown {
 	return extensions[extension][dataType]
 }

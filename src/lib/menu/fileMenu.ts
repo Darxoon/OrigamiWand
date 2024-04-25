@@ -109,7 +109,14 @@ async function saveFile() {
 		return
 	}
 
-	const { name, isCompressed, properties: { dataType, binary } } = tab
+	const { name, isCompressed, content } = tab
+	
+	if (content.type != "cardList") {
+		// TODO: ideally, this menu option should just be grayed out in the first place
+		throw new Error("Cannot save non-cards list file")
+	}
+	
+	const { dataType, binary } = content
 	
 	let serialized = serializeElfBinary(dataType, binary)
 	let output = isCompressed ? await compress(serialized) : serialized
@@ -135,7 +142,12 @@ async function openSaveDialog() {
 		return
 	}
 	
-	const { dataType, binary } = tab.properties
+	if (tab.content.type != "cardList") {
+		// TODO: ideally, this menu option should just be grayed out in the first place
+		throw new Error("Cannot save non-cards list file")
+	}
+	
+	const { dataType, binary } = tab.content	
 	
 	const modalOptions = {
 		fileName: tab.name,

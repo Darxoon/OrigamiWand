@@ -56,8 +56,6 @@
 	}
 	
 	function updateEntries(e) {
-		dispatch('valueChanged')
-		
 		const { key, value } = e.detail
 		obj[key] = value
 	}
@@ -191,7 +189,7 @@
 				<!-- Value Input -->
 				<div class="value">
 					{#if (FILE_TYPES[dataType].typedef[field] === "pointer" || FILE_TYPES[dataType].typedef[field] === "symbol")}
-						<CrossObjectLink targetObjects={value} sourceDataType={dataType} objectId={objectId}
+						<CrossObjectLink binary={binary} targetObjects={value} sourceDataType={dataType} objectId={objectId}
 							targetDataType={FILE_TYPES[dataType].childTypes[field]}
 							tabTitle={FILE_TYPES[dataType].metadata[field]?.tabName} error={fieldErrors[field]}
 							on:open on:create={() => createContent(obj, field)} />

@@ -9,6 +9,7 @@
     import logging from "$lib/logging";
     import { HTML_FOCUSABLE_ELEMENTS } from "$lib/util";
     import { OpenWindowEvent } from "../events";
+    import Page from "../fileEditor/Page.svelte";
 	
 	interface ContentComponent {
 		collapseAll(): void
@@ -202,8 +203,8 @@ Do you want to close those too?`,
 		
 		{#each tabs as tab, i (tab.id)}
 			<div bind:this={contentDivElements[i]} class:invisible={selectedIndex != i}>
-				<svelte:component this={tab.component} tabVisible={selectedIndex == i} {...tab.properties} bind:this={contentElements[i]}
-					on:valueChanged on:open={e => handleOpenWindowEvent(e.detail, tab)} />
+				<Page bind:this={contentElements[i]} bind:content={tab.content} tabVisible={selectedIndex == i}
+					fileName={tab.name} on:open={e => handleOpenWindowEvent(e.detail, tab)}/>
 			</div>
 		{/each}
 		
