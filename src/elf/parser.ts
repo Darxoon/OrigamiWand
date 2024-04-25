@@ -765,7 +765,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 				const { battles: symbolName } = area
 				
 				let battleSymbol = findSymbol(symbolName)
-				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle)
+				let battles = parseSymbol(dataSection, stringSection, battleSymbol, DataType.SetBattle, -1)
 				
 				let battleObj = {
 					symbolName,

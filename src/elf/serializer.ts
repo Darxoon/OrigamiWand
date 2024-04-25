@@ -6,7 +6,7 @@ import { BinaryWriter } from "./misc";
 import { Relocation, Section, Symbol } from "./types";
 import { demangle, mangleIdentifier } from "./nameMangling";
 import { enumerate, noUndefinedMap } from "./util";
-import { DATA_TYPE, VALUE_UUID, ValueUuid } from "./valueIdentifier";
+import { DATA_TYPE, VALUE_UUID, ValueUuid, type UuidTagged } from "./valueIdentifier";
 
 type SectionName = string
 type Offset = number
@@ -50,9 +50,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	// TODO: use noUndefinedMap only in development builds
 	const symbolLocationReference: Map<string, Pointer> = noUndefinedMap(new Map())
-	// TODO: use this everywhere
 	const symbolNameOverrides: Map<string, string> = noUndefinedMap(new Map())
-	// TODO: use this everywhere
 	const symbolSizeOverrides: Map<string, number> = noUndefinedMap(new Map())
 	
 	function findSection(sectionName: string): Section {
@@ -475,6 +473,9 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					symbolRelocations: dataSymbols,
 				}
 				
+				const paddingBattle = FILE_TYPES[DataType.SetBattle].instantiate() as Instance<DataType.SetBattle>
+				paddingBattle.battleType = 19
+				
 				// battles & enemies
 				for (const area of binary.data.main as Instance<DataType.DataBtlSet>[]) {
 					if (area.battles == undefined)
@@ -511,13 +512,13 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 					let newSymbolName = "wld::btl::data::s_setData_battle_" + area.id
 					
 					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
-					symbolSizeOverrides.set(symbolName, children.length * FILE_TYPES[DataType.SetBattle].size)
+					symbolSizeOverrides.set(symbolName, (children.length + 1) * FILE_TYPES[DataType.SetBattle].size)
 					symbolNameOverrides.set(symbolName, newSymbolName)
 					
 					battles.symbolName = newSymbolName
 					// No need to update battle count, since here, count is inferred through zero termination
 					
-					serializeObjects(data, DataType.SetBattle, children, { symbolWrapper: battles })
+					serializeObjects(data, DataType.SetBattle, children, { symbolWrapper: battles, padding: 1, paddingItem: paddingBattle })
 				}
 				
 				// areas
@@ -569,6 +570,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		
 		interface SerializeObjectsProperties {
 			padding?: number
+			paddingItem?: UuidTagged
 			addStrings?: boolean
 			symbolWrapper?: { symbolName: string, children?: any, item?: any }
 		}
@@ -583,7 +585,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 		 */
 		function serializeObjects(sectionElements: SerializeContext, dataType: DataType, objects: object[], properties: SerializeObjectsProperties = {}) {
 			const { writer, stringRelocations, crossPointers, symbolRelocations } = sectionElements
-			const { padding: paddingAmount = 0, addStrings = true, symbolWrapper } = properties
+			const { padding: paddingAmount = 0, paddingItem, addStrings = true, symbolWrapper } = properties
 			
 			if (symbolWrapper)
 				objectOffsets.set(symbolWrapper, new Pointer(writer.size))
@@ -593,7 +595,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 			}
 			
 			if (paddingAmount > 0) {
-				let padding = Array.from({ length: paddingAmount }, FILE_TYPES[dataType].instantiate)
+				let padding = Array.from({ length: paddingAmount }, paddingItem ? () => paddingItem : FILE_TYPES[dataType].instantiate)
 				objects = [...objects, ...padding]
 			}
 			
