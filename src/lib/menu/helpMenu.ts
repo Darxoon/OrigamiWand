@@ -1,7 +1,14 @@
+import type EditorStrip from "$lib/editor/EditorStrip.svelte"
+import { globalEditorStrip } from "$lib/stores"
+import type { MenuCategory } from "$lib/types"
+import { createWelcomeScreen } from "$lib/util"
 import { showModal } from "../modal/modal"
 import TextAlert from "../modal/TextAlert.svelte"
 
-export function getHelpMenu() {
+let editorStrip: EditorStrip
+globalEditorStrip.subscribe(value => editorStrip = value)
+
+export function getHelpMenu(): MenuCategory {
 	return {
 		title: "Help",
 		items: [
@@ -13,6 +20,12 @@ export function getHelpMenu() {
 					link.rel = "noopener noreferrer"
 					link.href = "https://github.com/darxoon/origamiwand"
 					link.click()
+				}
+			},
+			{
+				name: "Open welcome screen",
+				onClick: () => {
+					editorStrip.appendTab(createWelcomeScreen())
 				}
 			},
 			{

@@ -14,16 +14,17 @@
 	import { getFileMenu, openFileToEditor } from '$lib/menu/fileMenu';
 	import { getViewMenu } from '$lib/menu/viewMenu';
 	import { globalEditorStrip, loadedAutosave } from '$lib/stores';
-	import { map2d, createFileTab } from '$lib/util';
+	import { map2d, createFileTab, createWelcomeScreen } from '$lib/util';
 	
 	import TitleCard from '$lib/TitleCard.svelte';
     import VersionIdentifier from '$lib/VersionIdentifier.svelte';
+    import type { MenuCategory } from '$lib/types';
 	
 	let editorStrip: EditorStrip
 	
 	$: globalEditorStrip.set(editorStrip)
 	
-	export const menuItems = [
+	export const menuItems: MenuCategory[] = [
 		getFileMenu(),
 		{
 			title: "Edit",
@@ -52,6 +53,7 @@
 			
 			if (!save) {
 				$loadedAutosave = true
+				editorStrip.appendTab(createWelcomeScreen())
 				return
 			}
 			
@@ -59,7 +61,13 @@
 				createFileTab(name, parseElfBinary(dataType, content), dataType, isCompressed)
 			).filter(arr => arr.length > 0)
 			
-			if (tabs.length != 0) {
+			if (tabs.length == 0) {
+				let showWelcomeScreen = !parseInt(localStorage.getItem('hide-welcome-screen'))
+				
+				if (showWelcomeScreen) {
+					editorStrip.appendTab(createWelcomeScreen())
+				}
+			} else {
 				editorStrip.load(tabs)
 			}
 			

@@ -1,5 +1,6 @@
 <script lang="ts">
     import CardListEditor from "./CardListEditor.svelte";
+    import WelcomeScreen from "./WelcomeScreen.svelte";
     import type { PageContent } from "./page";
     
     export let content: PageContent
@@ -31,5 +32,5 @@
         tabVisible={tabVisible}
         on:open bind:this={contentElement} />
 {:else if content.type == "welcomeScreen"}
-    <div>Welcome!!!!</div>
+    <WelcomeScreen />
 {/if}

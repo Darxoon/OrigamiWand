@@ -134,6 +134,18 @@ export function createFileTab(fileName: string, binary: ElfBinary, dataType: Dat
 	}
 }
 
+export function createWelcomeScreen(): Tab {
+	return {
+		id: Symbol(),
+		name: "Welcome to Origami Wand",
+		isCompressed: false,
+		children: [],
+		content: {
+			type: "welcomeScreen",
+		}
+	}
+}
+
 export function insertIntoArrayPure<T>(arr: T[], index: number, ...items: T[]) {
 	let newArr = [...arr]
 	newArr.splice(index, 0, ...items)

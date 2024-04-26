@@ -100,6 +100,10 @@
 					isCompressed,
 					content: serializeElfBinary(dataType, binary)
 				}
+			} else if (content.type === "welcomeScreen") {
+				return []
+			} else {
+				throw new Error("Unknown page type")
 			}
 		})
 	}

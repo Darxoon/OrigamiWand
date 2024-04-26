@@ -1,8 +1,8 @@
 <script lang="ts">
 	import MenuStripItem from "./menu/MenuStripItem.svelte";
-	import type { MenuStripEntry } from "./types";
+    import type { MenuCategory } from "./types";
 	
-	export let menu: {title: string, items: MenuStripEntry[]}[] = []
+	export let menu: MenuCategory[] = []
 </script>
 
 <div>

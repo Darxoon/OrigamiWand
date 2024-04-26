@@ -1,6 +1,7 @@
+import type { MenuCategory } from "$lib/types"
 import { compress, decompress, downloadBlob, getFileContent } from "../util"
 
-export function getZstdMenu() {
+export function getZstdMenu(): MenuCategory {
 	return {
 		title: "Zstd",
 		items: [

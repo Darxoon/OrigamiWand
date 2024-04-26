@@ -10,11 +10,12 @@ import { DataType } from "paper-mario-elfs/dataType"
 import parseElfBinary, { EmptyFileError } from "paper-mario-elfs/parser"
 import serializeElfBinary from "paper-mario-elfs/serializer"
 import stripBinary from "paper-mario-elfs/strip"
+import type { MenuCategory } from "$lib/types"
 
 let editorStrip: EditorStrip
 globalEditorStrip.subscribe(value => editorStrip = value)
 
-export function getFileMenu() {
+export function getFileMenu(): MenuCategory {
 	return {
 		title: "File",
 		items: [

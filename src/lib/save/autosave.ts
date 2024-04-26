@@ -36,6 +36,11 @@ export async function initializeAutosaves() {
 }
 
 export async function createTemporarySave(windows: SaveFile[][]) {
+	if (!windows.every(files => files.every(file => file != undefined))) {
+		debugger
+		throw new Error("Trying to save undefined as a tab")
+	}
+	
 	// delete previous temp save
 	let previousTempSave = await db.overview.get(0)
 	

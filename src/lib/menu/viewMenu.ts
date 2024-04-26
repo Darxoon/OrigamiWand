@@ -5,13 +5,14 @@ import TextAlert from "$lib/modal/TextAlert.svelte"
 import DescriptionViewer from "$lib/modals/DescriptionViewer.svelte"
 import NoteViewer from "$lib/modals/NoteViewer.svelte"
 import { globalEditorStrip } from "$lib/stores"
+import type { MenuCategory } from "$lib/types"
 import { DataType } from "paper-mario-elfs/dataType"
 import { FILE_TYPES, Property, type PropertyType } from "paper-mario-elfs/fileTypes"
 
 let editorStrip: EditorStrip
 globalEditorStrip.subscribe(value => editorStrip = value)
 
-export function getViewMenu() {
+export function getViewMenu(): MenuCategory {
 	return {
 		title: "View",
 		items: [
