@@ -16,20 +16,22 @@
     <div class="welcome">
         <h1>Welcome to Origami Wand</h1>
         
-        <h2>Getting Started</h2>
-        
-        <ul>
-            <li><a href="https://github.com/Darxoon/OrigamiWand#usage">Read the introduction</a></li>
-            <li><a href="https://docs.google.com/spreadsheets/d/1n5Y-fE2lAtEFBWkpXFYqbb6iKa4cqEIj2pGoXztAuRw/"
-                target="_blank" rel="noopener noreferrer">Visit the ""documentation"" (TOK Spreadsheet)</a></li>
-            <li><a href="https://discord.gg/y7qfTKyhZy" target="_blank" rel="noopener noreferrer">Join the TOK Refolded discord</a></li>
-            <li>Open a file with File > Open</li>
-        </ul>
-        
-        <input type="checkbox" id={checkboxId} bind:checked={dontShowAgain}>
-        <label for={checkboxId}>Do not show again</label>
-        
-        <p>(This page can always be reopened with Help > Open welcome screen)</p>
+        <div class="welcome-content">
+            <h2>Getting Started</h2>
+            
+            <ul>
+                <li><a href="https://github.com/Darxoon/OrigamiWand#usage">Read the introduction</a></li>
+                <li><a href="https://docs.google.com/spreadsheets/d/1n5Y-fE2lAtEFBWkpXFYqbb6iKa4cqEIj2pGoXztAuRw/"
+                    target="_blank" rel="noopener noreferrer">Visit the ""documentation"" (TOK Spreadsheet)</a></li>
+                <li><a href="https://discord.gg/y7qfTKyhZy" target="_blank" rel="noopener noreferrer">Join the TOK Refolded discord</a></li>
+                <li>Open a file with File > Open</li>
+            </ul>
+            
+            <input type="checkbox" id={checkboxId} bind:checked={dontShowAgain}>
+            <label for={checkboxId}>Do not show again</label>
+            
+            <p>(This page can always be reopened with Help > Open welcome screen)</p>
+        </div>
     </div>
 </div>
 
@@ -37,9 +39,14 @@
     .welcome {
         margin: 2rem auto 0 auto;
         width: fit-content;
-        max-width: 32rem;
+        max-width: 40rem;
         color: white;
         text-shadow: 0 2px 8px #000000db;
+    }
+    
+    .welcome-content {
+        margin: 0 auto;
+        width: fit-content;
     }
     
     input[type=checkbox] {
