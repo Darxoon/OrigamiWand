@@ -528,7 +528,8 @@ Some examples of functions that are in this namespace:
 For instant defeat from a jump first strike, Mario's **Max HP** is required to be this value or greater."),
 		hammerDefeatMaxReq: new Property("int", "\
 For instant defeat from a hammer first strike, Mario's **Max HP** is required to be this value or greater."),
-		field_0x60: "int",
+		fieldAttackDamage: new Property("int", "\
+The amount of damage this actor can do to Mario outside of battle. I.E. Hammer Bros. Hammer Attack"),
 		field_0x64: "int",
 		firstStrikeItemDrop: "string",
 		field_0x70: "string",
@@ -1709,6 +1710,7 @@ To give mutiple attributes, pick them and add them together. Known Values:
 * 16 = On Fire
 * 32 = Is Cold
 * 256 = Spiked
+* 512 = Unknown
 * 1024 = Shelled
 * 2048 = Transforms
 * 4096 = Flippable`),
@@ -1750,10 +1752,10 @@ Resistance to this type of attack.
 		waterResistance: "float",
 		fireResistance: "float",
 		iceResistance: "float",
-		field_0x124: "float",
-		field_0x128: "float",
-		field_0x12c: "float",
-		field_0x130: "float",
+		magicEarthResistance?: "float",
+		magicWaterResistance?: "float",
+		magicFireResistance?: "float",
+		magicIceResistance?: "float",
 		field_0x134: "float",
 		field_0x138: "float",
 		field_0x13c: "float",
