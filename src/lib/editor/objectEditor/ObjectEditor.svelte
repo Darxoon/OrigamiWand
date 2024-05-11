@@ -157,6 +157,7 @@
 
 <svelte:options accessors={true} />
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="card editor" style="--bg-card: {actualBackgroundColor}; --bg-label-highlight: {actualLabelHighlightColor}" bind:this={editor}
 		on:mouseenter={e => mouseInside = true} on:mouseleave={e => mouseInside = false}>
 	

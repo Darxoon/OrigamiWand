@@ -120,6 +120,8 @@
 			default:
 				throw new Error(`Unknown data type ${Object.getPrototypeOf(value)?.constructor?.name}`)
 		}
+				
+		dispatch('valueChanged', {key, value})
 	}
 	
 	function onInput(e: KeyboardEvent) {
