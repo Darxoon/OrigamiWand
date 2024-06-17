@@ -409,8 +409,10 @@ Please verify."),
 		type: new Property("string", `
 Type type of the link. Possible values:
 
-* Dokan = pipe
-* 土管：下 = Vertical pipe
+* ベロ = Bero (Walk-Off Exit)
+*ドア = Door 
+* 土管：下 = Pipe: Under (Pipe is under you)
+*
 `),
 		objectId: new Property("string", `This is for linking a map exit to a Mobj, BShape, or map collision`),
 		rotationDegrees: "float",
@@ -436,11 +438,11 @@ The direction in which the link is facing. Possible values, among others:
 		field_0x6c: "int",
 		field_0x70: "int",
 		field_0x74: "int",
-		field_0x78: new Property("string", `
+		pipeCameraEnter: new Property("string", `
 Related to pipes and maybe cameras? The example strings below can't be found in any .cam file, so I'm not sure.
 
 Examples: "Cam_Dokan02", "Cam_Dokan03"`),
-		field_0x80: new Property("string", `
+		pipeCameraExit: new Property("string", `
 Related to pipes and maybe cameras? The example string below can't be found in any .cam file, so I'm not sure.
 
 Example: "Cam_Dokan"`),
@@ -1335,7 +1337,9 @@ might be the interaction function (called when pressing A; similar to talking).`
 		__displayName: "Effect Type",
 		
 		id: "string",
-		field_0x8: "string",
+		emitterSetName: new Property("string", `
+The name of the emitter set found in the effect folder inside the ptcl files.
+might be the interaction function (called when pressing A; similar to talking).`),
 		field_0x10: "int",
 		field_0x14: "int",
 		field_0x18: "string",
