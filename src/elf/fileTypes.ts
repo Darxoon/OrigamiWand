@@ -1528,9 +1528,10 @@ The name of the bone on the map model's skeleton that the item will be tied to. 
 		field_0x58: "int",
 		field_0x5c: "int",
 		field_0x60: "int",
-		selectionOrder: new Property("int", `
-The order in which items can be selected starting from 0, 1, 2 etc.`),
-		field_0x68: "int",
+		rowOrder: new Property("int", `
+The order in which items can be selected in a row starting from 0, 1, 2 etc.`),
+		columnOrder: new Property("int", `
+The order in which items can be selected in a column starting from 0, 1, 2 etc.`),
 		field_0x6c: "int",
 	},
 	
