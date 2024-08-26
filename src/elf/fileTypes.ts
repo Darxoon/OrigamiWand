@@ -332,7 +332,7 @@ Please verify."),
 		field_0xa0: "int",
 		field_0xa4: "float",
 		field_0xa8: "int",
-		field_0xac: "float",
+		itemDropDistance: new Property("float", "Distance from object the item travels after it appears (like when items drop out of blocks)."),
 		field_0xb0: "int",
 		field_0xb4: "int",
 		field_0xb8: "int",
@@ -1479,7 +1479,7 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		field_0x4c: "float",
 		field_0x50: "float",
 		field_0x54: "int",
-		field_0x58: "int",
+		field_0x58: "string",
 		field_0x5c: "int",
 		field_0x60: "int",
 		field_0x64: "int",
@@ -1723,33 +1723,33 @@ To give mutiple attributes, pick them and add them together. Known Values:
 		field_0x100: "int",
 		jumpResistance: new Property("float", `
 Resistance to this type of attack.
--999.0    Nullifies all damage
--1001.0    1.5x damage multiplier
--1002.0    2x damage multiplier
--1003.0    3x damage multiplier
--1004.0    4x damage multiplier
--1005.0    5x damage multiplier
--1006.0    6x damage multiplier
--1007.0    8x damage multiplier
--1008.0    10x damage multiplier
--1011.0    Deals 3/4th of original damage
--1012.0    Deals 1/2th of original damage
--1013.0    Deals 1/3rd of original damage
--1014.0    Deals 1/4th of original damage
--1015.0    Deals 1/5th of original damage
--1016.0    Deals 1/6th of original damage
--1017.0    Deals 1/8th of original damage
--1018.0    Deals 1/10th of original damage
--2000.0    All damage is reduced to 1
--2001.0    All damage is reduced to 2
--2002.0    All damage is reduced to 3
--2003.0    All damage is reduced to 4
--2004.0    All damage is reduced to 5
--2005.0    All damage is reduced to 6
--2006.0    All damage is reduced to 7
--2007.0    All damage is reduced to 8
--2008.0    All damage is reduced to 9
--2009.0    Nullifies all damage`),
+* 999.0    Nullifies all damage
+* 1001.0    1.5x damage multiplier
+* 1002.0    2x damage multiplier
+* 1003.0    3x damage multiplier
+* 1004.0    4x damage multiplier
+* 1005.0    5x damage multiplier
+* 1006.0    6x damage multiplier
+* 1007.0    8x damage multiplier
+* 1008.0    10x damage multiplier
+* 1011.0    Deals 3/4th of original damage
+* 1012.0    Deals 1/2th of original damage
+* 1013.0    Deals 1/3rd of original damage
+* 1014.0    Deals 1/4th of original damage
+* 1015.0    Deals 1/5th of original damage
+* 1016.0    Deals 1/6th of original damage
+* 1017.0    Deals 1/8th of original damage
+* 1018.0    Deals 1/10th of original damage
+* 2000.0    All damage is reduced to 1
+* 2001.0    All damage is reduced to 2
+* 2002.0    All damage is reduced to 3
+* 2003.0    All damage is reduced to 4
+* 2004.0    All damage is reduced to 5
+* 2005.0    All damage is reduced to 6
+* 2006.0    All damage is reduced to 7
+* 2007.0    All damage is reduced to 8
+* 2008.0    All damage is reduced to 9
+* 2009.0    Nullifies all damage`),
 		hammerResistance: "float",
 		throwHammerResistance: "float",
 		powResistance: "float",
@@ -1765,7 +1765,7 @@ Resistance to this type of attack.
 		field_0x138: "float",
 		field_0x13c: "float",
 		field_0x140: "float",
-		field_0x144: "float",
+		tFoldArmsResistance: "float",
 		golfResistance: "float",
 		field_0x14c: "float",
 	},
@@ -1895,7 +1895,7 @@ Example:
 		__objectType: dataDivisions.attackRange,
 		__nestedAllValues: true,
 		
-		field_0x0: "int",
+		enableRange: new Property("int", "Set to 1 to enable this range, set to 0 to disable this range."),
 		ringSection: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
 		rotation: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
 		rangeWidth: new Property("int", "The width that the attack range has"),
@@ -1903,7 +1903,7 @@ Example:
 		field_0x14: "int",
 		field_0x18: "int",
 		field_0x1c: "int",
-		field_0x20: "int",
+		enableRange2: new Property("int", "Set to 1 to enable this range, set to 0 to disable this range."),
 		ringSection2: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
 		rotation2: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
 		rangeWidth2: new Property("int", "The width that the attack range has"),
@@ -1911,7 +1911,7 @@ Example:
 		field_0x34: "int",
 		field_0x38: "int",
 		field_0x3c: "int",
-		field_0x40: "int",
+		enableRange3: new Property("int", "Set to 1 to enable this range, set to 0 to disable this range."),
 		ringSection3: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
 		rotation3: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
 		rangeWidth3: new Property("int", "The width that the attack range has"),
@@ -1919,7 +1919,7 @@ Example:
 		field_0x54: "int",
 		field_0x58: "int",
 		field_0x5c: "int",
-		field_0x60: "int",
+		enableRange4: new Property("int", "Set to 1 to enable this range, set to 0 to disable this range."),
 		ringSection4: new Property("int", "From inner ring to outer ring, its 0, 1, 2, and 3. Used for ring rotations."),
 		rotation4: new Property("int", "When Mario is facing forward, this is the clockwise rotation of targets he can hit. He will misalign himself while attacking, but can still hit enemies."),
 		rangeWidth4: new Property("int", "The width that the attack range has"),
@@ -1976,32 +1976,32 @@ Example:
 		field_0xb4: "int",
 		attackType: new Property("int", `
 Determines if an attack is Jump, Hammer, Pow etc.
-The values are all a power of 2. Known entries are listed as an exponent.
+The values are all a power of 2 starting from 2^0.
 To give mutiple attributes, pick them and add them together.
 
-* 2^0 = Jump
-* 2^1 = Hammer
-* 2^2 = Normal
-* 2^3 = Shell
-* 2^4 = Item
-* 2^5 = Magic
-* 2^6 = Pow
-* 2^7 = Tail
-* 2^8 = Fire
-* 2^9 = Ice
-* 2^10 = Earth
-* 2^11 = Water
-* 2^17 = Player Specific Value
-* 2^18 = Heal
-* 2^19 = Counter
-* 2^20 = UNKNOWN but you only target the first enemy in that encounter's list
-* 2^28 = Partner Specific Attack Type
-* 2^29 = Ignore Spike Defence`),
+* 1 = Jump
+* 2 = Hammer
+* 4 = Normal
+* 8 = Shell
+* 16 = Item
+* 32 = Magic
+* 64 = Pow
+* 128 = Tail
+* 256 = Fire
+* 512 = Ice
+* 1024 = Earth
+* 2048 = Water
+* 131072 = Player Specific Value
+* 262144 = Heal
+* 524288 = Counter
+* 1,048,576 = UNKNOWN but you only target the first enemy in that encounter's list
+* 268,435,456 = Partner Specific Attack Type
+* 536,870,912 = Ignore Spike Defence`),
 		field_0xbc: "int",
-		stunEffect: "int",
-		stunChance: "int",
-		freezeEffect: "int",
-		freezeChance: "int",
+		stunEffect: new Property("int", "Ability to stun an enemy. 0 for Off, 1 for On."),
+		stunChance: new Property("int", "Chance from 0 to 100 to stun an enemy. Effect must be turned on."),
+		freezeEffect: new Property("int", "Ability to freeze an enemy. 0 for Off, 1 for On."),
+		freezeChance: new Property("int", "Chance from 0 to 100 to freeze an enemy. Effect must be turned on."),
 		field_0xd0: "int",
 		field_0xd4: "int",
 		field_0xd8: "int",
@@ -2022,6 +2022,7 @@ Bit field for the attack GFX type. To have multiple effects, add the values toge
 Known values:
 
 * 2 - normal
+* 32 - magic
 * 128 - earth
 * 256 - water
 * 512 - fire
@@ -2524,8 +2525,10 @@ Used to be called ringPosition but is always -1 in the game. Its actual behavior
 Used to be called linePosition but is always -1 in the game. Its actual behavior is undetermined.`),
 		field_0x10: "int",
 		field_0x14: "int",
-		ringSection: "int",
-		lineSection: "int",
+		ringSection: new Property("int", `
+The position on the ring this enemy is on. Starts from 1 and ends at 12.`),
+		lineSection: new Property("int", `
+The position on the line this enemy is on. Starts from 0 and ends at 3.`),
 		startingState: new Property("string", `
 The state the enemy will start the battle in. Possible values:
 
