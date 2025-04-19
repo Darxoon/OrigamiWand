@@ -355,7 +355,7 @@ Please verify."),
 		field_0xfc: "int",
 		field_0x100: "int",
 		field_0x104: "int",
-		field_0x108: "string",
+		interactFunction: new Property("string", "Function that's run when this object is interacted with (Like the block being hit)."),
 		field_0x110: "int",
 		field_0x114: "int",
 		field_0x118: "int",
@@ -685,11 +685,7 @@ Examples with translations:
 * １回以下で修復　小さく = Repair in less than 1 time. Small.
 * ２回で修復ぐらいに　小さく = Small enough to repair in two tries.
 * 縦方向をジャンプできないぐらい小さく = Small enough to not jump vertically.`),
-		field_0x18: new Property("string", `
-Usage unknown, but it's always one of these possible values: \
-GET_YATARA_SMALL, GET_YATARA_MIDDLE or GET_YATARA_BIG.
-
-Yatara (やたら) could mean "unreasonably" or "excessively".`),
+		itemSetDrop: new Property("string", `The set of items that drop from clearing this hole. Sets listed in data_itemset.elf`),
 		field_0x20: "int",
 		field_0x24: "int",
 		field_0x28: "int",
@@ -2525,10 +2521,10 @@ Used to be called ringPosition but is always -1 in the game. Its actual behavior
 Used to be called linePosition but is always -1 in the game. Its actual behavior is undetermined.`),
 		field_0x10: "int",
 		field_0x14: "int",
-		ringSection: new Property("int", `
-The position on the ring this enemy is on. Starts from 1 and ends at 12.`),
-		lineSection: new Property("int", `
-The position on the line this enemy is on. Starts from 0 and ends at 3.`),
+		groupSection: new Property("int", `
+The position on the ring this of enemies is on. Starts from 1 and ends at 12.`),
+		groupOrder: new Property("int", `
+The order in the group this enemy is in. Starts from 0 and ends at 3.`),
 		startingState: new Property("string", `
 The state the enemy will start the battle in. Possible values:
 
