@@ -381,7 +381,8 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			break
 		}
 		
-		case DataType.DataItemSet: {
+		case DataType.DataItemSet:
+			{
 			const dataSection = findSection('.data')
 			const dataStringSection = findSection('.rodata.str1.1')
 			
@@ -800,6 +801,74 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			break
 		}
+
+		case DataType.DataMuseum: {
+			const dataSection = findSection('.data')
+			const stringSection = findSection('.rodata.str1.1')
+			const rodataSection = findSection('.rodata')
+
+			let rodataView = new DataView(rodataSection.content)
+
+			data = {}
+
+			// Museum Art
+			let artCountSymbol = findSymbol("wld::fld::data::kMuseumArtCount")
+			let artCount = rodataView.getInt32(artCountSymbol.location.value, true)
+
+			let artSymbol = findSymbol("wld::fld::data::s_MuseumArt")
+			let art = parseSymbol(dataSection, stringSection, artSymbol, DataType.MuseumArt, artCount)
+			data.art = art
+
+			// Museum Collectable
+			let collectableCountSymbol = findSymbol("wld::fld::data::kMuseumCollectableCount")
+			let collectableCount = rodataView.getInt32(collectableCountSymbol.location.value, true)
+
+			let collectableSymbol = findSymbol("wld::fld::data::s_MuseumCollectable")
+			let collectables = parseSymbol(dataSection, stringSection, collectableSymbol, DataType.MuseumCollectable, collectableCount)
+			data.collectable = collectables
+
+			// Museum Enemy
+			let enemyCountSymbol = findSymbol("wld::fld::data::kMuseumEnemyCount")
+			let enemyCount = rodataView.getInt32(enemyCountSymbol.location.value, true)
+
+			let enemySymbol = findSymbol("wld::fld::data::s_MuseumEnemy")
+			let enemies = parseSymbol(dataSection, stringSection, enemySymbol, DataType.MuseumEnemy, enemyCount)
+			data.enemy = enemies
+
+			// Museum Enemy Dispos
+			let enemydisposCountSymbol = findSymbol("wld::fld::data::kMuseumEnemyDisposCount")
+			let enemydisposCount = rodataView.getInt32(enemydisposCountSymbol.location.value, true)
+
+			let enemydisposSymbol = findSymbol("wld::fld::data::s_MuseumEnemyDispos")
+			let enemydispos = parseSymbol(dataSection, stringSection, enemydisposSymbol, DataType.MuseumEnemyDispos, enemydisposCount)
+			data.enemydispos = enemydispos
+
+			// Museum Kinopio
+			let kinopioCountSymbol = findSymbol("wld::fld::data::kMuseumKinopioCount")
+			let kinopioCount = rodataView.getInt32(kinopioCountSymbol.location.value, true)
+
+			let kinopioSymbol = findSymbol("wld::fld::data::s_MuseumKinopio")
+			let kinopio = parseSymbol(dataSection, stringSection, kinopioSymbol, DataType.MuseumKinopio, kinopioCount)
+			data.kinopio = kinopio
+
+			// Museum Kinopio Dispos
+			let kinopiodisposCountSymbol = findSymbol("wld::fld::data::kMuseumKinopioDisposCount")
+			let kinopiodisposCount = rodataView.getInt32(kinopiodisposCountSymbol.location.value, true)
+
+			let kinopiodisposSymbol = findSymbol("wld::fld::data::s_MuseumKinopioDispos")
+			let kinopiodispos = parseSymbol(dataSection, stringSection, kinopiodisposSymbol, DataType.MuseumKinopioDispos, kinopiodisposCount)
+			data.kinopiodispos = kinopiodispos
+
+			// Museum Sound
+			let soundCountSymbol = findSymbol("wld::fld::data::kMuseumSoundCount")
+			let soundCount = rodataView.getInt32(soundCountSymbol.location.value, true)
+
+			let soundSymbol = findSymbol("wld::fld::data::s_MuseumSound")
+			let sound = parseSymbol(dataSection, stringSection, soundSymbol, DataType.MuseumSound, soundCount)
+			data.sound = sound
+
+			break
+		}
 		
 		// parse .data section by data type
 		default: {
@@ -821,6 +890,45 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			break
 		}
+
+		case DataType.HRK:
+			{
+				const dataSection = findSection('.data')
+				const stringSection = findSection('.rodata.str1.1')
+
+				let mainSymbol = findSymbol("wld::fld::data::data")
+				let main = parseSymbol(dataSection, stringSection, mainSymbol, DataType.HRK, 1)
+
+				data = {}
+				data.main = main
+
+				// shells
+				let allAnimShells = []
+
+				for (const shell of main) {
+					const { shells: symbolName, shellCount } = shell
+
+					if (symbolName == undefined)
+						continue
+
+				let shellDataSymbol = findSymbol(symbolName)
+				let shells = parseSymbol(dataSection, stringSection, shellDataSymbol, DataType.HRKShells, shellCount)
+
+				let shellObj = {
+					symbolName,
+					children: shells,
+				}
+
+				allAnimShells.push(shellObj)
+				shell.shells = shellObj
+			}
+
+				data.shell = allAnimShells
+
+				break
+			}
+
+
 	}
 	
 	let binary = new ElfBinary(sections, data, symbolTable)

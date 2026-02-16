@@ -41,7 +41,7 @@ export enum DataType {
 	DataItemSet,
 	
 	// misc data.elf types
-	// DataMuseum,
+	DataMuseum,
 	DataConfettiTotalHoleInfo,
 	DataEffect,
 	DataMaplinkZoom,
@@ -49,6 +49,10 @@ export enum DataType {
 	DataUi,
 	DataBtl,
 	DataBtlSet,
+	DataFade,
+
+	//.hrk
+	HRK,
 	
 	// this is the end of the actual file types
 	TypeAmount,
@@ -94,4 +98,14 @@ export enum DataType {
 	SetAreaReference,
 	SetBattle,
 	SetEnemy,
+
+	MuseumArt,
+	MuseumCollectable,
+	MuseumEnemy,
+	MuseumEnemyDispos,
+	MuseumKinopio,
+	MuseumKinopioDispos,
+	MuseumSound,
+
+	HRKShells,
 }

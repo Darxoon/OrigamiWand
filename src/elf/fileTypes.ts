@@ -844,11 +844,11 @@ The type of the item which determines how it behaves. Possible values:
 * "Pouch" - item will be added to the item inventory
 * "Magic" - Velluminal books
 * "KeyItem" - key item
-* "Collectable" - trophy, collectibleModelId determines displayed mesh (probably misspelling of Collectible)
+* "Collectable" - trophy, collectableModelId determines displayed mesh (probably misspelling of Collectable)
 `),
 		modelId: "string",
 		textureId: "string",
-		collectibleModelId: "string",
+		collectableModelId: "string",
 		itemGrade: new Property("int", `
 I don't know what this does but this is a pattern that I noticed:
 
@@ -857,9 +857,9 @@ I don't know what this does but this is a pattern that I noticed:
 * 2 - silver and golden weapons as well as fire and ice flowers
 * 3 - shiny weapons
 * 4 - flashy weapons
-* >4 - collectibles
+* >4 - collectables
 
-My original thought was the shine on an item, but then I saw the collectibles
+My original thought was the shine on an item, but then I saw the collectables
 which have values up to 99.`),
 		buyPrice: "int",
 		sellPrice: new Property("int", "Unused as it is not possible to sell items"),
@@ -876,7 +876,7 @@ The variable to increase. Possible values:
 		textId: new Property("string", `
 The name of the item. Before it is displayed, it is looked up in \`glossary.msbt\`.
 
-This is also used for the collectible names, which are looked up
+This is also used for the collectable names, which are looked up
 in \`item.msbt\` with this value as the identifier.`),
 		field_0x50: "int",
 		field_0x54: "int",
@@ -2537,9 +2537,253 @@ The state the enemy will start the battle in. Possible values:
 		puzzleSolverCircle: new Property("string", `
 Sometimes contains unicode circle character "〇".
 Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
-		field_0x38: "int",
+		lineUpState: new Property("int", `
+0 = Square state, 1 = Line state`),
 		field_0x3c: "int",
 	},
+
+	[DataType.HRK]: {
+		__displayName: "Paper Macho Resource",
+		__childTypes: {
+			shells: DataType.HRKShells,
+		},
+
+		shellCount: new Property("int", undefined, { hidden: true }),
+		field_0x04: "int",
+		shells: new Property("pointer", undefined, { tabName: "Test " }),
+		field_0x10: "int",
+		field_0x14: "int",
+		syncBones: "string",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "string",
+		field_0x30: "int",
+		field_0x34: "int",
+		anims: "string",
+		field_0x40: "int",
+		field_0x44: "int",
+		dentBones: "string",
+		field_0x50: "int",
+		field_0x54: "int",
+		pelvisBones: "string",
+		field_0x60: "int",
+		field_0x64: "int",
+		shakeBones: "string",
+	},
+
+	[DataType.HRKShells]: {
+		__displayName: "Paper Macho Shells",
+		__objectType: dataDivisions.shell,
+		__nestedAllValues: true,
+
+		field_0x00: "int",
+		field_0x04: "int",
+		field_0x08: "int",
+		field_0x0c: "int",
+		field_0x10: "int",
+		field_0x18: "int",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "int",
+		field_0x2c: "int",
+		field_0x30: "int",
+		field_0x34: "int",
+		field_0x38: "int",
+		field_0x3c: "int",
+		field_0x40: "int",
+		field_0x44: "int",
+		field_0x48: "int",
+		field_0x4c: "int",
+		field_0x50: "int",
+		field_0x54: "int",
+		field_0x58: "int",
+		field_0x5c: "int",
+		field_0x60: "int",
+		field_0x64: "int",
+		field_0x68: "int",
+		field_0x6c: "int",
+		field_0x70: "int",
+		field_0x74: "int",
+		field_0x78: "int",
+		field_0x7c: "int",
+		field_0x80: "int",
+		field_0x84: "int",
+		field_0x88: "int",
+		field_0x8c: "int",
+		field_0x90: "int",
+		field_0x94: "int",
+		field_0x98: "int",
+		field_0x9c: "int",
+		field_0xa0: "int",
+		field_0xa4: "int",
+	},
+
+	[DataType.DataFade]: {
+		__displayName: "Screen Transitions",
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "string",
+		field_0x18: "string",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "string",
+		field_0x30: "string",
+		field_0x38: "string",
+		field_0x40: "string",
+		field_0x48: "string",
+		field_0x50: "string",
+	},
+
+	[DataType.DataMuseum]: {},
+
+	[DataType.MuseumArt]: {
+		__displayName: "Museum Art",
+		__objectType: dataDivisions.art,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "string",
+		field_0x18: "string",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "string",
+		field_0x30: "int",
+		field_0x34: "int",
+		field_0x38: "int",
+		field_0x3c: "int",
+		field_0x40: "int",
+		field_0x44: "int",
+	},
+
+	[DataType.MuseumCollectable]: {
+		__displayName: "Museum Collectables",
+		__objectType: dataDivisions.collectable,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		field_0x18: "string",
+		field_0x20: "string",
+		field_0x28: "string",
+	},
+
+	[DataType.MuseumEnemy]: {
+		__displayName: "Museum Enemies",
+		__objectType: dataDivisions.enemy,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		field_0x18: "int",
+		field_0x1c: "int",
+		field_0x20: "string",
+		field_0x28: "string",
+		field_0x30: "string",
+		field_0x38: "string",
+		field_0x40: "float",
+		field_0x44: "float",
+		field_0x48: "float",
+		field_0x4c: "float",
+		field_0x50: "float",
+		field_0x54: "float",
+		field_0x58: "float",
+		field_0x5c: "float",
+		field_0x60: "float",
+		field_0x64: "float",
+		field_0x68: "float",
+		field_0x6c: "float",
+		field_0x70: "float",
+		field_0x74: "float",
+		field_0x78: "float",
+		field_0x7c: "float",
+		field_0x80: "float",
+		field_0x84: "float",
+		field_0x88: "float",
+		field_0x8c: "float",
+	},
+
+	[DataType.MuseumEnemyDispos]: {
+		__displayName: "Museum Enemy Placement",
+		__objectType: dataDivisions.enemydispos,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		field_0x18: "int",
+		field_0x1c: "int",
+		field_0x20: "int",
+		field_0x24: "int",
+	},
+
+	[DataType.MuseumKinopio]: {
+		__displayName: "Museum Toad Origami",
+		__objectType: dataDivisions.kinopio,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "string",
+		field_0x14: "string",
+		field_0x18: "string",
+		field_0x1c: "string",
+		field_0x20: "string",
+		field_0x28: "float",
+		field_0x2c: "float",
+		field_0x30: "float",
+		field_0x34: "float",
+		field_0x38: "float",
+		field_0x3c: "float",
+		field_0x40: "float",
+		field_0x44: "float",
+		field_0x48: "float",
+		field_0x4c: "float",
+		field_0x50: "float",
+		field_0x54: "float",
+		field_0x58: "float",
+		field_0x5c: "float",
+		field_0x60: "float",
+		field_0x64: "float",
+		field_0x68: "float",
+		field_0x6c: "float",
+		field_0x70: "float",
+		field_0x74: "float",
+	},
+
+	[DataType.MuseumKinopioDispos]: {
+		__displayName: "Museum Toad Origami Placement",
+		__objectType: dataDivisions.kinopiodispos,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		field_0x18: "int",
+		field_0x1c: "int",
+		field_0x20: "int",
+		field_0x24: "int",
+	},
+
+	[DataType.MuseumSound]: {
+		__displayName: "Museum Sounds",
+		__objectType: dataDivisions.sound,
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "string",
+		field_0x18: "int",
+		field_0x1c: "int",
+		field_0x20: "string",
+		field_0x28: "int",
+		field_0x2c: "int",
+		field_0x30: "string",
+		field_0x38: "int",
+		field_0x3c: "int",
+		field_0x40: "string",
+	},
+
 } as const
 
 

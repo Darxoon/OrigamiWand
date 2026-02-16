@@ -64,6 +64,13 @@ export const dataDivisions = {
 	menu: "menu",
 	announcement: "announcement",
 	announcementExclude: "announcementExclude",
+
+	art: "art",
+	collectable: "collectable",
+	enemydispos: "enemydispos",
+	kinopio: "kinopio",
+	kinopiodispos: "kinopiodispos",
+	sound: "sound",
 	
 	part: "part",
 	unit: "unit",
@@ -81,6 +88,8 @@ export const dataDivisions = {
 	
 	battle: "battle",
 	enemy: "enemy",
+
+	shell: "shell",
 } as const
 
 export type DataDivision = keyof typeof dataDivisions

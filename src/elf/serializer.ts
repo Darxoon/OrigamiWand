@@ -536,6 +536,73 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				
 				break
 			}
+
+			case DataType.DataMuseum: {
+				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
+
+				// ----------------  data  ----------------
+				let data: SerializeContext = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
+				}
+
+				// art
+				symbolLocationReference.set(`wld::fld::data::s_MuseumArt`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumArt`, (binary.data.art.length + 1) * FILE_TYPES[DataType.MuseumArt].size)
+				serializeObjects(data, DataType.MuseumArt, binary.data.art, { padding: 1 })
+
+				// collectable
+				symbolLocationReference.set(`wld::fld::data::s_MuseumCollectable`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumCollectable`, (binary.data.collectable.length + 1) * FILE_TYPES[DataType.MuseumCollectable].size)
+				serializeObjects(data, DataType.MuseumCollectable, binary.data.collectable, { padding: 1 })
+
+				// enemy
+				symbolLocationReference.set(`wld::fld::data::s_MuseumEnemy`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemy`, (binary.data.enemy.length + 1) * FILE_TYPES[DataType.MuseumEnemy].size)
+				serializeObjects(data, DataType.MuseumEnemy, binary.data.enemy, { padding: 1 })
+
+				// enemy dispos
+				symbolLocationReference.set(`wld::fld::data::s_MuseumEnemyDispos`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemyDispos`, (binary.data.enemydispos.length + 1) * FILE_TYPES[DataType.MuseumEnemyDispos].size)
+				serializeObjects(data, DataType.MuseumEnemyDispos, binary.data.enemydispos, { padding: 1 })
+
+				// kinopio
+				symbolLocationReference.set(`wld::fld::data::s_MuseumKinopio`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumKinopio`, binary.data.kinopio.length * FILE_TYPES[DataType.MuseumKinopio].size)
+				serializeObjects(data, DataType.MuseumKinopio, binary.data.kinopio)
+
+				// kinopio dispos
+				symbolLocationReference.set(`wld::fld::data::s_MuseumKinopioDispos`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumKinopioDispos`, binary.data.kinopiodispos.length * FILE_TYPES[DataType.MuseumKinopioDispos].size)
+				serializeObjects(data, DataType.MuseumKinopioDispos, binary.data.kinopiodispos)
+
+				// sound
+				symbolLocationReference.set(`wld::fld::data::s_MuseumSound`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumSound`, binary.data.sound.length * FILE_TYPES[DataType.MuseumSound].size)
+				serializeObjects(data, DataType.MuseumSound, binary.data.sound)
+
+				// ----------------  rodata  ----------------
+				const rodataWriter = new BinaryWriter()
+
+				// array lengths of some .data things
+				rodataWriter.writeInt32(binary.data.art.length)
+				rodataWriter.writeInt32(binary.data.collectable.length)
+				rodataWriter.writeInt32(binary.data.enemy.length)
+				rodataWriter.writeInt32(binary.data.enemydispos.length)
+				rodataWriter.writeInt32(binary.data.kinopio.length)
+				rodataWriter.writeInt32(binary.data.kinopiodispos.length)
+				rodataWriter.writeInt32(binary.data.sound.length)
+
+				updatedSections.set('.rodata', rodataWriter.toArrayBuffer())
+
+				break
+			}
 			
 			default: {
 				let data: SerializeContext = {
@@ -986,7 +1053,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	{
 		// pointer relocations
-		let destinationSection = dataType === DataType.DataUi ? ".data" : ".rodata"
+		let destinationSection = dataType === DataType.DataUi ?? DataType.DataMuseum ? ".data" : ".rodata"
 		let destinationSectionIndex = sections.findIndex(section => section.name === destinationSection)
 		let sectionSymbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3 && symbol.sectionHeaderIndex == destinationSectionIndex)
 		

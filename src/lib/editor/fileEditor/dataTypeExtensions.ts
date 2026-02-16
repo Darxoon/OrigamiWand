@@ -7,6 +7,7 @@ export enum DataTypeExtension {
 
 const hasComplexEditor = {
 	[DataType.DataUi]: true,
+	[DataType.DataMuseum]: true,
 	[DataType.DataBtl]: true,
 }
 
@@ -74,6 +75,31 @@ const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {
 			dataType: DataType.BtlConfig,
 		},
 	},
+
+	[DataType.DataMuseum]: {
+		"Art": {
+			dataType: DataType.MuseumArt,
+		},
+		"Collectables": {
+			dataType: DataType.MuseumCollectable,
+		},
+		"Enemies": {
+			dataType: DataType.MuseumEnemy,
+		},
+		"Enemy Placement": {
+			dataType: DataType.MuseumEnemyDispos,
+		},
+		"Toad Origami": {
+			dataType: DataType.MuseumKinopio,
+		},
+		"Toad Origami Placement": {
+			dataType: DataType.MuseumKinopioDispos,
+		},
+		"Sounds": {
+			dataType: DataType.MuseumSound,
+		},
+	},
+
 }
 
 export type ComplexCategoryList = {[name: string]: { dataType: DataType, label?: string }}

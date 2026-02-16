@@ -56,6 +56,10 @@
 		"data_party": DataType.DataParty,
 		"data_ui": DataType.DataUi,
 		"data_btl": DataType.DataBtl,
+    "data_museum": DataType.DataMuseum,
+    
+    // "hrk": DataType.HRK,
+    // "data_fade": DataType.DataFade,
 	}
 	
 	onMount(() => {
@@ -135,7 +139,12 @@
 		<option value="DataParty">Party Member Registry (data_party)</option>
 		<option value="DataUi">User Interface Registry (data_ui)</option>
 		<option value="DataBtl">Diverse Battle Registry (data_btl)</option>
-	</select>
+    <option value="DataMuseum">Museum Registry (data_museum)</option>
+
+    <!-- <option value="HRK">Paper Macho Resource (*.hrk)</option> -->
+    <!-- <option value="DataFade">Screen Transitions (data_fade)</option> -->
+
+  </select>
 	
 	<div class="checkbox" style="margin-top: 0.3rem;">
 		<input type="checkbox" id="iscompressed" bind:checked={isCompressed}>
