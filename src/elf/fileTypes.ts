@@ -2671,7 +2671,7 @@ Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
 
 	[DataType.MuseumEnemy]: {
 		__displayName: "Museum Enemies",
-		__objectType: dataDivisions.enemy,
+		__objectType: dataDivisions.menemy,
 
 		id: "string",
 		field_0x08: "string",

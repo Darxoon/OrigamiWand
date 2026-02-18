@@ -67,6 +67,7 @@ export const dataDivisions = {
 
 	art: "art",
 	collectable: "collectable",
+	menemy: "menemy",
 	enemydispos: "enemydispos",
 	kinopio: "kinopio",
 	kinopiodispos: "kinopiodispos",

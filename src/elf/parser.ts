@@ -833,7 +833,7 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 
 			let enemySymbol = findSymbol("wld::fld::data::s_MuseumEnemy")
 			let enemies = parseSymbol(dataSection, stringSection, enemySymbol, DataType.MuseumEnemy, enemyCount)
-			data.enemy = enemies
+			data.menemy = enemies
 
 			// Museum Enemy Dispos
 			let enemydisposCountSymbol = findSymbol("wld::fld::data::kMuseumEnemyDisposCount")

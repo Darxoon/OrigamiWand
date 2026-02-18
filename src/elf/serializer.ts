@@ -554,23 +554,23 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 
 				// art
 				symbolLocationReference.set(`wld::fld::data::s_MuseumArt`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_MuseumArt`, (binary.data.art.length + 1) * FILE_TYPES[DataType.MuseumArt].size)
-				serializeObjects(data, DataType.MuseumArt, binary.data.art, { padding: 1 })
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumArt`, binary.data.art.length * FILE_TYPES[DataType.MuseumArt].size)
+				serializeObjects(data, DataType.MuseumArt, binary.data.art)
 
 				// collectable
 				symbolLocationReference.set(`wld::fld::data::s_MuseumCollectable`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_MuseumCollectable`, (binary.data.collectable.length + 1) * FILE_TYPES[DataType.MuseumCollectable].size)
-				serializeObjects(data, DataType.MuseumCollectable, binary.data.collectable, { padding: 1 })
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumCollectable`, binary.data.collectable.length * FILE_TYPES[DataType.MuseumCollectable].size)
+				serializeObjects(data, DataType.MuseumCollectable, binary.data.collectable)
 
 				// enemy
 				symbolLocationReference.set(`wld::fld::data::s_MuseumEnemy`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemy`, (binary.data.enemy.length + 1) * FILE_TYPES[DataType.MuseumEnemy].size)
-				serializeObjects(data, DataType.MuseumEnemy, binary.data.enemy, { padding: 1 })
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemy`, binary.data.menemy.length * FILE_TYPES[DataType.MuseumEnemy].size)
+				serializeObjects(data, DataType.MuseumEnemy, binary.data.menemy)
 
 				// enemy dispos
 				symbolLocationReference.set(`wld::fld::data::s_MuseumEnemyDispos`, new Pointer(dataWriter.size))
-				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemyDispos`, (binary.data.enemydispos.length + 1) * FILE_TYPES[DataType.MuseumEnemyDispos].size)
-				serializeObjects(data, DataType.MuseumEnemyDispos, binary.data.enemydispos, { padding: 1 })
+				symbolSizeOverrides.set(`wld::fld::data::s_MuseumEnemyDispos`, binary.data.enemydispos.length * FILE_TYPES[DataType.MuseumEnemyDispos].size)
+				serializeObjects(data, DataType.MuseumEnemyDispos, binary.data.enemydispos)
 
 				// kinopio
 				symbolLocationReference.set(`wld::fld::data::s_MuseumKinopio`, new Pointer(dataWriter.size))
@@ -593,7 +593,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				// array lengths of some .data things
 				rodataWriter.writeInt32(binary.data.art.length)
 				rodataWriter.writeInt32(binary.data.collectable.length)
-				rodataWriter.writeInt32(binary.data.enemy.length)
+				rodataWriter.writeInt32(binary.data.menemy.length)
 				rodataWriter.writeInt32(binary.data.enemydispos.length)
 				rodataWriter.writeInt32(binary.data.kinopio.length)
 				rodataWriter.writeInt32(binary.data.kinopiodispos.length)
@@ -1053,7 +1053,7 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 	
 	{
 		// pointer relocations
-		let destinationSection = dataType === DataType.DataUi ?? DataType.DataMuseum ? ".data" : ".rodata"
+		let destinationSection = dataType === DataType.DataUi ? ".data" : ".rodata"
 		let destinationSectionIndex = sections.findIndex(section => section.name === destinationSection)
 		let sectionSymbolIndex = binary.symbolTable.findIndex(symbol => symbol.info == 3 && symbol.sectionHeaderIndex == destinationSectionIndex)
 		
