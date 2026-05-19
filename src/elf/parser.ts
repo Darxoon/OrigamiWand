@@ -869,6 +869,26 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 
 			break
 		}
+
+		case DataType.DataSetupParam:
+			{
+				const dataSection = findSection('.data')
+				const dataStringSection = findSection('.rodata.str1.1')
+
+				// Because data_item_set doesn't contain a .rodata section,
+				// the object count is determined through the data section size
+				let count: number = dataSection.size / FILE_TYPES[dataType].size - 1
+
+				data = {}
+				data.main = applyStrings(
+					Pointer.ZERO, dataType, dataStringSection,
+					allRelocations.get('.data'), symbolTable,
+
+					parseRawDataSection(dataSection, count, 0, dataType),
+				)
+
+				break
+			}
 		
 		// parse .data section by data type
 		default: {

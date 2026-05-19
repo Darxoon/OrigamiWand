@@ -50,6 +50,7 @@ export enum DataType {
 	DataBtl,
 	DataBtlSet,
 	DataFade,
+	DataSetupParam,
 
 	//.hrk
 	HRK,

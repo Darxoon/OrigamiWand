@@ -60,6 +60,8 @@
     
     // "hrk": DataType.HRK,
     // "data_fade": DataType.DataFade,
+    
+    "data_setup_param": DataType.DataSetupParam,
 	}
 	
 	onMount(() => {
@@ -143,6 +145,8 @@
 
     <!-- <option value="HRK">Paper Macho Resource (*.hrk)</option> -->
     <!-- <option value="DataFade">Screen Transitions (data_fade)</option> -->
+
+    <option value="DataSetupParam">Parameters (data_setup_param)</option>
 
   </select>
 	
