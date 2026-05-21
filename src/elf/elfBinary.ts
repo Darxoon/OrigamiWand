@@ -91,6 +91,9 @@ export const dataDivisions = {
 	enemy: "enemy",
 
 	shell: "shell",
+
+	setting: "setting",
+	slot: "slot",
 } as const
 
 export type DataDivision = keyof typeof dataDivisions

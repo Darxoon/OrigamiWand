@@ -52,6 +52,12 @@ export enum DataType {
 	DataFade,
 	DataSetupParam,
 
+	//Sound
+	DataSnd,
+
+	//SearchKNP
+	SearchKNP,
+
 	//.hrk
 	HRK,
 	
@@ -107,6 +113,9 @@ export enum DataType {
 	MuseumKinopio,
 	MuseumKinopioDispos,
 	MuseumSound,
+
+	SoundSettings,
+	SoundSlot,
 
 	HRKShells,
 }

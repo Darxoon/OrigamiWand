@@ -1685,11 +1685,11 @@ The distance upward Mario will jump before landing the attack.`),
 		field_0x78: "float",
 		field_0x7c: "float",
 		field_0x80: "float",
-		field_0x84: "int",
-		field_0x88: "int",
-		field_0x8c: "int",
-		field_0x90: "int",
-		field_0x94: "int",
+		field_0x84: "float",
+		field_0x88: "float",
+		field_0x8c: "float",
+		field_0x90: "float",
+		field_0x94: "float",
 		attackPosition1: new Property("string", "Position where this actor can be attacked from in boss battles."),
 		attackPosition2: new Property("string", "Position where this actor can be attacked from in boss battles."),
 		attackPosition3: new Property("string", "Position where this actor can be attacked from in boss battles."),
@@ -2786,6 +2786,8 @@ Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
 	},
 
 	[DataType.DataSetupParam]: {
+		__displayName: "Setup Parameters",
+
 
 	id: "string",
 	field_0x8: "int",
@@ -2834,6 +2836,48 @@ Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
 	field_0x140: "string",
 	field_0x148: "string",
 },
+
+	[DataType.SearchKNP]: {
+		__displayName: "Toad Collection",
+
+		id: "string",
+		field_0x08: "string",
+		field_0x10: "string",
+		field_0x18: "string",
+		field_0x20: "string",
+		field_0x28: "string",
+		field_0x30: "string",
+		field_0x38: "string",
+	},
+
+	[DataType.DataSnd]: {},
+
+	[DataType.SoundSettings]: {
+		__displayName: "Sound Settings",
+		__objectType: dataDivisions.setting,
+
+	id: "string",
+	field_0x08: "string",
+	field_0x0c: "int",
+	field_0x10: "int",
+},
+
+	[DataType.SoundSlot]: {
+		__displayName: "Sound Slot",
+		__objectType: dataDivisions.slot,
+
+		field_0x00: "float",
+		field_0x04: "float",
+		field_0x08: "float",
+		field_0x0c: "float",
+		field_0x10: "float",
+		field_0x14: "float",
+		field_0x18: "float",
+		field_0x1c: "float",
+		field_0x20: "float",
+		field_0x24: "float",
+},
+
 
 } as const
 

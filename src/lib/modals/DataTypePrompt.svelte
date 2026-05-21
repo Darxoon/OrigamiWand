@@ -62,6 +62,10 @@
     // "data_fade": DataType.DataFade,
     
     "data_setup_param": DataType.DataSetupParam,
+    "data_search_knp": DataType.SearchKNP,
+    
+    "data_snd": DataType.DataSnd,
+   
 	}
 	
 	onMount(() => {
@@ -147,6 +151,8 @@
     <!-- <option value="DataFade">Screen Transitions (data_fade)</option> -->
 
     <option value="DataSetupParam">Parameters (data_setup_param)</option>
+    <option value="SearchKNP">Toad Collection Registry (data_search_knp)</option>
+    <!-- <option value="DataSnd">Sound Parameters (data_snd)</option> -->
 
   </select>
 	

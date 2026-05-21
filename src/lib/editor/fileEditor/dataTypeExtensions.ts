@@ -99,6 +99,14 @@ const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {
 			dataType: DataType.MuseumSound,
 		},
 	},
+	[DataType.DataSnd]: {
+		"Settings": {
+			dataType: DataType.SoundSettings,
+		},
+		"Slot": {
+			dataType: DataType.SoundSlot,
+		},
+	},
 
 }
 
