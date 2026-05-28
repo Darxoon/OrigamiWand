@@ -94,6 +94,8 @@ export const dataDivisions = {
 
 	setting: "setting",
 	slot: "slot",
+
+	board: "board",
 } as const
 
 export type DataDivision = keyof typeof dataDivisions

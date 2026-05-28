@@ -9,6 +9,7 @@ const hasComplexEditor = {
 	[DataType.DataUi]: true,
 	[DataType.DataMuseum]: true,
 	[DataType.DataBtl]: true,
+	[DataType.DataSnd]: true,
 }
 
 const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {

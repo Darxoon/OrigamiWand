@@ -889,6 +889,93 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 
 				break
 			}
+
+		case DataType.DataBtlBoard: {
+			const dataSection = findSection('.data')
+			const stringSection = findSection('.rodata.str1.1')
+
+			const boardSymbolPrefixLength = 35
+
+			data = {}
+
+			let boardSymbol = findSymbol("wld::btl::data::s_boardDataTable")
+			let boardReferences = parseSymbol(dataSection, stringSection, boardSymbol, DataType.BattleBoardReference, -1)
+			let boards: Instance<DataType.DataBtlBoard>[] = []
+
+			for (const ref of boardReferences) {
+				// remove "wld::btl::data::s_boardData_battle_" from symbol name to get area name
+				let id = ref.value.slice(boardSymbolPrefixLength)
+
+				boards.push({
+					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.DataBtlBoard,
+
+					id,
+					boards: ref.value,
+				})
+			}
+
+			data.main = boards
+
+			let allBoards = []
+
+			for (const board of boards) {
+				const { boards: symbolName } = board
+
+				let boardSymbol = findSymbol(symbolName)
+				let boards = parseSymbol(dataSection, stringSection, boardSymbol, DataType.BattleBoard, -1)
+
+				let boardObj = {
+					symbolName,
+					children: boards,
+				}
+
+				allBoards.push(boardObj)
+				board.boards = boardObj
+
+			}
+
+			data.board = allBoards
+
+			break
+		}
+
+		case DataType.HRK:
+			{
+				const dataSection = findSection('.data')
+				const stringSection = findSection('.rodata.str1.1')
+
+				let mainSymbol = findSymbol("wld::fld::data::data")
+				let main = parseSymbol(dataSection, stringSection, mainSymbol, DataType.HRK, -1)
+
+				data = {}
+				data.main = main
+
+				// shells
+				let allAnimShells = []
+
+				for (const shell of main) {
+					const { shells: symbolName, shellCount } = shell
+
+					if (symbolName == undefined)
+						continue
+
+					let shellDataSymbol = findSymbol(symbolName)
+					let shells = parseSymbol(dataSection, stringSection, shellDataSymbol, DataType.HRKShells, shellCount)
+
+					let shellObj = {
+						symbolName,
+						children: shells,
+					}
+
+					allAnimShells.push(shellObj)
+					shell.shells = shellObj
+				}
+
+				data.shell = allAnimShells
+
+				break
+			}
 		
 		// parse .data section by data type
 		default: {
@@ -910,43 +997,6 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			
 			break
 		}
-
-		case DataType.HRK:
-			{
-				const dataSection = findSection('.data')
-				const stringSection = findSection('.rodata.str1.1')
-
-				let mainSymbol = findSymbol("wld::fld::data::data")
-				let main = parseSymbol(dataSection, stringSection, mainSymbol, DataType.HRK, 1)
-
-				data = {}
-				data.main = main
-
-				// shells
-				let allAnimShells = []
-
-				for (const shell of main) {
-					const { shells: symbolName, shellCount } = shell
-
-					if (symbolName == undefined)
-						continue
-
-				let shellDataSymbol = findSymbol(symbolName)
-				let shells = parseSymbol(dataSection, stringSection, shellDataSymbol, DataType.HRKShells, shellCount)
-
-				let shellObj = {
-					symbolName,
-					children: shells,
-				}
-
-				allAnimShells.push(shellObj)
-				shell.shells = shellObj
-			}
-
-				data.shell = allAnimShells
-
-				break
-			}
 
 
 	}

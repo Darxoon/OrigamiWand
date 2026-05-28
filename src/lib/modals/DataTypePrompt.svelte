@@ -56,6 +56,7 @@
 		"data_party": DataType.DataParty,
 		"data_ui": DataType.DataUi,
 		"data_btl": DataType.DataBtl,
+    "data_btlBoard": DataType.DataBtlBoard,
     "data_museum": DataType.DataMuseum,
     
     // "hrk": DataType.HRK,
@@ -145,6 +146,7 @@
 		<option value="DataParty">Party Member Registry (data_party)</option>
 		<option value="DataUi">User Interface Registry (data_ui)</option>
 		<option value="DataBtl">Diverse Battle Registry (data_btl)</option>
+    <option value="DataBtlBoard">Battle Board Object Registry (data_btlBoard)</option>
     <option value="DataMuseum">Museum Registry (data_museum)</option>
 
     <!-- <option value="HRK">Paper Macho Resource (*.hrk)</option> -->

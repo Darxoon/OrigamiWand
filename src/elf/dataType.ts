@@ -49,6 +49,7 @@ export enum DataType {
 	DataUi,
 	DataBtl,
 	DataBtlSet,
+	DataBtlBoard,
 	DataFade,
 	DataSetupParam,
 
@@ -105,6 +106,9 @@ export enum DataType {
 	SetAreaReference,
 	SetBattle,
 	SetEnemy,
+
+	BattleBoard,
+	BattleBoardReference,
 
 	MuseumArt,
 	MuseumCollectable,

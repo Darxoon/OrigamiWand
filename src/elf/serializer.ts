@@ -537,6 +537,56 @@ export default function serializeElfBinary(dataType: DataType, binary: ElfBinary
 				break
 			}
 
+			case DataType.DataBtlBoard: {
+				const dataPointers = new Map()
+				objectRelocations.set('.data', dataPointers)
+
+				const dataSymbols = new Map()
+				symbolRelocations.set('.data', dataSymbols)
+
+				// ----------------  data  ----------------
+				let data: SerializeContext = {
+					writer: dataWriter,
+					stringRelocations: dataStringRelocations,
+					crossPointers: dataPointers,
+					symbolRelocations: dataSymbols,
+				}
+
+				for (const board of binary.data.main as Instance<DataType.DataBtlBoard>[]) {
+					if (board.boards == undefined)
+						continue
+
+					const boards = board.boards as { children: Instance<DataType.BattleBoard>[], symbolName: string }
+					const { children, symbolName } = boards
+
+					let newSymbolName = "wld::btl::data::s_boardData_battle_" + board.id
+
+					symbolLocationReference.set(symbolName, new Pointer(dataWriter.size))
+					symbolSizeOverrides.set(symbolName, (children.length + 1) * FILE_TYPES[DataType.BattleBoard].size)
+					symbolNameOverrides.set(symbolName, newSymbolName)
+
+					boards.symbolName = newSymbolName
+					// No need to update battle count, since here, count is inferred through zero termination
+
+					serializeObjects(data, DataType.BattleBoard, children, { symbolWrapper: boards, padding: 1})
+				}
+
+				// areas
+				// Since the area (DataType.DataBtlBoard) struct is entirely constructed,
+				// it has to be converted into BattleBoardReference first
+				let boardReferences = binary.data.main.map(board => ({
+					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.BattleBoardReference,
+					value: board.boards,
+				}) satisfies Instance<DataType.BattleBoardReference>)
+				
+				symbolLocationReference.set(`wld::btl::data::s_boardDataTable`, new Pointer(dataWriter.size))
+				symbolSizeOverrides.set(`wld::btl::data::s_boardDataTable`, (boardReferences.length + 1) * FILE_TYPES[DataType.BattleBoardReference].size)
+				serializeObjects(data, DataType.BattleBoardReference, boardReferences, { padding: 1 })
+				
+				break
+			}
+
 			case DataType.DataMuseum: {
 				const dataPointers = new Map()
 				objectRelocations.set('.data', dataPointers)
