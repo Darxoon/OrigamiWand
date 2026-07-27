@@ -50,6 +50,7 @@ export enum DataType {
 	DataBtl,
 	DataBtlSet,
 	DataBtlBoard,
+	DataBtlMap,
 	DataFade,
 	DataSetupParam,
 
@@ -102,6 +103,11 @@ export enum DataType {
 	BtlResourceField,
 	BtlResource,
 	BtlConfig,
+	BtlMap,
+	BtlMobj,
+	BtlMobjReference,
+	BtlMobjData,
+	BtlMobjModel,
 	
 	SetAreaReference,
 	SetBattle,

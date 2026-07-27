@@ -10,6 +10,7 @@ const hasComplexEditor = {
 	[DataType.DataMuseum]: true,
 	[DataType.DataBtl]: true,
 	[DataType.DataSnd]: true,
+	[DataType.DataBtlMap]: true,
 }
 
 const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {
@@ -106,6 +107,14 @@ const complexEditorCategories: {[dataType: number]: ComplexCategoryList} = {
 		},
 		"Slot": {
 			dataType: DataType.SoundSlot,
+		},
+	},
+	[DataType.DataBtlMap]: {
+		"Map Data": {
+			dataType: DataType.BtlMap,
+		},
+		"Mobj Table": {
+			dataType: DataType.BtlMobj,
 		},
 	},
 

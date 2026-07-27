@@ -1755,8 +1755,8 @@ Resistance to this type of attack.
 		iceResistance: "float",
 		electricResistance: "float",
 		waterResistance: "float",
-		fireFlowerResistance: "float",
-		iceFlowerResistance: "float",
+		fireHammerResistance: "float",
+		iceHammerResistance: "float",
 		unknownResistance4: "float",
 		unknownResistance5: "float",
 		unknownResistance6: "float",
@@ -2534,9 +2534,8 @@ The state the enemy will start the battle in. Possible values:
  * "pichi" = Fish out of water
 `),
 		field_0x28: new Property("string", "Examples: 回転 (rotate), Lab, RetrySecond"),
-		puzzleSolverCircle: new Property("string", `
-Sometimes contains unicode circle character "〇".
-Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
+		isAngry: new Property("string", `
+If "〇" is used, the enemy will be angry in battle.`),
 		lineUpState: new Property("int", `
 0 = Square state, 1 = Line state`),
 		field_0x3c: "int",
@@ -3073,6 +3072,108 @@ Indicates whether the Puzzle Solver from the battle lab should show a circle.`),
 		field_0x338: "int",
 		field_0x33c: "int",
 	},
+
+	[DataType.DataBtlMap]: {},
+
+	[DataType.BtlMap]: {
+		__displayName: "Map Data",
+		__objectType: dataDivisions.map,
+
+		id: "string",
+		field_0x8: "string",
+		field_0x10: "string",
+		field_0x18: "string",
+		field_0x20: "int",
+		field_0x24: "int",
+		field_0x28: "int",
+		field_0x2c: "int",
+		field_0x30: "int",
+		field_0x34: "int",
+		field_0x38: "int",
+		field_0x3c: "int",
+		field_0x40: "int",
+		field_0x44: "float",
+		field_0x48: "float",
+		field_0x4c: "float",
+		field_0x50: "string",
+		field_0x58: "string",
+		field_0x60: "string",
+		field_0x68: "string",
+		field_0x70: "float",
+		field_0x74: "float",
+		field_0x78: "float",
+		field_0x7c: "float",
+		field_0x80: "float",
+		field_0x84: "float",
+		field_0x88: "float",
+		field_0x8c: "float",
+		field_0x90: "float",
+		field_0x94: "float",
+		field_0x98: "float",
+		field_0x9c: "float",
+		field_0xa0: "int",
+		field_0xa4: "int",
+		field_0xa8: "string",
+		field_0xb0: "string",
+		field_0xb8: "string",
+		field_0xc0: "string",
+	},
+
+	[DataType.BtlMobj]: {
+		__displayName: "Mobj List",
+		__childTypes: {
+			mobjs: DataType.BtlMobjData,
+		},
+
+		id: "string",
+		mobjs: new Property("symbol", undefined, { tabName: "Mobj for {type} {id}" }),
+	},
+
+	[DataType.BtlMobjReference]: {
+		value: "symbol",
+	},
+
+	[DataType.BtlMobjData]: {
+		__displayName: "{dynamic}",
+		__dynamicDisplayName: obj => obj?.stageDefinition?.length > 0 ? "Stage Definition" : "mobj",
+		__nestedAllValues: true,
+		__objectType: dataDivisions.mobj,
+		__childTypes: {
+			mobjGroups: DataType.BtlMobjModel,
+		},
+
+		id: "string",
+		mobjGroups: new Property("pointer", undefined, { tabName: "Mobj Properties of {id}" }),
+		mobjGroupCount: new Property("int", undefined, { hidden: true }),
+		field_0x14: "int",
+	},
+
+	[DataType.BtlMobjModel]: {
+		__nestedAllValues: true,
+		__objectType: dataDivisions.mobjGroup,
+
+		field_0x00: "int",
+		field_0x04: "int",
+		id: "string",
+		field_0x10: "int",
+		field_0x14: "int",
+		field_0x18: "string",
+		field_0x20: "string",
+		field_0x28: "int",
+		field_0x2c: "int",
+		field_0x30: "float",
+		field_0x34: "float",
+		field_0x38: "float",
+		field_0x3c: "int",
+		field_0x40: "float",
+		field_0x44: "int",
+		field_0x48: "float",
+		field_0x4c: "float",
+		field_0x50: "float",
+		field_0x54: "int",
+		field_0x58: "string",
+	},
+
 
 	[DataType.DataSnd]: {},
 

@@ -940,6 +940,95 @@ export default function parseElfBinary(dataType: DataType, arrayBuffer: ArrayBuf
 			break
 		}
 
+		case DataType.DataBtlMap: {
+			const dataSection = findSection('.data')
+			const bssSection = findSection('.bss')
+			const stringSection = findSection('.rodata.str1.1')
+
+			const mobjSymbolPrefixLength = 34
+
+			data = {}
+
+			//Maps
+			let mapSymbol = findSymbol("wld::btl::data::s_mapData")
+			let map = parseSymbol(dataSection, stringSection, mapSymbol, DataType.BtlMap, -1)
+			data.map = map
+
+			//Mobj
+			let mobjSymbol = findSymbol("wld::btl::data::s_mobjDataTable")
+			let mobjReferences = parseSymbol(dataSection, stringSection, mobjSymbol, DataType.BtlMobjReference, -1)
+			let mobjs: Instance<DataType.BtlMobj>[] = []
+
+			for (const ref of mobjReferences) {
+				// remove "wld::btl::data::s_mobjData_battle_" from symbol name to get area name
+				let id = ref.value.slice(mobjSymbolPrefixLength)
+
+				mobjs.push({
+					[VALUE_UUID]: ValueUuid(),
+					[DATA_TYPE]: DataType.BtlMobj,
+
+					id,
+					mobjs: ref.value,
+				})
+			}
+
+			data.main = mobjs
+
+			let allMobjs = []
+			let allMobjGroups = []
+
+			for (const mobj of mobjs) {
+				const { mobjs: symbolName } = mobj
+
+				let mobjSymbol = findSymbol(symbolName)
+				let mobjs = parseSymbol(dataSection, stringSection, mobjSymbol, DataType.BtlMobjData, -1)
+
+				let mobjObj = {
+					symbolName,
+					children: mobjs,
+				}
+
+				allMobjs.push(mobjObj)
+				mobj.mobjs = mobjObj
+
+				for (const mobj of mobjs) {
+					const { mobjGroups: offset, mobjGroupCount } = mobj
+
+					if (offset == undefined || offset == Pointer.NULL) {
+						mobj.mobjGroups = null
+						continue
+					}
+
+					let children = applyStrings(
+						offset, DataType.BtlMobjModel, stringSection,
+						allRelocations.get('.data'), symbolTable,
+
+						parseRawDataSection(dataSection, mobjGroupCount, offset, DataType.BtlMobjModel),
+					)
+
+					let symbol = findSymbolAt(dataSection, offset) ?? createMissingSymbol(`wld::btl::data::s_mobjElementData_^${mobj.id}`, dataSection)
+
+					let mobjGroupObj = {
+						symbolName: demangle(symbol.name),
+						children,
+					}
+
+					allMobjGroups.push(mobjGroupObj);
+					mobj.mobjGroups = mobjGroupObj
+				}
+
+
+			}
+			data.mobj = allMobjs
+			data.mobjGroup = allMobjGroups
+
+
+
+			break
+
+
+			}
+
 		case DataType.HRK:
 			{
 				const dataSection = findSection('.data')

@@ -1,79 +1,80 @@
 <script lang="ts">
-	import { DataType } from "paper-mario-elfs/dataType";
+  import { DataType } from "paper-mario-elfs/dataType";
 
-	import { afterUpdate, beforeUpdate, onMount } from "svelte";
-	
-	import Alert from "../modal/Alert.svelte";
-	import { hideActiveModal } from "../modal/modal";
+  import { afterUpdate, beforeUpdate, onMount } from "svelte";
 
-	export let fileName: string = ""
-	
-	let select: HTMLSelectElement
-	let okButton: HTMLButtonElement
-	
-	let selectedIndex = 0
-	
-	let isCompressed = false
-	
-	const defaultFileNames = {
-		"dispos_Npc": DataType.Npc,
-		"dispos_Item": DataType.Item,
-		"dispos_Mobj": DataType.Mobj,
-		"dispos_Aobj": DataType.Aobj,
-		"dispos_BShape": DataType.BShape,
-		"maplink": DataType.Maplink,
-		"dispos_Hand": DataType.Hand,
-		"dispos_Hariko": DataType.Hariko,
-		"dispos_Hole": DataType.Hole,
-		"dispos_Effect": DataType.Effect,
-		"dispos_Sobj": DataType.Sobj,
-		"dispos_Gobj": DataType.Gobj,
-		
-		"lobj": DataType.Lobj,
-		"resource_Gobj": DataType.ResourceGobj,
-		"DigPoint": DataType.DigPoint,
-		
-		"data_npc": DataType.DataNpc,
-		"data_item": DataType.DataItem,
-		"data_map": DataType.DataMap,
-		"data_hariko": DataType.DataHariko,
-		"data_mobj": DataType.DataMobj,
-		"data_aobj": DataType.DataAobj,
-		
-		"data_npc_model": DataType.DataNpcModel,
-		"data_item_model": DataType.DataItemModel,
-		"data_item_set": DataType.DataItemSet,
-		"data_gobj_model": DataType.DataGobjModel,
-		"data_hariko_model": DataType.DataHarikoModel,
-		"data_navi_model": DataType.DataNaviModel,
-		"data_mobj_model": DataType.DataMobjModel,
-		"data_player_model": DataType.DataPlayerModel,
-		
-		"data_btlSet": DataType.DataBtlSet,
-		// "data_confetti_hole_totalInfo": DataType.DataConfettiTotalHoleInfo,
-		"data_effect": DataType.DataEffect,
-		"data_mapLinkZoom": DataType.DataMaplinkZoom,
-		"data_party": DataType.DataParty,
-		"data_ui": DataType.DataUi,
-		"data_btl": DataType.DataBtl,
-    "data_btlBoard": DataType.DataBtlBoard,
-    "data_museum": DataType.DataMuseum,
-    
-    // "hrk": DataType.HRK,
-    // "data_fade": DataType.DataFade,
-    
-    "data_setup_param": DataType.DataSetupParam,
-    "data_search_knp": DataType.SearchKNP,
-    
-    "data_snd": DataType.DataSnd,
-   
-	}
-	
-	onMount(() => {
-		okButton.disabled = true
-		
-		select.onchange = function(e) {
-			okButton.disabled = select.selectedIndex < 1
+  import Alert from "../modal/Alert.svelte";
+  import { hideActiveModal } from "../modal/modal";
+
+  export let fileName: string = ""
+
+  let select: HTMLSelectElement
+  let okButton: HTMLButtonElement
+
+  let selectedIndex = 0
+
+  let isCompressed = false
+
+  const defaultFileNames = {
+  "dispos_Npc": DataType.Npc,
+  "dispos_Item": DataType.Item,
+  "dispos_Mobj": DataType.Mobj,
+  "dispos_Aobj": DataType.Aobj,
+  "dispos_BShape": DataType.BShape,
+  "maplink": DataType.Maplink,
+  "dispos_Hand": DataType.Hand,
+  "dispos_Hariko": DataType.Hariko,
+  "dispos_Hole": DataType.Hole,
+  "dispos_Effect": DataType.Effect,
+  "dispos_Sobj": DataType.Sobj,
+  "dispos_Gobj": DataType.Gobj,
+
+  "lobj": DataType.Lobj,
+  "resource_Gobj": DataType.ResourceGobj,
+  "DigPoint": DataType.DigPoint,
+
+  "data_npc": DataType.DataNpc,
+  "data_item": DataType.DataItem,
+  "data_map": DataType.DataMap,
+  "data_hariko": DataType.DataHariko,
+  "data_mobj": DataType.DataMobj,
+  "data_aobj": DataType.DataAobj,
+
+  "data_npc_model": DataType.DataNpcModel,
+  "data_item_model": DataType.DataItemModel,
+  "data_item_set": DataType.DataItemSet,
+  "data_gobj_model": DataType.DataGobjModel,
+  "data_hariko_model": DataType.DataHarikoModel,
+  "data_navi_model": DataType.DataNaviModel,
+  "data_mobj_model": DataType.DataMobjModel,
+  "data_player_model": DataType.DataPlayerModel,
+
+  "data_btlSet": DataType.DataBtlSet,
+  // "data_confetti_hole_totalInfo": DataType.DataConfettiTotalHoleInfo,
+  "data_effect": DataType.DataEffect,
+  "data_mapLinkZoom": DataType.DataMaplinkZoom,
+  "data_party": DataType.DataParty,
+  "data_ui": DataType.DataUi,
+  "data_btl": DataType.DataBtl,
+  "data_btlBoard": DataType.DataBtlBoard,
+  "data_btlMap": DataType.DataBtlMap,
+  "data_museum": DataType.DataMuseum,
+
+  // "hrk": DataType.HRK,
+  // "data_fade": DataType.DataFade,
+
+  "data_setup_param": DataType.DataSetupParam,
+  "data_search_knp": DataType.SearchKNP,
+
+  "data_snd": DataType.DataSnd,
+
+  }
+
+  onMount(() => {
+  okButton.disabled = true
+
+  select.onchange = function(e) {
+  okButton.disabled = select.selectedIndex < 1
 		}
 		
 		const sortedEntries = Object.entries(defaultFileNames).sort(([a], [b]) => b.length - a.length)
@@ -147,6 +148,7 @@
 		<option value="DataUi">User Interface Registry (data_ui)</option>
 		<option value="DataBtl">Diverse Battle Registry (data_btl)</option>
     <option value="DataBtlBoard">Battle Board Object Registry (data_btlBoard)</option>
+    <option value="DataBtlMap">Battle Map Registry (data_btlMap)</option>
     <option value="DataMuseum">Museum Registry (data_museum)</option>
 
     <!-- <option value="HRK">Paper Macho Resource (*.hrk)</option> -->
