@@ -566,10 +566,10 @@ The position of the character in the air or the ground:
 		id: "string",
 		field_0x10: "int",
 		field_0x14: "int",
-		MagicCircleMobj: "string",
-		TargetObject: "string",
-		LeftHandLocation: "string",
-		RightHandLocation: "string",
+		magicCircleMobj: "string",
+		targetObject: "string",
+		leftHandLocation: "string",
+		rightHandLocation: "string",
 		field_0x38: "string",
 		field_0x40: "int",
 		field_0x44: "int",
@@ -613,7 +613,7 @@ The position of the character in the air or the ground:
 		field_0xec: "int",
 		field_0xf0: "int",
 		field_0xf4: "int",
-		GrippedSFX: "string",
+		grippedSFX: "string",
 		field_0x100: "int",
 		field_0x104: "int",
 		field_0x108: "int",
@@ -897,12 +897,12 @@ The ID for the icon to display in GUIs. References ui/ItemIcon.bntx.zst.
 		guaranteedHits: new Property("int", `
 The game will not roll to see if your weapons will break until this amount of enemies have been hit with it. Extra guaranteed hits are determined by the CAP you get in data_btl.elf's Settings.
 `),
-		BreakRate0Chance: new Property("int", `
+		breakRate0Chance: new Property("int", `
 Chance to get Break Rate and Break Cap 0 in data_btl.elf's Settings. All the chances should add up to 100.
 `),
-		BreakRate1Chance: "int",
-		BreakRate2Chance: "int",
-		BreakRate3Chance: "int",
+		breakRate1Chance: "int",
+		breakRate2Chance: "int",
+		breakRate3Chance: "int",
 		field_0x84: "int",
 		collectSfx: "string",
 		collectEffect: "string",
@@ -1407,24 +1407,24 @@ might be the interaction function (called when pressing A; similar to talking).`
 		field_0x38: "string",
 		field_0x40: "int",
 		field_0x44: "int",
-		LandingSFX: "string",
+		landingSFX: "string",
 		field_0x50: "int",
 		field_0x54: "int",
-		JumpSFX: "string",
-		HammerHitSFX: "string",
+		jumpSFX: "string",
+		hammerHitSFX: "string",
 		field_0x68: "int",
 		field_0x6c: "int",
-		TextSFX: "string",
-		InSFX: "string",
-		OutSFX: "string",
-		LoopSFX: "string",
+		textSFX: "string",
+		inSFX: "string",
+		outSFX: "string",
+		loopSFX: "string",
 		field_0x90: "int",
 		field_0x94: "int",
-		LandingSFX: "string",
-		IngressIn: "string",
-		IngressOut: "string",
-		IngressLoop: "string",
-		IngressLoopStop: "string",
+		landingGFX: "string",
+		ingressIn: "string",
+		ingressOut: "string",
+		ingressLoop: "string",
+		ingressLoopStop: "string",
 	},
 	
 	[DataType.DataUi]: {},
@@ -1484,10 +1484,10 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 Text rotation. Increase the degrees to rotate the text counterclockwise around the origin. This behavior is unused in the original game.`),
 		boxProperties: new Property("int", `
 Four bits that determine:
--does text appear instantly?
--does it wait for a button prompt before advancing or disappearing?
--is it aligned with the speaker?
--is there a tail indicating the speaker?`),
+* does text appear instantly?
+* does it wait for a button prompt before advancing or disappearing?
+* is it aligned with the speaker?
+* is there a tail indicating the speaker?`),
 		field_0x58: "string",
 		field_0x60: "int",
 		field_0x64: "int",
@@ -2019,11 +2019,11 @@ To give mutiple attributes, pick them and add them together.
 		field_0xbc: new Property("int", `
 Exclusive to Magic Circle attacks.
 
-2^24: Magic Earth
-2^25: Magic Water
-2^26: Magic Fire
-2^27: Magic Ice
-2^28: Magic 1000-Fold Arms`),
+* 2^24: Magic Earth
+* 2^25: Magic Water
+* 2^26: Magic Fire
+* 2^27: Magic Ice
+* 2^28: Magic 1000-Fold Arms`),
 		stunEffect: new Property("int", "Ability to stun an enemy. 0 for Off, 1 for On."),
 		stunChance: new Property("int", "Chance from 0 to 100 to stun an enemy. Effect must be turned on."),
 		freezeEffect: new Property("int", "Ability to freeze an enemy. 0 for Off, 1 for On."),
@@ -2476,20 +2476,20 @@ Known values:
 		move3Selection: "int",
 		move3Nudges: "int",
 		battleType: new Property("int", `
-0: Regular Battle
-1: Boss Battle
-2: Handaconda (uses blue opening transition instead of purple)
-3: Shy Guys Finish Last Quiz
-9: Battle Lab Action Command Practice
-10: Battle Lab Speed Rings
-11: Battle Lab The Ringer
-12: Battle Lab Boss Rematch
-13: Battle Lab Handaconda
-14: Final Battle Vellumental Phase
-15: Final Battle Puzzle Picture
-16: Viewer Map Test (not seen in normal gameplay)
-17: Viewer Boss Map Test (not seen in normal gameplay)
-18: Has Lil Cutout Soldiers`),
+* 0: Regular Battle
+* 1: Boss Battle
+* 2: Handaconda (uses blue opening transition instead of purple)
+* 3: Shy Guys Finish Last Quiz
+* 9: Battle Lab Action Command Practice
+* 10: Battle Lab Speed Rings
+* 11: Battle Lab The Ringer
+* 12: Battle Lab Boss Rematch
+* 13: Battle Lab Handaconda
+* 14: Final Battle Vellumental Phase
+* 15: Final Battle Puzzle Picture
+* 16: Viewer Map Test (not seen in normal gameplay)
+* 17: Viewer Boss Map Test (not seen in normal gameplay)
+* 18: Has Lil Cutout Soldiers`),
 		clearBonus: new Property("int", "Base Clear Bonus in coins at the end of battle."),
 		confettiDropped: new Property("int", "Forced amount of confetti dropped after the battle."),
 		puzzleClearBonus: new Property("int", "Forced multiplier for the Puzzle Clear Bonus regardless of how efficiently the puzzle was solved. Usually unseen as it is always set to 100."),
@@ -2514,20 +2514,20 @@ The background music .opus file that plays during the battle. It is found in rom
 		eventScript: "string",
 		audienceDialogueSet: new Property("int",
 `Refers to which set of dialogue the Toad audience says in the background. The order corresponds to the way the sets are listed in the Cheer Terms tab of data_btl.elf.zst.
-0: Normal Battle
-1: Earth Vellumental
-2: Water Vellumental
-3: Fire Vellumental
-4: Ice Vellumental
-5: Colored Pencils
-6: Rubber Band
-7: Hole Punch
-8: Tape
-9: Scissors
-10: Stapler
-11: King Olly
-12: Boss Sumo Bro
-13: Handaconda`),
+* 0: Normal Battle
+* 1: Earth Vellumental
+* 2: Water Vellumental
+* 3: Fire Vellumental
+* 4: Ice Vellumental
+* 5: Colored Pencils
+* 6: Rubber Band
+* 7: Hole Punch
+* 8: Tape
+* 9: Scissors
+* 10: Stapler
+* 11: King Olly
+* 12: Boss Sumo Bro
+* 13: Handaconda`),
 		field_0xac: "int",
 		field_0xb0: "string",
 		field_0xb8: "string",
