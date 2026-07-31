@@ -1452,15 +1452,18 @@ Not sure what this is for. It seems like it's the same as \`id\`.`),
 		
 		id: "string",
 		model: "string",
-		field_0x10: "string",
-		field_0x18: "float",
-		field_0x1c: "float",
-		field_0x20: "float",
-		field_0x24: "int",
+		textLabel: "string",
+		textXPosition: "float",
+		textYPosition: "float",
+		textSize: "float",
+		textSquish: new Property("int", `
+Will squish the text horizontally if set to certain numbers like -30.`),
 		textColor: "string",
 		textFont: "string",
-		field_0x38: "int",
-		field_0x3c: "int",
+		field_0x38:  new Property("int", `
+Has something to do with the text's horizontal alignment.`),
+		field_0x3c: new Property("int", `
+Has something to do with the text's max display size before it wraps to another line.`)
 	},
 	
 	[DataType.UiMsg]: {
@@ -1625,7 +1628,8 @@ The order in which items can be selected in a column starting from 0, 1, 2 etc.`
 		id: "string",
 		headText: "string",
 		bodyText: "string",
-		field_0x20: "int",
+		delay: new Property("int", `
+How long the delay is before the announcement appears after entering the area.`),
 		field_0x24: "int",
 		field_0x28: "int",
 		field_0x2c: "int",
@@ -1636,7 +1640,7 @@ The order in which items can be selected in a column starting from 0, 1, 2 etc.`
 		__objectType: dataDivisions.announcementExclude,
 		
 		id: "string",
-		field_0x8: "int",
+		isExcluded: "int",
 		field_0xc: "int",
 		field_0x10: "int",
 		field_0x14: "int",
