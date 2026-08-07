@@ -1963,7 +1963,7 @@ Example:
 		textId: new Property("string", "The name of the attack. Before it is displayed, it is looked up in `battle_Attack.msbt`."),
 		field_0x28: "int",
 		field_0x2c: "int",
-		field_0x30: "int",
+		useAdditiveDamage: new Property("int", "Determines how the following damage numbers are used. If Use Additive Damage is 1, then the Nice/Great/Excellent values are "added" onto the Base value. If it's 0, only the raw Nice/Great/Excellent value is used."),
 		baseValue: "int",
 		niceValueIncrease: "int",
 		greatValueIncrease: "int",
