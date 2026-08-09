@@ -1208,20 +1208,14 @@ Flag pop-up effect for when the enemy is hit. Found in effect/particle/EMY.ptcl.
 		modelId: "string",
 		field_0x18: "int",
 		field_0x1c: "int",
-		itemSet1: new Property("string", `
-Usage unknown, but could be related to hitting the Mobj?
-Brake could be misspelled for "break" and DRP could be short for "drop"?
-
-Also probably related to data_mobj_model or something similar to that.
-
-Examples: "DRP_MOBJ_BRAKE_METAL", "DRP_MOBJ_TREE_2", "DRP_MOBJ_BRAKE_CRAFT"`),
-		field_0x28: "int",
+		itemSet1: new Property("string", "The item dropped when the mobj is hit. The sets can be found in data_item_set.elf."),
+		itemSet1Drops: new Property("int", "How many times the drop from Item Set 1 can be obtained before it moves on to Item Set 2 (if enabled) or Item Set 3."),
 		field_0x2c: "int",
-		itemSet2: new Property("string", "Same as field_0x20. See that for more information."),
-		field_0x38: "int",
+		itemSet2: new Property("string", "Same as Item Set 1. See that for more information."),
+		itemSet2Drops: "int",
 		field_0x3c: "int",
-		itemSet3: new Property("string", "Same as field_0x20 and field_0x30. See that for more information."),
-		field_0x48: "int",
+		itemSet3: new Property("string", "Same as Item Set 1 and Item Set 2. See that for more information. This can be dropped multiple times after the other two sets."),
+		field_0x48: new Property("int", "There does not seem to be a cap to how many times this item can be dropped, even if one is set here."),
 		field_0x4c: "int",
 		scriptPath: new Property("string", `
 The path of the script file, starting at romfs/script/wld/fld/mobj/. Also, the file extension is omitted.
@@ -1834,7 +1828,7 @@ Example:
 		field_0xb4: "int",
 		field_0xb8: "int",
 		field_0xbc: "int",
-		skill1Description: "string",
+		skill1Description: new Property("string","The description can affect the formation used for an attack, among other details."),
 		skill1Rate: "float",
 		field_0xcc: "int",
 		skill1: "string",
