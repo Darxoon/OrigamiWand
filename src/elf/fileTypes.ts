@@ -842,7 +842,7 @@ The type of the item which determines how it behaves. Possible values:
 
 * "Icon" - item will trigger something and immediately be discarded (like coins or hearts)
 * "Pouch" - item will be added to the item inventory
-* "Magic" - Velluminal books
+* "Magic" - Vellumental books
 * "KeyItem" - key item
 * "Collectable" - trophy, collectableModelId determines displayed mesh (probably misspelling of Collectable)
 `),
@@ -2745,24 +2745,12 @@ If "〇" is used, the enemy will be angry in battle.`),
 		idleAnimation: "string",
 		actionAnimation: "string",
 		name: "string",
-		previewXPlacement: "float",
-		previewYPlacement: "float",
-		previewZPlacement: "float",
-		previewXRotation: "float",
-		previewYRotation: "float",
-		previewZRotation: "float",
-		previewXScale: new Property("float", "Scaling for the static model seen on the menu."),
-		previewYScale: "float",
-		previewZScale: "float",
-		viewerXPlacement: "float",
-		viewerYPlacement: "float",
-		viewerZPlacement: "float",
-		viewerXRotation: "float",
-		viewerYRotation: "float",
-		viewerZRotation: "float",
-		viewerXScale: new Property("float", "Scaling for the actual model viewer after selecting the enemy."),
-		viewerYScale: "float",
-		viewerZScale: "float",
+		previewPlacement: new Property("Vector3", "Position for the static model seen on the menu."),
+		previewRotation: new Property("Vector3", "Rotation for the static model seen on the menu."),
+		previewScale: new Property("Vector3", "Scaling for the static model seen on the menu."),
+		viewerPlacement: new Property("Vector3", "Position used for the model after opening it in the viewer."),
+		viewerRotation: new Property("Vector3", "Rotation used for the model after opening it in the viewer."),
+		viewerScale: new Property("Vector3", "Scaling used for the model after opening it in the viewer."),
 		cameraZoomMin: new Property("float", "How far out you can zoom the camera. In the base game, this is always 0.5."),
 		cameraZoomMax: new Property("float", "How far in you can zoom the camera. In the base game, this is always 2."),
 	},
