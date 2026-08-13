@@ -708,7 +708,7 @@ Examples with translations:
 		type: "string",
 		position: "Vector3",
 		field_0x24: "int",
-		field_0x28: "int",
+		field_0x28: "float",
 		field_0x2c: "int",
 		field_0x30: "float",
 		field_0x34: "int",
