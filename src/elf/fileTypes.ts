@@ -748,7 +748,7 @@ Examples with translations:
 Usage unknown, but I have a slight feeling that this could be (total) confetti given from hammering the object.
 
 From the number scale, it would definitely be fitting.`),
-		field_0x8c: "int",
+		field_0x8c: "float",
 		field_0x90: "float",
 		field_0x94: "int",
 		field_0x98: "int",
