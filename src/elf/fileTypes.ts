@@ -664,7 +664,7 @@ Affects the action when you activate the Magic Circle.
 		field_0x9c: "int",
 		field_0xa0: "string",
 		field_0xa8: "float",
-		field_0xac: "float",
+		field_0xac: "int",
 		field_0xb0: "int",
 		field_0xb4: "int",
 		initFunction: "string",
