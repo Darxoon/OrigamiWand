@@ -139,7 +139,7 @@ Examples: W1G1_HouseA, W1G3_Observatory`),
 		field_0x2b: "byte",
 		field_0x2c: "int",
 		enemyEncounterId: new Property("string", "The enemy's battle encounter, which can be found in data_btlSet"),
-		field_0x38: new Property("string", "Sometimes says 'GF'."),
+		field_0x38: new Property("string", "Sometimes says 'GF', which stands for Global Function. Unclear exactly what it does."),
 		field_0x40: new Property("int", `
 Usage unknown, but could determine how it handles collision.
 
@@ -562,7 +562,19 @@ The position of the character in the air or the ground:
 	[DataType.Hand]: {
 		stage: "string",
 		id: "string",
-		field_0x10: "int",
+		actionType: new Property("int",`
+Affects the action when you activate the Magic Circle.
+* 0: Pull something
+* 1: Seems identical to 0
+* 2: Turning (immediately starts with hands on grab point, multiple turns required)
+* 3: Hit something
+* 4: You can grab, then it softlocks you and you can do nothing
+* 5: Circle immediately quits after you try to use it
+* 6: Side to side rubbing (Snif City lamp)
+* 7: Turning (opposite direction)
+* 8: Temple of Shrooms spider web
+* 9: Reach forward to grab something (Temple of Shrooms CD room)
+`),
 		field_0x14: "int",
 		magicCircleMobj: "string",
 		targetObject: "string",
@@ -597,8 +609,8 @@ The position of the character in the air or the ground:
 		field_0xa4: "float",
 		field_0xa8: "int",
 		field_0xac: "int",
-		field_0xb0: "float",
-		field_0xb4: "float",
+		instructionBoxXPosition: "float",
+		instructionBoxYPosition: "float",
 		field_0xb8: "int",
 		field_0xbc: "int",
 		field_0xc0: new Property("string", "Probably the script function that gets called when the magic circle is touched"),
